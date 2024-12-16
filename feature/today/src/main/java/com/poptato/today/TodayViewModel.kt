@@ -62,7 +62,7 @@ class TodayViewModel @Inject constructor(
 
     private fun getCategoryList() {
         viewModelScope.launch {
-            getCategoryListUseCase(request = GetCategoryListRequestModel(0, 8)).collect {
+            getCategoryListUseCase(request = GetCategoryListRequestModel(0, 100)).collect {
                 resultResponse(it, { data ->
                     onSuccessGetCategoryList(data)
                 })

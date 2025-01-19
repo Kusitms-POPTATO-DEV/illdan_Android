@@ -75,7 +75,7 @@ class BacklogViewModel @Inject constructor(
 
     private fun getCategoryList() {
         viewModelScope.launch {
-            getCategoryListUseCase(request = GetCategoryListRequestModel(0, 8)).collect {
+            getCategoryListUseCase(request = GetCategoryListRequestModel(0, 100)).collect {
                 resultResponse(it, { data ->
                     onSuccessGetCategoryList(data)
                 })
@@ -113,7 +113,7 @@ class BacklogViewModel @Inject constructor(
             )
         )
 
-        getBacklogList(uiState.value.selectedCategoryId, 0, 8)
+        getBacklogList(uiState.value.selectedCategoryId, 0, 100)
     }
 
     private fun getBacklogList(categoryId: Long, page: Int, size: Int) {

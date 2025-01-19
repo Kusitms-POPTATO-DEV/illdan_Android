@@ -31,7 +31,7 @@ class KaKaoLoginViewModel @Inject constructor(
 
     fun kakaoLogin(token: String) {
         viewModelScope.launch {
-            postKaKaoLoginUseCase.invoke(request = KaKaoLoginRequest(
+            postKaKaoLoginUseCase(request = KaKaoLoginRequest(
                 accessToken = token,
                 clientId = uiState.value.clientId,
                 socialType = SOCIAL_TYPE,

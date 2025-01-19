@@ -42,5 +42,6 @@ internal fun Project.configureAndroidCommonPlugin() {
         "implementation"(libs.findLibrary("activity").get())
         "implementation"(libs.findLibrary("material").get())
         "implementation"(libs.findLibrary("timber").get())
+        "implementation"(libs.findLibrary("clarity").get())
     }
 }

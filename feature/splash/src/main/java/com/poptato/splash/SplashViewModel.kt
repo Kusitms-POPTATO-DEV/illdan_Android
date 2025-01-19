@@ -12,6 +12,7 @@ import com.poptato.domain.usecase.auth.SaveTokenUseCase
 import com.poptato.domain.usecase.today.GetTodayListUseCase
 import com.poptato.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -26,13 +27,40 @@ class SplashViewModel @Inject constructor(
         checkLocalToken()
     }
 
+//    private fun checkLocalToken() {
+//        viewModelScope.launch {
+//            getTokenUseCase.invoke(Unit).collect {
+//                if (it.accessToken.isNotEmpty() && it.refreshToken.isNotEmpty()) {
+//                    updateState(uiState.value.copy(skipLogin = true))
+//                }
+//            }
+//        }
+//    }
+
     private fun checkLocalToken() {
-        viewModelScope.launch {
-            getTokenUseCase.invoke(Unit).collect {
+        viewModelScope.launch(Dispatchers.Main) {
+            getTokenUseCase(Unit).collect {
                 if (it.accessToken.isNotEmpty() && it.refreshToken.isNotEmpty()) {
-                    updateState(uiState.value.copy(skipLogin = true))
+                    reissueToken(it)
                 }
             }
         }
+    }
+
+    private fun reissueToken(token: TokenModel) {
+        viewModelScope.launch(Dispatchers.Main) {
+            reissueTokenUseCase(
+                request = ReissueRequestModel(accessToken = token.accessToken, refreshToken = token.refreshToken)
+            ).collect {
+                resultResponse(it, ::onSuccessReissueToken)
+            }
+        }
+    }
+
+    private fun onSuccessReissueToken(response: TokenModel) {
+        viewModelScope.launch(Dispatchers.Main) {
+            saveTokenUseCase(request = response).collect{}
+        }
+        updateState(uiState.value.copy(skipLogin = true))
     }
 }

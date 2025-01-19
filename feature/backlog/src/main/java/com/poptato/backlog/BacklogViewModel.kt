@@ -1,6 +1,7 @@
 package com.poptato.backlog
 
 import androidx.lifecycle.viewModelScope
+import com.microsoft.clarity.Clarity
 import com.poptato.core.enums.TodoType
 import com.poptato.core.util.TimeFormatter
 import com.poptato.core.util.move
@@ -117,6 +118,7 @@ class BacklogViewModel @Inject constructor(
     }
 
     private fun getBacklogList(categoryId: Long, page: Int, size: Int) {
+        Clarity.sendCustomEvent("백로그 데이터 조회!")
         viewModelScope.launch {
             getBacklogListUseCase.invoke(request = GetBacklogListRequestModel(categoryId = categoryId, page = page, size = size)).collect {
                 resultResponse(it, ::onSuccessGetBacklogList)

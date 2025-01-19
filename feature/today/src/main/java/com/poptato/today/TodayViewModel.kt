@@ -32,6 +32,7 @@ import com.poptato.domain.usecase.todo.UpdateTodoCompletionUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoRepeatUseCase
 import com.poptato.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -125,7 +126,7 @@ class TodayViewModel @Inject constructor(
     }
 
     private fun getTodayList(page: Int, size: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Main) {
             getTodayListUseCase.invoke(request = GetTodayListRequestModel(page = page, size = size)).collect {
                 resultResponse(it, ::onSuccessGetTodayList, { onFailedUpdateTodayList() })
             }

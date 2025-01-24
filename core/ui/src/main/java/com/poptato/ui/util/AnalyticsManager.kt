@@ -3,6 +3,7 @@ package com.poptato.ui.util
 import android.content.Context
 import android.os.Bundle
 import com.google.firebase.analytics.FirebaseAnalytics
+import timber.log.Timber
 
 object AnalyticsManager {
     private var firebaseAnalytics: FirebaseAnalytics? = null
@@ -15,6 +16,7 @@ object AnalyticsManager {
     }
 
     fun logEvent(eventName: String, params: Map<String, String> = emptyMap()) {
+        Timber.d("eventName: $eventName")
         val bundle = Bundle().apply {
             params.forEach { (key, value) ->
                 putString(key, value)

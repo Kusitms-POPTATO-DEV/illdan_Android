@@ -93,6 +93,7 @@ import com.poptato.ui.common.PoptatoCheckBox
 import com.poptato.ui.common.RepeatItem
 import com.poptato.ui.common.TopBar
 import com.poptato.ui.common.formatDeadline
+import com.poptato.ui.util.AnalyticsManager
 import com.poptato.ui.util.LoadingManager
 import com.poptato.ui.util.rememberDragDropListState
 import com.poptato.ui.util.toPx
@@ -197,6 +198,10 @@ fun TodayScreen(
             showBottomSheet = {
                 viewModel.getSelectedItemDetailContent(it) { callback ->
                     showBottomSheet(callback, uiState.categoryList)
+
+                    AnalyticsManager.logEvent(
+                        eventName = "today_bottom_sheet"
+                    )
                 }
             },
             activeItemId = activeItemId,

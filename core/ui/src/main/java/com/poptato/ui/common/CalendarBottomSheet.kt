@@ -35,6 +35,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.poptato.core.util.TimeFormatter
 import com.poptato.design_system.Complete
 import com.poptato.design_system.DELETE
 import com.poptato.design_system.FRI
@@ -54,6 +55,7 @@ import com.poptato.design_system.SUN
 import com.poptato.design_system.THU
 import com.poptato.design_system.TUE
 import com.poptato.design_system.WED
+import com.poptato.ui.util.AnalyticsManager
 import org.threeten.bp.LocalDate
 import org.threeten.bp.YearMonth
 

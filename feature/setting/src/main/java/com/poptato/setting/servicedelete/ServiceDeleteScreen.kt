@@ -68,6 +68,7 @@ import com.poptato.domain.model.enums.DialogType
 import com.poptato.domain.model.enums.UserDeleteType
 import com.poptato.domain.model.response.dialog.DialogContentModel
 import com.poptato.ui.common.PoptatoCheckBox
+import com.poptato.ui.util.AnalyticsManager
 import kotlinx.coroutines.flow.SharedFlow
 import timber.log.Timber
 
@@ -105,6 +106,10 @@ fun ServiceDeleteScreen(
                     cancelBtnText = Cancel,
                     positiveBtnAction = {
                         viewModel.userDelete()
+                        AnalyticsManager.logEvent(
+                            eventName = "delete_account",
+                            params = mapOf("reason" to uiState.selectedReasonList.map { it.reasons }.toString(), "user_input_reason" to uiState.deleteInputReason)
+                        )
                         showDeleteFinishScreen(uiState.userName)
                     }
                 )

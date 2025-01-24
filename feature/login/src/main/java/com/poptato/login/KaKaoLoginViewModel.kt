@@ -9,6 +9,7 @@ import com.poptato.domain.model.response.login.AuthModel
 import com.poptato.domain.usecase.PostKaKaoLoginUseCase
 import com.poptato.domain.usecase.auth.SaveTokenUseCase
 import com.poptato.ui.base.BaseViewModel
+import com.poptato.ui.util.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -43,6 +44,10 @@ class KaKaoLoginViewModel @Inject constructor(
     }
 
     private fun onSuccessKaKaoLogin(model: AuthModel) {
+        AnalyticsManager.logEvent(
+            eventName = "log_in",
+            params = mapOf("method" to "kakao")
+        )
         viewModelScope.launch {
             saveTokenUseCase.invoke(
                 request = TokenModel(accessToken = model.accessToken, refreshToken = model.refreshToken)

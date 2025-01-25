@@ -52,6 +52,7 @@ google-service = "4.4.2"
 firebase-bom = "33.6.0"
 firebase-messaging = "21.1.0"
 permissions = "0.33.1-alpha"
+clarity = "3.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -161,6 +162,9 @@ pdf-viewer = { module = "com.github.barteksc:AndroidPdfViewer", version.ref = "p
 
 # LazyColumnScrollbar
 lazycolumn-scrollbar = { module = "com.github.nanihadesuka:LazyColumnScrollbar", version.ref = "lazy-column-scrollbar" }
+
+# Clarity
+clarity = { module = "com.microsoft.clarity:clarity-compose", version.ref = "clarity" }
 
 [bundles]
 compose = [

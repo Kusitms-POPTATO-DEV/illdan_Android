@@ -24,6 +24,9 @@ android {
 
         val baseUrl = properties.getProperty("BASE_URL")
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
+
+        val clarityId = properties.getProperty("CLARITY_ID")
+        buildConfigField("String", "CLARITY_ID", "\"$clarityId\"")
     }
 }
 
@@ -52,4 +55,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.messaging)
+
+    // Clarity
+    implementation(libs.clarity)
 }

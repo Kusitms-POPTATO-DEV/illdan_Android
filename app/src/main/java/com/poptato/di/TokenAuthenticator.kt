@@ -35,13 +35,13 @@ class TokenAuthenticator @Inject constructor(
                 }
                 tokens?.let { handleTokenRefresh(response, it) }
             }
-            6002 -> {
-                Timber.e("Token invalid: 유효하지 않은 토큰, 로그인 필요")
-                runBlocking {
-                    CommonEventManager.triggerLogout()
-                }
-                null
-            }
+//            6002 -> {
+//                Timber.e("Token invalid: 유효하지 않은 토큰, 로그인 필요")
+//                runBlocking {
+//                    CommonEventManager.triggerLogout()
+//                }
+//                null
+//            }
             else -> {
                 Timber.e("Unhandled error code: $errorCode")
                 null

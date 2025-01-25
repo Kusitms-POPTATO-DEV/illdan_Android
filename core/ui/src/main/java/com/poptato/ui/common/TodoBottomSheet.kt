@@ -51,6 +51,7 @@ import com.poptato.design_system.Settings
 import com.poptato.design_system.modify
 import com.poptato.domain.model.response.category.CategoryItemModel
 import com.poptato.domain.model.response.today.TodoItemModel
+import com.poptato.ui.util.AnalyticsManager
 
 @Composable
 fun TodoBottomSheet(
@@ -146,9 +147,15 @@ fun TodoBottomSheetContent(
 
         BottomSheetBtn(resourceId = R.drawable.ic_pen, buttonText = modify, textColor = Gray30, modifier = Modifier.clickable {
             onClickBtnModify(item.todoId)
+            AnalyticsManager.logEvent(
+                eventName = "edit_task"
+            )
         })
         BottomSheetBtn(resourceId = R.drawable.ic_trash, buttonText = DELETE_ACTION, textColor = Danger50, modifier = Modifier.clickable {
             onClickBtnDelete(item.todoId)
+            AnalyticsManager.logEvent(
+                eventName = "delete_task"
+            )
         })
         BottomSheetBtn(
             resourceId = R.drawable.ic_refresh,
@@ -156,6 +163,10 @@ fun TodoBottomSheetContent(
             textColor = Gray30,
             modifier = Modifier.clickable {
                 onClickBtnRepeat(item.todoId)
+                AnalyticsManager.logEvent(
+                    eventName = "set_repeat",
+                    params = mapOf("task_ID" to "${item.todoId}")
+                )
             },
             isRepeatBtn = true,
             isRepeat = item.isRepeat,

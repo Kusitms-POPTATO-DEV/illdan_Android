@@ -124,6 +124,7 @@ import com.poptato.ui.common.BookmarkItem
 import com.poptato.ui.common.RepeatItem
 import com.poptato.ui.common.TopBar
 import com.poptato.ui.common.formatDeadline
+import com.poptato.ui.util.AnalyticsManager
 import com.poptato.ui.util.LoadingManager
 import com.poptato.ui.util.rememberDragDropListState
 import kotlinx.coroutines.flow.SharedFlow
@@ -583,6 +584,10 @@ fun BacklogTaskList(
                         dragDropState.onDragStart(offset)
                         draggedItem = backlogList[dragDropState.currentIndexOfDraggedItem
                             ?: return@detectDragGesturesAfterLongPress]
+                        AnalyticsManager.logEvent(
+                            eventName = "drag_tasks",
+                            params = mapOf("task_ID" to "${draggedItem?.todoId}")
+                        )
                         isDragging = true
                     },
                     onDragEnd = {

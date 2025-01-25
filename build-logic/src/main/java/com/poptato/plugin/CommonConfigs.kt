@@ -20,6 +20,7 @@ internal fun Project.configureAndroidCommonPlugin() {
 
     with(plugins) {
         apply("kotlin-parcelize")
+        apply("com.google.gms.google-services")
     }
 
     extensions.getByType<BaseExtension>().apply {
@@ -42,5 +43,8 @@ internal fun Project.configureAndroidCommonPlugin() {
         "implementation"(libs.findLibrary("activity").get())
         "implementation"(libs.findLibrary("material").get())
         "implementation"(libs.findLibrary("timber").get())
+        "implementation"(libs.findLibrary("clarity").get())
+        "implementation"(platform(libs.findLibrary("firebase-bom").get()))
+        "implementation"(libs.findLibrary("firebase-analytics").get())
     }
 }

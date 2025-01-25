@@ -35,6 +35,7 @@ import com.poptato.domain.usecase.todo.UpdateTodoRepeatUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoCategoryUseCase
 import com.poptato.domain.usecase.yesterday.GetYesterdayListUseCase
 import com.poptato.ui.base.BaseViewModel
+import com.poptato.ui.util.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -92,6 +93,14 @@ class BacklogViewModel @Inject constructor(
     }
 
     fun deleteCategory() {
+        AnalyticsManager.logEvent(
+            eventName = "delete_category",
+            params = mapOf(
+                "category_name" to uiState.value.categoryList[uiState.value.selectedCategoryIndex].categoryName,
+                "delete_date" to TimeFormatter.getTodayFullDate()
+            )
+        )
+
         viewModelScope.launch {
             deleteCategoryUseCase(request = uiState.value.selectedCategoryId).collect {
                 resultResponse(it, {
@@ -106,6 +115,11 @@ class BacklogViewModel @Inject constructor(
     }
 
     fun getBacklogListInCategory(categoryIndex: Int) {
+        AnalyticsManager.logEvent(
+            eventName = "view_category",
+            params = mapOf("category_name" to uiState.value.categoryList[categoryIndex].categoryName)
+        )
+
         updateState(
             uiState.value.copy(
                 selectedCategoryIndex = categoryIndex,
@@ -117,8 +131,12 @@ class BacklogViewModel @Inject constructor(
     }
 
     private fun getBacklogList(categoryId: Long, page: Int, size: Int) {
+        AnalyticsManager.logEvent(
+            eventName = "get_backlog_list",
+            params = mapOf("button_name" to "할 일 내비게이션바 버튼", "user_action" to "백로그 전체 조회")
+        )
         viewModelScope.launch {
-            getBacklogListUseCase.invoke(request = GetBacklogListRequestModel(categoryId = categoryId, page = page, size = size)).collect {
+            getBacklogListUseCase(request = GetBacklogListRequestModel(categoryId = categoryId, page = page, size = size)).collect {
                 resultResponse(it, ::onSuccessGetBacklogList)
             }
         }
@@ -189,6 +207,10 @@ class BacklogViewModel @Inject constructor(
     }
 
     private fun onSuccessCreateBacklog(response: TodoIdModel) {
+        AnalyticsManager.logEvent(
+            eventName = "make_task",
+            params = mapOf("make_date" to TimeFormatter.getTodayFullDate(), "task_ID" to "${response.todoId}")
+        )
         val updatedList = uiState.value.backlogList.map { item ->
             if (item.todoId == tempTodoId) {
                 item.copy(todoId = response.todoId)
@@ -208,6 +230,11 @@ class BacklogViewModel @Inject constructor(
     }
 
     fun swipeBacklogItem(item: TodoItemModel) {
+        AnalyticsManager.logEvent(
+            eventName = "add_today",
+            params = mapOf("add_date" to TimeFormatter.getTodayFullDate(), "task_ID" to "${item.todoId}")
+        )
+
         val newList = uiState.value.backlogList.filter { it.todoId != item.todoId }
 
         updateList(newList)
@@ -259,8 +286,6 @@ class BacklogViewModel @Inject constructor(
 
     fun updateCategory(todoId: Long, categoryId: Long?) {
         Timber.d("[수정 테스트] ${uiState.value.backlogList} -> $todoId $categoryId")
-//        val newList = uiState.value.backlogList.filter { it.todoId != todoId }
-//        updateList(newList)
 
         viewModelScope.launch {
             updateTodoCategoryUseCase(request = UpdateTodoCategoryModel(
@@ -268,7 +293,6 @@ class BacklogViewModel @Inject constructor(
                 todoCategoryModel = TodoCategoryIdModel(categoryId)
             )).collect {
                 resultResponse(it, {
-//                    updateSnapshotList(uiState.value.backlogList)
                     getBacklogList(categoryId = uiState.value.selectedCategoryId, page = 0, size = uiState.value.backlogList.size)
                 }, { error ->
                     Timber.d("[카테고리] 수정 서버통신 실패 -> $error")

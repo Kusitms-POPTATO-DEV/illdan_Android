@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.microsoft.clarity.Clarity
 import com.poptato.design_system.BgProgressBar
 import com.poptato.design_system.Gray100
 import com.poptato.design_system.Gray80
@@ -26,6 +27,10 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val rootView = window.decorView.rootView
+        Clarity.maskView(rootView)
+
         enableEdgeToEdge()
         setContent {
             val isLoading by LoadingManager.isLoading.collectAsStateWithLifecycle()
@@ -45,7 +50,6 @@ class MainActivity : ComponentActivity() {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-//                            .background(BgProgressBar.copy(alpha = 0.5f))
                     ) {
                         CircularProgressIndicator(
                             modifier = Modifier.align(Alignment.Center),

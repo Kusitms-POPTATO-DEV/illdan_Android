@@ -31,7 +31,9 @@ import com.poptato.domain.usecase.todo.UpdateTodoCategoryUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoCompletionUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoRepeatUseCase
 import com.poptato.ui.base.BaseViewModel
+import com.poptato.ui.util.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -81,8 +83,13 @@ class TodayViewModel @Inject constructor(
     fun onCheckedTodo(status: TodoStatus, id: Long) {
         updateTodoStatusInUI(status = status, id = id)
 
+        AnalyticsManager.logEvent(
+            eventName = "complete_task",
+            params = mapOf("task_ID" to "$id")
+        )
+
         viewModelScope.launch {
-            updateTodoCompletionUseCase.invoke(id).collect {
+            updateTodoCompletionUseCase(id).collect {
                 resultResponse(it, { updateSnapshotList(uiState.value.todayList) }, { onFailedUpdateTodayList() })
             }
         }
@@ -121,11 +128,15 @@ class TodayViewModel @Inject constructor(
             }
         }
 
-        if (isAllChecked) { emitEventFlow(TodayEvent.TodayAllChecked) }
+        if (isAllChecked) {
+            emitEventFlow(TodayEvent.TodayAllChecked)
+
+            AnalyticsManager.logEvent(eventName = "complete_all")
+        }
     }
 
     private fun getTodayList(page: Int, size: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Main) {
             getTodayListUseCase.invoke(request = GetTodayListRequestModel(page = page, size = size)).collect {
                 resultResponse(it, ::onSuccessGetTodayList, { onFailedUpdateTodayList() })
             }
@@ -159,8 +170,12 @@ class TodayViewModel @Inject constructor(
 
     fun swipeTodayItem(item: TodoItemModel) {
         val newList = uiState.value.todayList.filter { it.todoId != item.todoId }
-
         updateList(newList)
+
+        AnalyticsManager.logEvent(
+            eventName = "back_tasks",
+            params = mapOf("task_ID" to "${item.todoId}")
+        )
 
         viewModelScope.launch {
             swipeTodoUseCase.invoke(TodoIdModel(item.todoId)).collect {
@@ -181,6 +196,11 @@ class TodayViewModel @Inject constructor(
         }
 
         if (fromIndex != safeToIndex) {
+            AnalyticsManager.logEvent(
+                eventName = "drag_today",
+                params = mapOf("task_ID" to "${uiState.value.todayList[fromIndex].todoId}")
+            )
+
             currentList.move(fromIndex, safeToIndex)
             updateList(currentList)
         }

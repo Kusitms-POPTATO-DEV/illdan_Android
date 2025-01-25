@@ -53,6 +53,7 @@ import com.poptato.design_system.VersionSetting
 import com.poptato.mypage.BuildConfig.VERSION_NAME
 import com.poptato.mypage.MyPageViewModel.Companion.FAQ_TYPE
 import com.poptato.mypage.MyPageViewModel.Companion.NOTICE_TYPE
+import com.poptato.ui.util.AnalyticsManager
 import timber.log.Timber
 
 @Composable
@@ -116,24 +117,32 @@ fun MyPageContent(
         SettingServiceItem(
             title = Notice,
             interactionSource = interactionSource,
-            onClickAction = { onClickServiceNotice() }
+            onClickAction = {
+                onClickServiceNotice()
+                AnalyticsManager.logEvent(eventName = "notice")
+            }
         )
         SettingServiceItem(
             title = FAQ,
             interactionSource = interactionSource,
-            onClickAction = { onClickServiceFAQ() }
+            onClickAction = {
+                onClickServiceFAQ()
+                AnalyticsManager.logEvent(eventName = "faq")
+            }
         )
         SettingServiceItem(
             title = Policy,
             interactionSource = interactionSource,
-            onClickAction = { onClickPolicyBtn() }
+            onClickAction = {
+                onClickPolicyBtn()
+                AnalyticsManager.logEvent(eventName = "terms")
+            }
         )
         SettingServiceItem(
             title = Version,
             isVersion = true,
             interactionSource = interactionSource
         )
-
     }
 }
 

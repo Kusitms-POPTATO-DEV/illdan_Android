@@ -11,6 +11,7 @@ import com.poptato.domain.usecase.category.CreateCategoryUseCase
 import com.poptato.domain.usecase.category.GetCategoryIconListUseCase
 import com.poptato.domain.usecase.category.ModifyCategoryUseCase
 import com.poptato.ui.base.BaseViewModel
+import com.poptato.ui.util.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -88,6 +89,11 @@ class CategoryViewModel @Inject constructor(
     }
 
     private fun createCategory() {
+        AnalyticsManager.logEvent(
+            eventName = "make_category",
+            params = mapOf("category_name" to uiState.value.categoryName)
+        )
+
         viewModelScope.launch {
             createCategoryUseCase(request = CategoryRequestModel(uiState.value.categoryName, uiState.value.selectedIcon?.iconId ?: -1)).collect {
                 resultResponse(it, {

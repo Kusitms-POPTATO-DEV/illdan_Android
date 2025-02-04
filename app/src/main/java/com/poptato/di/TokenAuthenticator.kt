@@ -29,19 +29,19 @@ class TokenAuthenticator @Inject constructor(
         val errorCode = response.parseErrorCode()
 
         return when (errorCode) {
-            6001 -> {
+            "AUTH-002" -> {
                 val tokens = runBlocking {
                     getTokenUseCase.get().invoke(Unit).firstOrNull()
                 }
                 tokens?.let { handleTokenRefresh(response, it) }
             }
-//            6002 -> {
-//                Timber.e("Token invalid: 유효하지 않은 토큰, 로그인 필요")
-//                runBlocking {
-//                    CommonEventManager.triggerLogout()
-//                }
-//                null
-//            }
+            "AUTH-008" -> {
+                Timber.e("Token invalid: 유효하지 않은 토큰, 로그인 필요")
+                runBlocking {
+                    CommonEventManager.triggerLogout()
+                }
+                null
+            }
             else -> {
                 Timber.e("Unhandled error code: $errorCode")
                 null
@@ -75,14 +75,14 @@ class TokenAuthenticator @Inject constructor(
         }
     }
 
-    private fun Response.parseErrorCode(): Int {
+    private fun Response.parseErrorCode(): String {
         return try {
             val errorBody = this.peekBody(Long.MAX_VALUE).charStream()
             val apiResponse = Gson().fromJson(errorBody, ApiResponse::class.java) as ApiResponse<*>
             apiResponse.code
         } catch (e: Exception) {
             Timber.e("알 수 없는 에러 코드: ${e.message}")
-            -1
+            ""
         }
     }
 }

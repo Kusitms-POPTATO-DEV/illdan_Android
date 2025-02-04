@@ -1,6 +1,6 @@
 package com.poptato.domain.base
 
 class ApiException(
-    val code: Int,
+    val code: String,
     message: String
 ): Exception(message)

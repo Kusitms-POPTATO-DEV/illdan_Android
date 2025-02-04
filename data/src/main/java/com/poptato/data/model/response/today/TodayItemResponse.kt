@@ -16,6 +16,6 @@ data class TodayItemResponse(
     val isRepeat: Boolean = false,
     @SerializedName("deadline")
     val deadline: String? = null,
-    @SerializedName("dday")
+    @SerializedName("dDay")
     val dDay: Int? = null
 )

@@ -10,7 +10,7 @@ data class ApiResponse<T>(
     val status: Int = -1,
 
     @SerializedName("code")
-    val code: Int = -1,
+    val code: String = "",
 
     @SerializedName("message")
     val message: String = "",

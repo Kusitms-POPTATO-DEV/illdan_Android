@@ -218,7 +218,7 @@ class BacklogViewModel @Inject constructor(
         }
         updateList(updatedList)
 
-        getBacklogList(categoryId = -1, page = 0, size = uiState.value.backlogList.size)
+        getBacklogList(categoryId = uiState.value.selectedCategoryId, page = 0, size = 100)
     }
 
     private fun onFailedUpdateBacklogList() {

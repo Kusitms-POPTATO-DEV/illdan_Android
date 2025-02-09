@@ -5,11 +5,13 @@ import com.poptato.data.base.Endpoints
 import com.poptato.data.model.response.category.CategoryIconTotalListResponse
 import com.poptato.data.model.response.category.CategoryIdResponse
 import com.poptato.data.model.response.category.CategoryListResponse
+import com.poptato.domain.model.request.category.CategoryDragDropRequestModel
 import com.poptato.domain.model.request.category.CategoryRequestModel
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -40,5 +42,10 @@ interface CategoryService {
     @DELETE(Endpoints.Category.MODIFY)
     suspend fun deleteCategory(
         @Path("categoryId") category: Long,
+    ): Response<ApiResponse<Unit>>
+
+    @PATCH(Endpoints.Category.DRAG_DROP)
+    suspend fun dragDrop(
+        @Body request: CategoryDragDropRequestModel
     ): Response<ApiResponse<Unit>>
 }

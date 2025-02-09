@@ -1,5 +1,6 @@
 package com.poptato.domain.repository
 
+import com.poptato.domain.model.request.category.CategoryDragDropRequestModel
 import com.poptato.domain.model.request.category.CategoryIdModel
 import com.poptato.domain.model.request.category.CategoryRequestModel
 import com.poptato.domain.model.request.category.ModifyCategoryRequestModel
@@ -14,4 +15,5 @@ interface CategoryRepository {
     suspend fun getCategoryList(page: Int, size: Int): Flow<Result<CategoryListModel>>
     suspend fun modifyCategory(request: ModifyCategoryRequestModel): Flow<Result<Unit>>
     suspend fun deleteCategory(categoryId: Long): Flow<Result<Unit>>
+    suspend fun dragDrop(request: CategoryDragDropRequestModel): Flow<Result<Unit>>
 }

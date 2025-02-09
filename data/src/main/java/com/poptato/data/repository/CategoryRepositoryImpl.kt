@@ -6,6 +6,7 @@ import com.poptato.data.mapper.CategoryIdResponseMapper
 import com.poptato.data.mapper.CategoryListResponseMapper
 import com.poptato.data.mapper.UnitResponseMapper
 import com.poptato.data.service.CategoryService
+import com.poptato.domain.model.request.category.CategoryDragDropRequestModel
 import com.poptato.domain.model.request.category.CategoryIdModel
 import com.poptato.domain.model.request.category.CategoryRequestModel
 import com.poptato.domain.model.request.category.ModifyCategoryRequestModel
@@ -53,5 +54,9 @@ class CategoryRepositoryImpl @Inject constructor(
         return apiLaunch(
             apiCall = { categoryService.deleteCategory(categoryId) }, UnitResponseMapper
         )
+    }
+
+    override suspend fun dragDrop(request: CategoryDragDropRequestModel): Flow<Result<Unit>> {
+        return apiLaunch(apiCall = { categoryService.dragDrop(request) }, UnitResponseMapper)
     }
 }

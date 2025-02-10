@@ -7,6 +7,7 @@ import com.poptato.core.util.move
 import com.poptato.domain.model.request.ListRequestModel
 import com.poptato.domain.model.request.backlog.CreateBacklogRequestModel
 import com.poptato.domain.model.request.backlog.GetBacklogListRequestModel
+import com.poptato.domain.model.request.category.CategoryDragDropRequestModel
 import com.poptato.domain.model.request.category.GetCategoryListRequestModel
 import com.poptato.domain.model.request.todo.DeadlineContentModel
 import com.poptato.domain.model.request.todo.DragDropRequestModel
@@ -16,12 +17,14 @@ import com.poptato.domain.model.request.todo.TodoIdModel
 import com.poptato.domain.model.request.todo.UpdateDeadlineRequestModel
 import com.poptato.domain.model.request.todo.UpdateTodoCategoryModel
 import com.poptato.domain.model.response.backlog.BacklogListModel
+import com.poptato.domain.model.response.category.CategoryItemModel
 import com.poptato.domain.model.response.category.CategoryListModel
 import com.poptato.domain.model.response.today.TodoItemModel
 import com.poptato.domain.model.response.todo.TodoDetailItemModel
 import com.poptato.domain.model.response.yesterday.YesterdayListModel
 import com.poptato.domain.usecase.backlog.CreateBacklogUseCase
 import com.poptato.domain.usecase.backlog.GetBacklogListUseCase
+import com.poptato.domain.usecase.category.CategoryDragDropUseCase
 import com.poptato.domain.usecase.category.DeleteCategoryUseCase
 import com.poptato.domain.usecase.category.GetCategoryListUseCase
 import com.poptato.domain.usecase.todo.DeleteTodoUseCase
@@ -60,7 +63,8 @@ class BacklogViewModel @Inject constructor(
     private val updateTodoCategoryUseCase: UpdateTodoCategoryUseCase,
     private val getTodoDetailUseCase: GetTodoDetailUseCase,
     private val swipeTodoUseCase: SwipeTodoUseCase,
-    private val updateTodoRepeatUseCase: UpdateTodoRepeatUseCase
+    private val updateTodoRepeatUseCase: UpdateTodoRepeatUseCase,
+    private val categoryDragDropUseCase: CategoryDragDropUseCase
 ) : BaseViewModel<BacklogPageState>(
     BacklogPageState()
 ) {
@@ -120,14 +124,18 @@ class BacklogViewModel @Inject constructor(
             params = mapOf("category_name" to uiState.value.categoryList[categoryIndex].categoryName)
         )
 
+        updateSelectedCategory(categoryIndex)
+
+        getBacklogList(uiState.value.selectedCategoryId, 0, 100)
+    }
+
+    private fun updateSelectedCategory(categoryIndex: Int) {
         updateState(
             uiState.value.copy(
                 selectedCategoryIndex = categoryIndex,
                 selectedCategoryId = uiState.value.categoryList[categoryIndex].categoryId
             )
         )
-
-        getBacklogList(uiState.value.selectedCategoryId, 0, 100)
     }
 
     private fun getBacklogList(categoryId: Long, page: Int, size: Int) {
@@ -256,6 +264,14 @@ class BacklogViewModel @Inject constructor(
         updateList(currentList)
     }
 
+    fun onMoveCategory(from: Int, to: Int) {
+        if (from == 0 || from == 1 || to == 0 || to == 1) return
+
+        val currentList = uiState.value.categoryList.toMutableList()
+        currentList.move(from, to)
+        updateCategoryList(currentList)
+    }
+
     fun onDragEnd() {
         val todoIdList = uiState.value.backlogList.map { it.todoId }
 
@@ -275,12 +291,31 @@ class BacklogViewModel @Inject constructor(
         }
     }
 
+    fun onCategoryDragEnd() {
+        val categoryIds = uiState.value.categoryList.map { it.categoryId }.toMutableList()
+
+        categoryIds.removeFirst()
+        categoryIds.removeFirst()
+
+        viewModelScope.launch {
+            categoryDragDropUseCase(CategoryDragDropRequestModel(categoryIds)).collect {
+                resultResponse(it, {})
+            }
+        }
+    }
+
     private fun updateList(updatedList: List<TodoItemModel>) {
         val newList = updatedList.toList()
         updateState(
             uiState.value.copy(
                 backlogList = newList
             )
+        )
+    }
+
+    private fun updateCategoryList(newList: List<CategoryItemModel>) {
+        updateState(
+            uiState.value.copy(categoryList = newList)
         )
     }
 

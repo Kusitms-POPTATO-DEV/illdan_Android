@@ -52,5 +52,6 @@ object Endpoints {
         const val CATEGORY = "/category"
         const val LIST = "$CATEGORY/list"
         const val MODIFY = "$CATEGORY/{categoryId}"
+        const val DRAG_DROP = "$CATEGORY/dragAndDrop"
     }
 }

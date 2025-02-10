@@ -129,6 +129,7 @@ import com.poptato.ui.util.LoadingManager
 import com.poptato.ui.util.rememberDragDropListState
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalPermissionsApi::class)
@@ -152,7 +153,6 @@ fun BacklogScreen(
     var activeItemId by remember { mutableStateOf<Long?>(null) }
     var isDropDownMenuExpanded by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
-
     val permissionState = rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
 
     LaunchedEffect(Unit) {
@@ -278,13 +278,19 @@ fun BacklogScreen(
             },
             resetNewItemFlag = { viewModel.updateNewItemFlag(false) },
             onDragEnd = { viewModel.onDragEnd() },
+            onCategoryDragEnd = { viewModel.onCategoryDragEnd() },
             onMove = { from, to -> viewModel.onMove(from, to) },
+            onMoveCategory = { from, to -> viewModel.onMoveCategory(from, to) },
             isDropDownMenuExpanded = isDropDownMenuExpanded,
             onDropdownExpandedChange = { isDropDownMenuExpanded = it },
             haptic = haptic
         )
     } else {
-        LoadingManager.startLoading()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Gray100)
+        )
     }
 }
 
@@ -305,8 +311,10 @@ fun BacklogContent(
     onClearActiveItem: () -> Unit = {},
     onTodoItemModified: (Long, String) -> Unit = { _, _ -> },
     resetNewItemFlag: () -> Unit = {},
-    onDragEnd: (List<TodoItemModel>) -> Unit = { },
+    onDragEnd: (List<TodoItemModel>) -> Unit = {},
+    onCategoryDragEnd: () -> Unit = {},
     onMove: (Int, Int) -> Unit,
+    onMoveCategory: (Int, Int) -> Unit,
     isDropDownMenuExpanded: Boolean = false,
     onDropdownExpandedChange: (Boolean) -> Unit = {},
     haptic: HapticFeedback = LocalHapticFeedback.current
@@ -321,6 +329,8 @@ fun BacklogContent(
             categoryList = uiState.categoryList,
             interactionSource = interactionSource,
             onSelectCategory = onSelectCategory,
+            onMoveCategory = onMoveCategory,
+            onCategoryDragEnd = onCategoryDragEnd,
             selectedCategoryIndex = uiState.selectedCategoryIndex
         )
 
@@ -464,8 +474,17 @@ fun BacklogCategoryList(
     categoryList: List<CategoryItemModel> = emptyList(),
     onClickCategoryAdd: () -> Unit = {},
     onSelectCategory: (Int) -> Unit = {},
+    onMoveCategory: (Int, Int) -> Unit,
+    onCategoryDragEnd: () -> Unit = {},
     selectedCategoryIndex: Int = 0
 ) {
+    var draggedItem by remember { mutableStateOf<CategoryItemModel?>(null) }
+    var isDragging by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val dragDropState = rememberDragDropListState(
+        lazyListState = rememberLazyListState(),
+        onMove = onMoveCategory
+    )
 
     Row(
         modifier = Modifier
@@ -473,42 +492,100 @@ fun BacklogCategoryList(
             .wrapContentHeight()
             .padding(top = 16.dp)
     ) {
-
         LazyRow(
+            state = dragDropState.lazyListState,
             modifier = Modifier
-                .fillMaxWidth(),
+                .weight(1f)
+                .pointerInput(Unit) {
+                    detectDragGesturesAfterLongPress(
+                        onDragStart = { offset ->
+                            dragDropState.onHorizontalDragStart(offset)
+                            if (dragDropState.currentIndexOfDraggedItem == 0 || dragDropState.currentIndexOfDraggedItem == 1) return@detectDragGesturesAfterLongPress
+                            draggedItem = categoryList[dragDropState.currentIndexOfDraggedItem
+                                ?: return@detectDragGesturesAfterLongPress]
+                            isDragging = true
+                        },
+                        onDragEnd = {
+                            dragDropState.onDragInterrupted()
+                            draggedItem = null
+                            isDragging = false
+                            onCategoryDragEnd()
+                        },
+                        onDragCancel = {
+                            dragDropState.onDragInterrupted()
+                            draggedItem = null
+                            isDragging = false
+                        },
+                        onDrag = { change, offset ->
+                            change.consume()
+
+                            val currentIndex = dragDropState.currentIndexOfDraggedItem
+                            if (currentIndex != null && currentIndex > 1) {
+                                dragDropState.onHorizontalDrag(offset)
+                            }
+
+                            if (dragDropState.overscrollJob?.isActive == true) return@detectDragGesturesAfterLongPress
+                            dragDropState
+                                .checkForOverScrollHorizontal()
+                                .takeIf { it != 0f }
+                                ?.let {
+                                    dragDropState.overscrollJob = scope.launch {
+                                        val adjustedScroll = it * 0.3f
+                                        dragDropState.lazyListState.scrollBy(adjustedScroll)
+                                    }
+                                } ?: run { dragDropState.overscrollJob?.cancel() }
+                        }
+                    )
+                },
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             val categoryFixedIcon: List<Int> =
                 listOf(R.drawable.ic_category_all, R.drawable.ic_category_star)
 
             itemsIndexed(categoryList, key = { _, item -> item.categoryId }) { index, item ->
-                CategoryListIcon(
-                    imgResource = if (index == 0 || index == 1) categoryFixedIcon[index] else -1,
-                    paddingStart = if (index == 0) 16 else 0,
-                    imgUrl = item.categoryImgUrl,
-                    isSelected = selectedCategoryIndex == index,
-                    onClickCategory = { onSelectCategory(index) }
-                )
-            }
+                val isDragged = (index == dragDropState.currentIndexOfDraggedItem && index != 0 && index != 1)
 
-            item {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_add_category),
-                    contentDescription = "add backlog category",
-                    tint = Color.Unspecified,
+                Box(
                     modifier = Modifier
-                        .padding(end = 12.dp)
-                        .size(40.dp)
-                        .clickable(
-                            indication = null,
-                            interactionSource = interactionSource,
-                            onClick = { onClickCategoryAdd() }
+                        .graphicsLayer {
+                            translationX =
+                                dragDropState.horizontalElementDisplacement.takeIf { isDragged }
+                                    ?: 0f
+                            scaleX = if (isDragged) 1.05f else 1f
+                            scaleY = if (isDragged) 1.05f else 1f
+                        }
+                        .border(
+                            if (isDragged) BorderStroke(1.dp, Color.White) else BorderStroke(
+                                0.dp,
+                                Color.Transparent
+                            ),
+                            CircleShape
                         )
-                )
+                ) {
+                    CategoryListIcon(
+                        imgResource = if (index == 0 || index == 1) categoryFixedIcon[index] else -1,
+                        paddingStart = if (index == 0) 16 else 0,
+                        imgUrl = item.categoryImgUrl,
+                        isSelected = selectedCategoryIndex == index,
+                        onClickCategory = { onSelectCategory(index) }
+                    )
+                }
             }
         }
 
+        Icon(
+            painter = painterResource(id = R.drawable.ic_add_category),
+            contentDescription = "add backlog category",
+            tint = Color.Unspecified,
+            modifier = Modifier
+                .padding(end = 12.dp)
+                .size(40.dp)
+                .clickable(
+                    indication = null,
+                    interactionSource = interactionSource,
+                    onClick = { onClickCategoryAdd() }
+                )
+        )
     }
 }
 
@@ -519,7 +596,8 @@ fun CategoryListIcon(
     imgResource: Int = -1,
     imgUrl: String = "",
     isSelected: Boolean,
-    onClickCategory: () -> Unit = {}
+    interactionSource: MutableInteractionSource = remember{ MutableInteractionSource() },
+    onClickCategory: () -> Unit = {},
 ) {
 
     val context = LocalContext.current
@@ -536,7 +614,11 @@ fun CategoryListIcon(
             .padding(horizontal = paddingHorizontal.dp)
             .size(40.dp)
             .border(width = 1.dp, color = if (isSelected) Gray00 else Gray95, shape = CircleShape)
-            .clickable { onClickCategory() }
+            .clickable(
+                indication = null,
+                interactionSource = interactionSource,
+                onClick = { onClickCategory() }
+            )
     ) {
         AsyncImage(
             model = if (imgResource == -1) imgUrl else imgResource,

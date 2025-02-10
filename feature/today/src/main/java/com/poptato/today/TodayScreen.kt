@@ -219,7 +219,11 @@ fun TodayScreen(
             haptic = haptic
         )
     } else {
-        LoadingManager.startLoading()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Gray100)
+        )
     }
 }
 

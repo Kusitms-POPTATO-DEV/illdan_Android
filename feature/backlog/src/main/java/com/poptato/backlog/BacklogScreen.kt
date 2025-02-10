@@ -279,6 +279,7 @@ fun BacklogScreen(
             resetNewItemFlag = { viewModel.updateNewItemFlag(false) },
             onDragEnd = { viewModel.onDragEnd() },
             onMove = { from, to -> viewModel.onMove(from, to) },
+            onMoveCategory = { from, to -> viewModel.onMoveCategory(from, to) },
             isDropDownMenuExpanded = isDropDownMenuExpanded,
             onDropdownExpandedChange = { isDropDownMenuExpanded = it },
             haptic = haptic
@@ -307,6 +308,7 @@ fun BacklogContent(
     resetNewItemFlag: () -> Unit = {},
     onDragEnd: (List<TodoItemModel>) -> Unit = { },
     onMove: (Int, Int) -> Unit,
+    onMoveCategory: (Int, Int) -> Unit,
     isDropDownMenuExpanded: Boolean = false,
     onDropdownExpandedChange: (Boolean) -> Unit = {},
     haptic: HapticFeedback = LocalHapticFeedback.current
@@ -321,6 +323,7 @@ fun BacklogContent(
             categoryList = uiState.categoryList,
             interactionSource = interactionSource,
             onSelectCategory = onSelectCategory,
+            onMoveCategory = onMoveCategory,
             selectedCategoryIndex = uiState.selectedCategoryIndex
         )
 
@@ -464,8 +467,16 @@ fun BacklogCategoryList(
     categoryList: List<CategoryItemModel> = emptyList(),
     onClickCategoryAdd: () -> Unit = {},
     onSelectCategory: (Int) -> Unit = {},
+    onMoveCategory: (Int, Int) -> Unit,
     selectedCategoryIndex: Int = 0
 ) {
+    var draggedItem by remember { mutableStateOf<TodoItemModel?>(null) }
+    var isDragging by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val dragDropState = rememberDragDropListState(
+        lazyListState = rememberLazyListState(),
+        onMove = onMoveCategory
+    )
 
     Row(
         modifier = Modifier
@@ -473,10 +484,10 @@ fun BacklogCategoryList(
             .wrapContentHeight()
             .padding(top = 16.dp)
     ) {
-
         LazyRow(
+            state = dragDropState.lazyListState,
             modifier = Modifier
-                .fillMaxWidth(),
+                .weight(1f),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             val categoryFixedIcon: List<Int> =
@@ -491,24 +502,21 @@ fun BacklogCategoryList(
                     onClickCategory = { onSelectCategory(index) }
                 )
             }
-
-            item {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_add_category),
-                    contentDescription = "add backlog category",
-                    tint = Color.Unspecified,
-                    modifier = Modifier
-                        .padding(end = 12.dp)
-                        .size(40.dp)
-                        .clickable(
-                            indication = null,
-                            interactionSource = interactionSource,
-                            onClick = { onClickCategoryAdd() }
-                        )
-                )
-            }
         }
 
+        Icon(
+            painter = painterResource(id = R.drawable.ic_add_category),
+            contentDescription = "add backlog category",
+            tint = Color.Unspecified,
+            modifier = Modifier
+                .padding(end = 12.dp)
+                .size(40.dp)
+                .clickable(
+                    indication = null,
+                    interactionSource = interactionSource,
+                    onClick = { onClickCategoryAdd() }
+                )
+        )
     }
 }
 

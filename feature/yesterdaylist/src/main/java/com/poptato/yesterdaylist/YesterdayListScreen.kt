@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.poptato.design_system.Complete
 import com.poptato.design_system.Gray00
 import com.poptato.design_system.Gray100
 import com.poptato.design_system.Gray40
@@ -64,8 +65,8 @@ fun YesterdayListScreen(
         onCheckedChange = { id, status ->
             viewModel.onCheckedTodo(id, status)
         },
-        onClickAllCheckBtn = {
-            viewModel.onCheckAllTodoList()
+        onClickBtnComplete = {
+            viewModel.onClickBtnComplete()
             showAllCheckPage()
         }
     )
@@ -75,8 +76,8 @@ fun YesterdayListScreen(
 fun YesterdayContent(
     uiState: YesterdayListPageState = YesterdayListPageState(),
     onClickCloseBtn: () -> Unit = {},
-    onCheckedChange: (Long, TodoStatus) -> Unit = {_, _ ->},
-    onClickAllCheckBtn: () -> Unit = {}
+    onClickBtnComplete: () -> Unit  = {},
+    onCheckedChange: (Long, TodoStatus) -> Unit = {_, _ ->}
 ) {
     Box(
         modifier = Modifier
@@ -88,7 +89,7 @@ fun YesterdayContent(
             modifier = Modifier.fillMaxSize()
         ) {
             TitleTopBar(
-                onClickCloseBtn = onClickCloseBtn
+                onClickBtnComplete = onClickCloseBtn
             )
 
             Box(
@@ -126,8 +127,8 @@ fun YesterdayContent(
                 }
             }
 
-            AllCheckBtn(
-                onClickAllCheckBtn = onClickAllCheckBtn
+            BtnComplete(
+                onClickAllCheckBtn = onClickBtnComplete
             )
         }
 
@@ -136,7 +137,7 @@ fun YesterdayContent(
 
 @Composable
 fun TitleTopBar(
-    onClickCloseBtn: () -> Unit = {}
+    onClickBtnComplete: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -152,7 +153,7 @@ fun TitleTopBar(
                 .align(Alignment.CenterEnd)
                 .padding(top = 24.dp, bottom = 8.dp)
                 .size(width = 24.dp, height = 24.dp)
-                .clickable { onClickCloseBtn() }
+                .clickable { onClickBtnComplete() }
         )
     }
 }
@@ -242,7 +243,7 @@ fun YesterdayTodoItem(
 }
 
 @Composable
-fun AllCheckBtn(
+fun BtnComplete(
     onClickAllCheckBtn: () -> Unit = {}
 ) {
     Box(
@@ -255,7 +256,7 @@ fun AllCheckBtn(
             .clickable { onClickAllCheckBtn() }
     ) {
         Text(
-            text = YesterdayAllCheckBtn,
+            text = Complete,
             style = PoptatoTypo.lgSemiBold,
             color = Gray100,
             modifier = Modifier

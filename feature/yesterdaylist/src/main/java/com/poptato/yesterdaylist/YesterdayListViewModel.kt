@@ -3,6 +3,7 @@ package com.poptato.yesterdaylist
 import androidx.lifecycle.viewModelScope
 import com.poptato.domain.model.enums.TodoStatus
 import com.poptato.domain.model.request.ListRequestModel
+import com.poptato.domain.model.response.yesterday.YesterdayItemModel
 import com.poptato.domain.model.response.yesterday.YesterdayListModel
 import com.poptato.domain.usecase.todo.UpdateTodoCompletionUseCase
 import com.poptato.domain.usecase.yesterday.GetYesterdayListUseCase
@@ -21,7 +22,7 @@ class YesterdayListViewModel @Inject constructor(
 ) {
 
     init {
-        getYesterdayList(0, 8)
+        getYesterdayList(0, 100)
     }
 
     private fun getYesterdayList(page: Int, size: Int) {
@@ -47,10 +48,7 @@ class YesterdayListViewModel @Inject constructor(
     }
 
     fun onCheckedTodo(id: Long, status: TodoStatus) {
-        Timber.d("[어제 한 일] check -> id: $id & status: $status")
-
         val newStatus = if (status == TodoStatus.COMPLETED) TodoStatus.INCOMPLETE else TodoStatus.COMPLETED
-
         val updatedList = uiState.value.yesterdayList.map { item ->
             if (item.todoId == id) {
                 item.copy(todoStatus = newStatus)
@@ -58,19 +56,22 @@ class YesterdayListViewModel @Inject constructor(
                 item
             }
         }
+        val completedList = uiState.value.completedTodoList.toMutableList()
+
+        if (newStatus == TodoStatus.COMPLETED) { completedList.add(id) }
+        else { completedList.remove(id) }
 
         updateState(
-            uiState.value.copy(yesterdayList = updatedList)
+            uiState.value.copy(
+                yesterdayList = updatedList,
+                completedTodoList = completedList
+            )
         )
-
-        updateTodoApi(id)
     }
 
-    fun onCheckAllTodoList() {
-        val yesterdayList = uiState.value.yesterdayList
-
-        yesterdayList.forEach { item ->
-            updateTodoApi(item.todoId)
+    fun onClickBtnComplete() {
+        uiState.value.completedTodoList.map {
+            updateTodoApi(it)
         }
     }
 

@@ -161,6 +161,12 @@ fun BacklogScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        if (uiState.isExistYesterdayTodo) {
+            goToYesterdayList()
+        }
+    }
+
     LaunchedEffect(activateItemFlow) {
         activateItemFlow.collect { id ->
             activeItemId = id
@@ -223,7 +229,6 @@ fun BacklogScreen(
             onValueChange = { newValue -> viewModel.onValueChange(newValue) },
             createBacklog = { newItem -> viewModel.createBacklog(newItem) },
             onItemSwiped = { itemToRemove -> viewModel.swipeBacklogItem(itemToRemove) },
-            onClickYesterdayList = { goToYesterdayList() },
             onSelectCategory = { index ->
                 viewModel.getBacklogListInCategory(index)
             },
@@ -299,7 +304,6 @@ fun BacklogContent(
     uiState: BacklogPageState = BacklogPageState(),
     onValueChange: (String) -> Unit = {},
     createBacklog: (String) -> Unit = {},
-    onClickYesterdayList: () -> Unit = {},
     onSelectCategory: (Int) -> Unit = {},
     onClickCategoryAdd: () -> Unit = {},
     onClickCategoryDeleteDropdown: () -> Unit = {},
@@ -423,15 +427,6 @@ fun BacklogContent(
                         haptic = haptic
                     )
                 }
-            }
-
-            if (!uiState.isYesterdayListEmpty) {
-                BacklogGuideItem(
-                    onClickYesterdayList = onClickYesterdayList,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter),
-                    interactionSource = interactionSource
-                )
             }
         }
     }
@@ -1005,54 +1000,54 @@ fun CreateBacklogTextFiled(
     }
 }
 
-@SuppressLint("ModifierParameter")
-@Composable
-fun BacklogGuideItem(
-    onClickYesterdayList: () -> Unit = {},
-    modifier: Modifier = Modifier,
-    interactionSource: MutableInteractionSource
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
-            .background(Primary60)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = BACKLOG_YESTERDAY_TASK_GUIDE,
-            style = PoptatoTypo.smMedium,
-            color = Gray100,
-            textAlign = TextAlign.Start,
-            modifier = Modifier
-                .weight(1f)
-        )
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .clickable(
-                    indication = null,
-                    interactionSource = interactionSource,
-                    onClick = { onClickYesterdayList() }
-                )
-
-        ) {
-            Text(
-                text = CONFIRM_ACTION,
-                style = PoptatoTypo.smSemiBold,
-                color = Gray100
-            )
-
-            Spacer(modifier = Modifier.width(4.dp))
-
-            Icon(
-                painter = painterResource(id = R.drawable.ic_right_arrow),
-                contentDescription = "",
-                tint = Color.Unspecified
-            )
-        }
-    }
-}
+//@SuppressLint("ModifierParameter")
+//@Composable
+//fun BacklogGuideItem(
+//    onClickYesterdayList: () -> Unit = {},
+//    modifier: Modifier = Modifier,
+//    interactionSource: MutableInteractionSource
+//) {
+//    Row(
+//        modifier = modifier
+//            .fillMaxWidth()
+//            .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+//            .background(Primary60)
+//            .padding(horizontal = 16.dp, vertical = 12.dp),
+//        verticalAlignment = Alignment.CenterVertically
+//    ) {
+//        Text(
+//            text = BACKLOG_YESTERDAY_TASK_GUIDE,
+//            style = PoptatoTypo.smMedium,
+//            color = Gray100,
+//            textAlign = TextAlign.Start,
+//            modifier = Modifier
+//                .weight(1f)
+//        )
+//
+//        Row(
+//            verticalAlignment = Alignment.CenterVertically,
+//            modifier = Modifier
+//                .clickable(
+//                    indication = null,
+//                    interactionSource = interactionSource,
+//                    onClick = { onClickYesterdayList() }
+//                )
+//
+//        ) {
+//            Text(
+//                text = CONFIRM_ACTION,
+//                style = PoptatoTypo.smSemiBold,
+//                color = Gray100
+//            )
+//
+//            Spacer(modifier = Modifier.width(4.dp))
+//
+//            Icon(
+//                painter = painterResource(id = R.drawable.ic_right_arrow),
+//                contentDescription = "",
+//                tint = Color.Unspecified
+//            )
+//        }
+//    }
+//}
 

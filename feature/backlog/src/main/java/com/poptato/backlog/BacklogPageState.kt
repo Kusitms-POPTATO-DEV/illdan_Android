@@ -11,7 +11,7 @@ data class BacklogPageState(
     val selectedItem: TodoItemModel = TodoItemModel(),
     val totalItemCount: Int = -1,
     val totalPageCount: Int = -1,
-    val isYesterdayListEmpty: Boolean = true,
+    val isExistYesterdayTodo: Boolean = false,
     val isNewItemCreated: Boolean = false,
     val currentPage: Int = 0,
     val isFinishedInitialization: Boolean = false,

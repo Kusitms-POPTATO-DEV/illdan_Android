@@ -52,8 +52,7 @@ import timber.log.Timber
 
 @Composable
 fun YesterdayListScreen(
-    goBackToBacklog: () -> Unit = {},
-    showAllCheckPage: () -> Unit = {}
+    goBackToBacklog: () -> Unit = {}
 ) {
 
     val viewModel: YesterdayListViewModel = hiltViewModel()
@@ -67,7 +66,7 @@ fun YesterdayListScreen(
         },
         onClickBtnComplete = {
             viewModel.onClickBtnComplete()
-            showAllCheckPage()
+            goBackToBacklog()
         }
     )
 }

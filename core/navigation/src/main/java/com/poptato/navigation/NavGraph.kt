@@ -157,8 +157,7 @@ fun NavGraphBuilder.yesterdayListNavGraph(navController: NavHostController) {
     ) {
         composable(NavRoutes.YesterdayListScreen.route) {
             YesterdayListScreen(
-                goBackToBacklog = { navController.popBackStack() },
-                showAllCheckPage = { navController.navigate(NavRoutes.YesterdayAllCheckScreen.route) }
+                goBackToBacklog = { navController.popBackStack() }
             )
         }
 

@@ -15,11 +15,16 @@ object AnalyticsManager {
         }
     }
 
-    fun logEvent(eventName: String, params: Map<String, String> = emptyMap()) {
-        Timber.d("eventName: $eventName")
+    fun logEvent(eventName: String, params: Map<String, Any> = emptyMap()) {
         val bundle = Bundle().apply {
             params.forEach { (key, value) ->
-                putString(key, value)
+                when (value) {
+                    is String -> putString(key, value)
+                    is Int -> putInt(key, value)
+                    is Double -> putDouble(key, value)
+                    is Boolean -> putBoolean(key, value)
+                    else -> putString(key, value.toString())
+                }
             }
         }
         firebaseAnalytics?.logEvent(eventName, bundle)

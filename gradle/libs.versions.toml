@@ -46,7 +46,7 @@ coil-svg="2.2.2"
 kotlin-serialization-converter = "0.8.0"
 kakao-auth = "2.20.1"
 web-view = "0.24.13-rc"
-pdf-viewer = "master-SNAPSHOT"
+pdf-viewer = "1.6.0"
 lazy-column-scrollbar = "2.2.0"
 google-service = "4.4.2"
 firebase-bom = "33.6.0"
@@ -158,7 +158,7 @@ kakao-auth = { module = "com.kakao.sdk:v2-user", version.ref = "kakao-auth" }
 web-view = { module = "com.google.accompanist:accompanist-webview", version.ref = "web-view" }
 
 # pdf viewer
-pdf-viewer = { module = "com.github.barteksc:AndroidPdfViewer", version.ref = "pdf-viewer" }
+pdf-viewer = { module = "com.github.barteksc:AndroidPdfViewerV1", version.ref = "pdf-viewer" }
 
 # LazyColumnScrollbar
 lazycolumn-scrollbar = { module = "com.github.nanihadesuka:LazyColumnScrollbar", version.ref = "lazy-column-scrollbar" }

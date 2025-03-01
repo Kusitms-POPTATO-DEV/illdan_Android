@@ -27,16 +27,6 @@ class SplashViewModel @Inject constructor(
         checkLocalToken()
     }
 
-//    private fun checkLocalToken() {
-//        viewModelScope.launch {
-//            getTokenUseCase.invoke(Unit).collect {
-//                if (it.accessToken.isNotEmpty() && it.refreshToken.isNotEmpty()) {
-//                    updateState(uiState.value.copy(skipLogin = true))
-//                }
-//            }
-//        }
-//    }
-
     private fun checkLocalToken() {
         viewModelScope.launch(Dispatchers.Main) {
             getTokenUseCase(Unit).collect {

@@ -2,22 +2,28 @@ package com.poptato.mypage
 
 import androidx.lifecycle.viewModelScope
 import com.poptato.domain.model.response.mypage.UserDataModel
+import com.poptato.domain.usecase.auth.GetDeadlineDateModeUseCase
+import com.poptato.domain.usecase.auth.SetDeadlineDateModeUseCase
 import com.poptato.domain.usecase.mypage.GetUserDataUseCase
 import com.poptato.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class MyPageViewModel @Inject constructor(
-    private val getUserDataUseCase: GetUserDataUseCase
+    private val getUserDataUseCase: GetUserDataUseCase,
+    private val getDeadlineDateModeUseCase: GetDeadlineDateModeUseCase,
+    private val setDeadlineDateModeUseCase: SetDeadlineDateModeUseCase
 ) : BaseViewModel<MyPagePageState>(
     MyPagePageState()
 ) {
 
     init {
         getUserData()
+        getDeadlineDateMode()
     }
 
     private fun getUserData() {
@@ -46,6 +52,20 @@ class MyPageViewModel @Inject constructor(
             NOTICE_TYPE -> updateState(uiState.value.copy(noticeWebViewState = state))
             FAQ_TYPE -> updateState(uiState.value.copy(faqWebViewState = state))
             POLICY_TYPE -> updateState(uiState.value.copy(policyViewState = state))
+        }
+    }
+
+    private fun getDeadlineDateMode() {
+        viewModelScope.launch {
+            getDeadlineDateModeUseCase(Unit).collect {
+                updateState(uiState.value.copy(isDeadlineDateMode = it))
+            }
+        }
+    }
+
+    fun setDeadlineDateMode(value: Boolean) {
+        viewModelScope.launch {
+            setDeadlineDateModeUseCase(value).collect()
         }
     }
 

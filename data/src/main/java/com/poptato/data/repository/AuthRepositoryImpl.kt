@@ -52,4 +52,12 @@ class AuthRepositoryImpl @Inject constructor (
             )
         }
     }
+
+    override suspend fun getDeadlineDateMode(): Flow<Boolean> {
+        return dataStore.deadlineDateMode
+    }
+
+    override suspend fun setDeadlineDateMode(value: Boolean) {
+        dataStore.setDeadlineDateMode(value)
+    }
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -35,6 +36,7 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.decode.SvgDecoder
+import com.poptato.design_system.DEADLINE_MODE_TEXT
 import com.poptato.design_system.FAQ
 import com.poptato.design_system.Gray00
 import com.poptato.design_system.Gray100
@@ -53,6 +55,7 @@ import com.poptato.design_system.VersionSetting
 import com.poptato.mypage.BuildConfig.VERSION_NAME
 import com.poptato.mypage.MyPageViewModel.Companion.FAQ_TYPE
 import com.poptato.mypage.MyPageViewModel.Companion.NOTICE_TYPE
+import com.poptato.ui.common.PoptatoSwitchButton
 import com.poptato.ui.util.AnalyticsManager
 import timber.log.Timber
 
@@ -70,6 +73,7 @@ fun MyPageScreen(
 
     MyPageContent(
         uiState = uiState,
+        onClickSwitchButton = { viewModel.setDeadlineDateMode(it) },
         onClickUserDataBtn = { goToUserDataPage() },
         interactionSource = interactionSource,
         onClickServiceNotice = { viewModel.updateState(true, NOTICE_TYPE) },
@@ -89,6 +93,7 @@ fun MyPageScreen(
 @Composable
 fun MyPageContent(
     uiState: MyPagePageState = MyPagePageState(),
+    onClickSwitchButton: (Boolean) -> Unit = {},
     onClickUserDataBtn: () -> Unit = {},
     onClickServiceNotice: () -> Unit = {},
     onClickServiceFAQ: () -> Unit = {},
@@ -112,6 +117,11 @@ fun MyPageContent(
         SettingSubTitle(
             title = SettingTitle,
             topPadding = 24
+        )
+
+        DeadlineModeSwitch(
+            isDeadlineDateMode = uiState.isDeadlineDateMode,
+            onClickSwitchButton = onClickSwitchButton
         )
 
         SettingServiceItem(
@@ -142,6 +152,32 @@ fun MyPageContent(
             title = Version,
             isVersion = true,
             interactionSource = interactionSource
+        )
+    }
+}
+
+@Composable
+fun DeadlineModeSwitch(
+    isDeadlineDateMode: Boolean = false,
+    onClickSwitchButton: (Boolean) -> Unit = {}
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = DEADLINE_MODE_TEXT,
+            color = Gray20,
+            style = PoptatoTypo.mdMedium
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        PoptatoSwitchButton(
+            check = isDeadlineDateMode,
+            onClick = { onClickSwitchButton(!isDeadlineDateMode) }
         )
     }
 }

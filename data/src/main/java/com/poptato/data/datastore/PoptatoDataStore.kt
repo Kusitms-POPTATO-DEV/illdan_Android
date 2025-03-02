@@ -24,6 +24,9 @@ class PoptatoDataStore(context: Context) {
         if (lastCheckedDate != currentDate) { true }
         else { preferences[SHOULD_SHOW_YESTERDAY_KEY] ?: true }
     }
+    val deadlineDateMode: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[DEADLINE_DATE_MODE] ?: false
+    }
 
     suspend fun setShouldShowYesterday(value: Boolean) {
         dataStore.edit { preferences ->
@@ -46,6 +49,12 @@ class PoptatoDataStore(context: Context) {
         }
     }
 
+    suspend fun setDeadlineDateMode(value: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[DEADLINE_DATE_MODE] = value
+        }
+    }
+
     suspend fun clearToken() {
         dataStore.edit { preferences ->
             preferences.remove(ACCESS_TOKEN_KEY)
@@ -58,5 +67,6 @@ class PoptatoDataStore(context: Context) {
         val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token")
         val SHOULD_SHOW_YESTERDAY_KEY = booleanPreferencesKey("should_show_yesterday")
         val LAST_CHECKED_DATE_KEY = stringPreferencesKey("last_checked_date")
+        val DEADLINE_DATE_MODE = booleanPreferencesKey("deadline_date_mode")
     }
 }

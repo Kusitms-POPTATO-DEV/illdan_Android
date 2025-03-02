@@ -18,6 +18,7 @@ import com.poptato.domain.model.response.category.CategoryListModel
 import com.poptato.domain.model.response.today.TodayListModel
 import com.poptato.domain.model.response.today.TodoItemModel
 import com.poptato.domain.model.response.todo.TodoDetailItemModel
+import com.poptato.domain.usecase.auth.GetDeadlineDateModeUseCase
 import com.poptato.domain.usecase.category.GetCategoryListUseCase
 import com.poptato.domain.usecase.today.GetTodayListUseCase
 import com.poptato.domain.usecase.todo.DeleteTodoUseCase
@@ -53,11 +54,13 @@ class TodayViewModel @Inject constructor(
     private val getTodoDetailUseCase: GetTodoDetailUseCase,
     private val updateTodoCategoryUseCase: UpdateTodoCategoryUseCase,
     private val deleteTodoUseCase: DeleteTodoUseCase,
-    private val updateTodoRepeatUseCase: UpdateTodoRepeatUseCase
+    private val updateTodoRepeatUseCase: UpdateTodoRepeatUseCase,
+    private val getDeadlineDateModeUseCase: GetDeadlineDateModeUseCase
 ) : BaseViewModel<TodayPageState>(TodayPageState()) {
     private var snapshotList: List<TodoItemModel> = emptyList()
 
     init {
+        getDeadlineDateMode()
         getTodayList(0, 50)
         getCategoryList()
     }
@@ -396,6 +399,15 @@ class TodayViewModel @Inject constructor(
                 }, { error ->
                     Timber.d("[카테고리] 수정 서버통신 실패 -> $error")
                 })
+            }
+        }
+    }
+
+    // DeadlineDateMode
+    private fun getDeadlineDateMode() {
+        viewModelScope.launch {
+            getDeadlineDateModeUseCase(Unit).collect {
+                updateState(uiState.value.copy(isDeadlineDateMode = it))
             }
         }
     }

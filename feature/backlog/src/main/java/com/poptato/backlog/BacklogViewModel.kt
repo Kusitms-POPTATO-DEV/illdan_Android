@@ -21,7 +21,7 @@ import com.poptato.domain.model.response.category.CategoryItemModel
 import com.poptato.domain.model.response.category.CategoryListModel
 import com.poptato.domain.model.response.today.TodoItemModel
 import com.poptato.domain.model.response.todo.TodoDetailItemModel
-import com.poptato.domain.model.response.yesterday.YesterdayListModel
+import com.poptato.domain.usecase.auth.GetDeadlineDateModeUseCase
 import com.poptato.domain.usecase.backlog.CreateBacklogUseCase
 import com.poptato.domain.usecase.backlog.GetBacklogListUseCase
 import com.poptato.domain.usecase.category.CategoryDragDropUseCase
@@ -70,7 +70,8 @@ class BacklogViewModel @Inject constructor(
     private val updateTodoRepeatUseCase: UpdateTodoRepeatUseCase,
     private val categoryDragDropUseCase: CategoryDragDropUseCase,
     private val getShouldShowYesterdayUseCase: GetShouldShowYesterdayUseCase,
-    private val setShouldShowYesterdayUseCase: SetShouldShowYesterdayUseCase
+    private val setShouldShowYesterdayUseCase: SetShouldShowYesterdayUseCase,
+    private val getDeadlineDateModeUseCase: GetDeadlineDateModeUseCase
 ) : BaseViewModel<BacklogPageState>(
     BacklogPageState()
 ) {
@@ -81,6 +82,7 @@ class BacklogViewModel @Inject constructor(
     init {
         getCategoryList()
         getShouldShowYesterday()
+        getDeadlineDateMode()
         getBacklogList(-1, 0, 100)
     }
 
@@ -521,6 +523,15 @@ class BacklogViewModel @Inject constructor(
     private suspend fun getSnapshotList(): List<TodoItemModel> {
         return mutex.withLock {
             snapshotList
+        }
+    }
+
+    // DeadlineDateMode
+    private fun getDeadlineDateMode() {
+        viewModelScope.launch {
+            getDeadlineDateModeUseCase(Unit).collect {
+                updateState(uiState.value.copy(isDeadlineDateMode = it))
+            }
         }
     }
 }

@@ -13,4 +13,6 @@ interface AuthRepository {
     suspend fun clearToken(): Flow<Result<Unit>>
     suspend fun logout(): Flow<Result<Unit>>
     suspend fun getToken(): Flow<TokenModel>
+    suspend fun getDeadlineDateMode(): Flow<Boolean>
+    suspend fun setDeadlineDateMode(value: Boolean)
 }

@@ -11,6 +11,7 @@ import com.poptato.domain.usecase.auth.ReissueTokenUseCase
 import com.poptato.domain.usecase.auth.SaveTokenUseCase
 import com.poptato.domain.usecase.today.GetTodayListUseCase
 import com.poptato.ui.base.BaseViewModel
+import com.poptato.ui.util.FCMManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -38,11 +39,17 @@ class SplashViewModel @Inject constructor(
     }
 
     private fun reissueToken(token: TokenModel) {
-        viewModelScope.launch(Dispatchers.Main) {
-            reissueTokenUseCase(
-                request = ReissueRequestModel(accessToken = token.accessToken, refreshToken = token.refreshToken)
-            ).collect {
-                resultResponse(it, ::onSuccessReissueToken)
+        FCMManager.getFCMToken { clientId ->
+            viewModelScope.launch(Dispatchers.Main) {
+                reissueTokenUseCase(
+                    request = ReissueRequestModel(
+                        accessToken = token.accessToken,
+                        refreshToken = token.refreshToken,
+                        clientId = clientId ?: ""
+                    )
+                ).collect {
+                    resultResponse(it, ::onSuccessReissueToken)
+                }
             }
         }
     }

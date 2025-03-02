@@ -10,15 +10,18 @@ import com.poptato.domain.usecase.auth.GetTokenUseCase
 import com.poptato.domain.usecase.auth.ReissueTokenUseCase
 import com.poptato.domain.usecase.auth.SaveTokenUseCase
 import com.poptato.ui.util.CommonEventManager
+import com.poptato.ui.util.FCMManager
 import dagger.Lazy
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.coroutines.resume
 
 class TokenAuthenticator @Inject constructor(
     private val getTokenUseCase: Lazy<GetTokenUseCase>,
@@ -52,10 +55,12 @@ class TokenAuthenticator @Inject constructor(
     private fun handleTokenRefresh(response: Response, tokenModel: TokenModel): Request? {
         return runBlocking {
             try {
+                val clientId = getFCMTokenSync()
                 val newTokensResult = reissueTokenUseCase.get().invoke(
                     ReissueRequestModel(
                         accessToken = tokenModel.accessToken,
-                        refreshToken = tokenModel.refreshToken
+                        refreshToken = tokenModel.refreshToken,
+                        clientId = clientId ?: ""
                     )
                 ).firstOrNull()
 
@@ -71,6 +76,14 @@ class TokenAuthenticator @Inject constructor(
             } catch (e: Exception) {
                 Timber.e("Token reissue failed: ${e.message}")
                 null
+            }
+        }
+    }
+
+    private fun getFCMTokenSync(): String? = runBlocking {
+        suspendCancellableCoroutine { continuation ->
+            FCMManager.getFCMToken { token ->
+                continuation.resume(token)
             }
         }
     }

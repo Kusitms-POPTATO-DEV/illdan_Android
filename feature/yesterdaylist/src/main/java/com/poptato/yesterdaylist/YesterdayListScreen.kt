@@ -162,8 +162,6 @@ fun YesterdayTodoList(
     list: List<YesterdayItemModel> = emptyList(),
     onCheckedChange: (Long, TodoStatus) -> Unit = {_, _ ->},
 ) {
-    Timber.d("[어제 한 일] list -> $list")
-
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()

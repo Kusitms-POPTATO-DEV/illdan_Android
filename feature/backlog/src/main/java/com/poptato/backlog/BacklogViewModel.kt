@@ -81,7 +81,7 @@ class BacklogViewModel @Inject constructor(
 
     init {
         getCategoryList()
-        getShouldShowYesterday()
+        getYesterdayList(0, 1)
         getDeadlineDateMode()
         getBacklogList(-1, 0, 100)
     }
@@ -532,6 +532,14 @@ class BacklogViewModel @Inject constructor(
             getDeadlineDateModeUseCase(Unit).collect {
                 updateState(uiState.value.copy(isDeadlineDateMode = it))
             }
+        }
+    }
+
+    // YesterdayTodo
+    fun completeYesterdayTodoDisplay() {
+        updateState(uiState.value.copy(isExistYesterdayTodo = false))
+        viewModelScope.launch {
+            setShouldShowYesterdayUseCase(false).collect()
         }
     }
 }

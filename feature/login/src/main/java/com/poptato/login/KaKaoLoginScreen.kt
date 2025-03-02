@@ -39,6 +39,7 @@ import com.poptato.design_system.PoptatoTypo
 import com.poptato.design_system.R
 import com.poptato.design_system.SUCCESS_LOGIN
 import com.poptato.design_system.Splash
+import com.poptato.ui.util.FCMManager
 import com.poptato.ui.util.LoadingManager
 import timber.log.Timber
 
@@ -69,17 +70,11 @@ fun KaKaoLoginScreen(
         }
     }
 
-    FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-        if (!task. isSuccessful) {
-            Timber.d("[FCM] login -> 실패: ${task.exception}")
-            return@OnCompleteListener
+    LaunchedEffect(Unit) {
+        FCMManager.getFCMToken { token ->
+            if (token != null) { viewModel.getClientId(token) }
         }
-
-        val token = task.result
-        if (token != null) {
-            viewModel.getClientId(token)
-        }
-    })
+    }
 
     KaKaoLoginContent(
         onSuccessKaKaoLogin = { viewModel.kakaoLogin(it) },

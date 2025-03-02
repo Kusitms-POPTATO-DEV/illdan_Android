@@ -65,7 +65,7 @@ fun YesterdayListScreen(
             viewModel.onCheckedTodo(id, status)
         },
         onClickBtnComplete = {
-            viewModel.onClickBtnComplete()
+            viewModel.updateYesterdayTodoCompletion()
             goBackToBacklog()
         }
     )

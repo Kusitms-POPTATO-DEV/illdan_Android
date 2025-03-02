@@ -74,6 +74,7 @@ import com.poptato.design_system.EmptyTodoTitle
 import com.poptato.design_system.Gray00
 import com.poptato.design_system.Gray100
 import com.poptato.design_system.Gray40
+import com.poptato.design_system.Gray50
 import com.poptato.design_system.Gray70
 import com.poptato.design_system.Gray90
 import com.poptato.design_system.Gray95
@@ -277,7 +278,8 @@ fun TodayContent(
                 activeItemId = activeItemId,
                 onClearActiveItem = onClearActiveItem,
                 onTodoItemModified = onTodoItemModified,
-                haptic = haptic
+                haptic = haptic,
+                isDeadlineDateMode = uiState.isDeadlineDateMode
             )
         }
     }
@@ -295,7 +297,8 @@ fun TodayTodoList(
     activeItemId: Long?,
     onClearActiveItem: () -> Unit = {},
     onTodoItemModified: (Long, String) -> Unit = {_,_ ->},
-    haptic: HapticFeedback = LocalHapticFeedback.current
+    haptic: HapticFeedback = LocalHapticFeedback.current,
+    isDeadlineDateMode: Boolean = false
 ) {
     var draggedItem by remember { mutableStateOf<TodoItemModel?>(null) }
     var isDragging by remember { mutableStateOf(false) }
@@ -403,6 +406,7 @@ fun TodayTodoList(
                     ),
                 showBottomSheet = showBottomSheet,
                 isActive = isActive,
+                isDeadlineDateMode = isDeadlineDateMode,
                 onClearActiveItem = onClearActiveItem,
                 onTodoItemModified = onTodoItemModified
             )
@@ -421,6 +425,7 @@ fun TodayTodoItem(
     modifier: Modifier = Modifier,
     showBottomSheet: (TodoItemModel) -> Unit = {},
     isActive: Boolean,
+    isDeadlineDateMode: Boolean,
     onClearActiveItem: () -> Unit = {},
     onTodoItemModified: (Long, String) -> Unit = {_,_ ->}
 ) {
@@ -505,9 +510,9 @@ fun TodayTodoItem(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = formatDeadline(item.dDay),
+                            text = if(isDeadlineDateMode) item.deadline else formatDeadline(item.dDay),
                             style = PoptatoTypo.xsSemiBold,
-                            color = Gray70
+                            color = Gray50
                         )
                     }
                 }

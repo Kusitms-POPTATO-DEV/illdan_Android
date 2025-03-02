@@ -16,6 +16,7 @@ object Endpoints {
 
     object Yesterday {
         const val YESTERDAY = "/yesterdays"
+        const val YESTERDAY_COMPLETION = "/todo/check/yesterdays"
     }
 
     object History {

@@ -101,7 +101,7 @@ const val SecondNoticeTitle = "회원님의 데이터가 모두 삭제돼요"
 const val SecondNoticeContent = "오늘, 할 일, 기록에 저장된 모든 데이터가 삭제돼요."
 const val UserDataName = "이름"
 const val UserDataEmail = "카카오 로그인"
-
+const val DEADLINE_MODE_TEXT = "마감기한 날짜로 보기"
 
 // Today
 const val TodayTopBarSub = "오늘도 하나씩 해보는 거야!"

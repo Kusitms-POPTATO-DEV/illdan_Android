@@ -4,9 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.poptato.domain.model.enums.TodoStatus
 import com.poptato.domain.model.request.ListRequestModel
 import com.poptato.domain.model.request.todo.TodoIdsModel
-import com.poptato.domain.model.response.yesterday.YesterdayItemModel
 import com.poptato.domain.model.response.yesterday.YesterdayListModel
-import com.poptato.domain.usecase.todo.UpdateTodoCompletionUseCase
 import com.poptato.domain.usecase.yesterday.GetYesterdayListUseCase
 import com.poptato.domain.usecase.yesterday.UpdateYesterdayTodoCompletionUseCase
 import com.poptato.ui.base.BaseViewModel
@@ -18,7 +16,6 @@ import javax.inject.Inject
 @HiltViewModel
 class YesterdayListViewModel @Inject constructor(
     private val getYesterdayListUseCase: GetYesterdayListUseCase,
-    private val updateTodoCompletionUseCase: UpdateTodoCompletionUseCase,
     private val updateYesterdayTodoCompletionUseCase: UpdateYesterdayTodoCompletionUseCase
 ): BaseViewModel<YesterdayListPageState>(
     YesterdayListPageState()

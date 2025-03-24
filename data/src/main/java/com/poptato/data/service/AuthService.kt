@@ -6,6 +6,7 @@ import com.poptato.data.model.response.auth.TokenResponse
 import com.poptato.data.model.response.login.AuthResponse
 import com.poptato.domain.model.request.KaKaoLoginRequest
 import com.poptato.domain.model.request.ReissueRequestModel
+import com.poptato.domain.model.request.auth.LogoutRequestModel
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
@@ -23,5 +24,7 @@ interface AuthService {
     ): Response<ApiResponse<TokenResponse>>
 
     @POST(Endpoints.Auth.LOGOUT)
-    suspend fun logout(): Response<ApiResponse<String>>
+    suspend fun logout(
+        @Body request: LogoutRequestModel
+    ): Response<ApiResponse<String>>
 }

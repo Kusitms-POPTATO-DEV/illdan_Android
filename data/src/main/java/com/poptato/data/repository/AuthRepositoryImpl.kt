@@ -8,6 +8,7 @@ import com.poptato.data.mapper.ReissueResponseMapper
 import com.poptato.data.service.AuthService
 import com.poptato.domain.model.request.KaKaoLoginRequest
 import com.poptato.domain.model.request.ReissueRequestModel
+import com.poptato.domain.model.request.auth.LogoutRequestModel
 import com.poptato.domain.model.response.auth.TokenModel
 import com.poptato.domain.model.response.login.AuthModel
 import com.poptato.domain.repository.AuthRepository
@@ -37,8 +38,8 @@ class AuthRepositoryImpl @Inject constructor (
         dataStore.clearToken()
     }
 
-    override suspend fun logout(): Flow<Result<Unit>> {
-        return apiLaunch(apiCall = { authService.logout() }, AuthLogOutResponseMapper)
+    override suspend fun logout(request: LogoutRequestModel): Flow<Result<Unit>> {
+        return apiLaunch(apiCall = { authService.logout(request) }, AuthLogOutResponseMapper)
     }
 
     override suspend fun getToken(): Flow<TokenModel> {

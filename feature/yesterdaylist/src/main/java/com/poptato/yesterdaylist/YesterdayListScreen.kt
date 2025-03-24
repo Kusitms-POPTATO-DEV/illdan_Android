@@ -40,7 +40,6 @@ import com.poptato.design_system.Gray95
 import com.poptato.design_system.PoptatoTypo
 import com.poptato.design_system.Primary60
 import com.poptato.design_system.R
-import com.poptato.design_system.YesterdayAllCheckBtn
 import com.poptato.design_system.YesterdayListTitle
 import com.poptato.domain.model.enums.TodoStatus
 import com.poptato.domain.model.response.yesterday.YesterdayItemModel

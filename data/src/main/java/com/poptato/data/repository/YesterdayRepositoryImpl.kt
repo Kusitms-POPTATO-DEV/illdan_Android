@@ -23,14 +23,6 @@ class YesterdayRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun getShouldShowYesterday(): Flow<Boolean> {
-        return dataStore.shouldShowYesterday
-    }
-
-    override suspend fun setShouldShowYesterday(value: Boolean) {
-        dataStore.setShouldShowYesterday(value)
-    }
-
     override suspend fun updateYesterdayTodoCompletion(request: TodoIdsModel): Flow<Result<Unit>> {
         return apiLaunch(apiCall = { yesterdayService.updateYesterdayTodoCompletion(request) }, UnitResponseMapper)
     }

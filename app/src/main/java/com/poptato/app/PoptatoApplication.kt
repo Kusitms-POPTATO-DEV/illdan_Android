@@ -1,11 +1,15 @@
 package com.poptato.app
 
 import android.app.Application
+import androidx.lifecycle.ProcessLifecycleOwner
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.kakao.sdk.common.KakaoSdk
 import com.microsoft.clarity.Clarity
 import com.microsoft.clarity.ClarityConfig
 import com.poptato.ui.util.AnalyticsManager
+import com.poptato.di.AppLifecycleObserver
+import com.poptato.di.AppLifecycleObserverEntryPoint
+import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 
@@ -14,6 +18,18 @@ class PoptatoApplication: Application() {
     override fun onCreate() {
         super.onCreate()
 
+        val entryPoint = EntryPointAccessors.fromApplication(
+            this,
+            AppLifecycleObserverEntryPoint::class.java
+        )
+        val observer = AppLifecycleObserver(entryPoint.tokenRefreshHandler())
+
+        ProcessLifecycleOwner.get().lifecycle.addObserver(observer)
+
+        initClarityAndSdk()
+    }
+
+    private fun initClarityAndSdk() {
         val config = ClarityConfig(BuildConfig.CLARITY_ID)
 
         AnalyticsManager.initialize(this)

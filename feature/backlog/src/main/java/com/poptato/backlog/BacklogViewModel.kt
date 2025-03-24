@@ -36,9 +36,7 @@ import com.poptato.domain.usecase.todo.UpdateBookmarkUseCase
 import com.poptato.domain.usecase.todo.UpdateDeadlineUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoRepeatUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoCategoryUseCase
-import com.poptato.domain.usecase.yesterday.GetShouldShowYesterdayUseCase
 import com.poptato.domain.usecase.yesterday.GetYesterdayListUseCase
-import com.poptato.domain.usecase.yesterday.SetShouldShowYesterdayUseCase
 import com.poptato.ui.base.BaseViewModel
 import com.poptato.ui.util.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -69,8 +67,6 @@ class BacklogViewModel @Inject constructor(
     private val swipeTodoUseCase: SwipeTodoUseCase,
     private val updateTodoRepeatUseCase: UpdateTodoRepeatUseCase,
     private val categoryDragDropUseCase: CategoryDragDropUseCase,
-    private val getShouldShowYesterdayUseCase: GetShouldShowYesterdayUseCase,
-    private val setShouldShowYesterdayUseCase: SetShouldShowYesterdayUseCase,
     private val getDeadlineDateModeUseCase: GetDeadlineDateModeUseCase
 ) : BaseViewModel<BacklogPageState>(
     BacklogPageState()
@@ -84,18 +80,6 @@ class BacklogViewModel @Inject constructor(
         getYesterdayList(0, 1)
         getDeadlineDateMode()
         getBacklogList(-1, 0, 100)
-    }
-
-    private fun getShouldShowYesterday() {
-        viewModelScope.launch {
-            getShouldShowYesterdayUseCase(Unit).firstOrNull()?.let { shouldShow ->
-                Timber.d("$shouldShow")
-                if (shouldShow) {
-                    getYesterdayList(0, 1)
-                    setShouldShowYesterdayUseCase(false).collect()
-                }
-            }
-        }
     }
 
     private fun getCategoryList() {
@@ -538,8 +522,5 @@ class BacklogViewModel @Inject constructor(
     // YesterdayTodo
     fun completeYesterdayTodoDisplay() {
         updateState(uiState.value.copy(isExistYesterdayTodo = false))
-        viewModelScope.launch {
-            setShouldShowYesterdayUseCase(false).collect()
-        }
     }
 }

@@ -1,11 +1,13 @@
 package com.poptato.setting.userdata
 
 import androidx.lifecycle.viewModelScope
+import com.poptato.domain.model.request.auth.LogoutRequestModel
 import com.poptato.domain.model.response.mypage.UserDataModel
 import com.poptato.domain.usecase.auth.ClearTokenUseCase
 import com.poptato.domain.usecase.mypage.GetUserDataUseCase
 import com.poptato.domain.usecase.mypage.LogOutUseCase
 import com.poptato.ui.base.BaseViewModel
+import com.poptato.ui.util.FCMManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -41,14 +43,16 @@ class UserDataViewModel @Inject constructor(
     }
 
     fun logOut() {
-        viewModelScope.launch {
-            logOutUseCase(request = Unit).collect {
-                resultResponse(it, {
-                    clearTokenUseCase
-                    emitEventFlow(UserDataEvent.GoBackToLogIn)
-                }, { error ->
-                    Timber.d("[계정정보] 로그아웃 서버통신 실패 -> ${error.message}")
-                })
+        FCMManager.getFCMToken { clientId ->
+            viewModelScope.launch {
+                logOutUseCase(request = LogoutRequestModel(clientId ?: "")).collect {
+                    resultResponse(it, {
+                        clearTokenUseCase
+                        emitEventFlow(UserDataEvent.GoBackToLogIn)
+                    }, { error ->
+                        Timber.d("[계정정보] 로그아웃 서버통신 실패 -> ${error.message}")
+                    })
+                }
             }
         }
     }

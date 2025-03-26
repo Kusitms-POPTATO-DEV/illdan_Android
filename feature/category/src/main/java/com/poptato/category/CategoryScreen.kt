@@ -69,7 +69,7 @@ import kotlinx.coroutines.flow.SharedFlow
 @Composable
 fun CategoryScreen(
     popScreen: () -> Unit = {},
-    goToBacklog: () -> Unit = {},a
+    goToBacklog: () -> Unit = {},
     showIconBottomSheet: (CategoryIconTotalListModel) -> Unit = {},
     selectedIconInBottomSheet: SharedFlow<CategoryIconItemModel>,
     showDialog: (DialogContentModel) -> Unit = {},

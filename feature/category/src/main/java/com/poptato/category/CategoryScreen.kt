@@ -68,8 +68,8 @@ import kotlinx.coroutines.flow.SharedFlow
 
 @Composable
 fun CategoryScreen(
-    goBackToBacklog: () -> Unit = {},
-    goToBacklog: () -> Unit = {},
+    popScreen: () -> Unit = {},
+    goToBacklog: () -> Unit = {},a
     showIconBottomSheet: (CategoryIconTotalListModel) -> Unit = {},
     selectedIconInBottomSheet: SharedFlow<CategoryIconItemModel>,
     showDialog: (DialogContentModel) -> Unit = {},
@@ -110,7 +110,7 @@ fun CategoryScreen(
     CategoryContent(
         uiState = uiState,
         interactionSource = interactionSource,
-        onClickBackBtn = { goBackToBacklog() },
+        onClickBackBtn = { popScreen() },
         onClickFinishBtn = {
             if (isCategorySettingValid) {
                 viewModel.finishSettingCategory()

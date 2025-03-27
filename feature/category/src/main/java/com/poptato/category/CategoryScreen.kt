@@ -41,7 +41,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -69,6 +71,7 @@ import com.poptato.domain.model.response.category.CategoryScreenContentModel
 import com.poptato.domain.model.response.dialog.DialogContentModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
+import timber.log.Timber
 
 @Composable
 fun CategoryScreen(
@@ -326,10 +329,27 @@ fun CategoryNameTextField(
     var isFocused by remember { mutableStateOf(false) }
     val imeVisible = WindowInsets.isImeVisible
     val focusRequester = remember { FocusRequester() }
+    var textFieldValue by remember {
+        mutableStateOf(
+            TextFieldValue(
+                text = textInput,
+                selection = TextRange(textInput.length)
+            )
+        )
+    }
 
     LaunchedEffect(Unit) {
         delay(300)
         focusRequester.requestFocus()
+    }
+
+    LaunchedEffect(textInput, isFocused) {
+        if (!isFocused) {
+            textFieldValue = TextFieldValue(
+                text = textInput,
+                selection = TextRange(textInput.length)
+            )
+        }
     }
 
     LaunchedEffect(imeVisible) {
@@ -343,10 +363,11 @@ fun CategoryNameTextField(
             .fillMaxWidth()
     ) {
         BasicTextField(
-            value = textInput,
+            value = textFieldValue,
             onValueChange = { input ->
-                if (input.length <= 15) {
-                    onValueChange(input)
+                if (input.text.length <= 15) {
+                    textFieldValue = input
+                    onValueChange(input.text)
                 }
             },
             modifier = Modifier
@@ -355,6 +376,11 @@ fun CategoryNameTextField(
                 .focusRequester(focusRequester)
                 .onFocusChanged { focusState ->
                     isFocused = focusState.isFocused
+                    if (focusState.isFocused) {
+                        textFieldValue = textFieldValue.copy(
+                            selection = TextRange(textFieldValue.text.length)
+                        )
+                    }
                 },
             textStyle = PoptatoTypo.xLMedium.copy(color = Gray00),
             cursorBrush = SolidColor(Gray00),
@@ -375,7 +401,7 @@ fun CategoryNameTextField(
                         modifier = Modifier
                             .fillMaxWidth()
                     ){
-                        if (textInput.isEmpty() && !isFocused) {
+                        if (textFieldValue.text.isEmpty() && !isFocused) {
                             Text(
                                 text = CategoryNameInputTitle,
                                 style = PoptatoTypo.xLMedium,

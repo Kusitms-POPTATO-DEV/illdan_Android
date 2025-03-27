@@ -92,13 +92,12 @@ class BacklogViewModel @Inject constructor(
     }
 
     private fun onSuccessGetCategoryList(response: CategoryListModel, initialCategoryIndex: Int = 0) {
+        if (initialCategoryIndex != 0) getBacklogListInCategory(initialCategoryIndex, response.categoryList)
         updateStateSync(
             uiState.value.copy(
                 categoryList = response.categoryList
             )
         )
-
-        if (initialCategoryIndex != 0) getBacklogListInCategory(initialCategoryIndex, response.categoryList)
     }
 
     fun deleteCategory() {
@@ -123,13 +122,13 @@ class BacklogViewModel @Inject constructor(
         }
     }
 
-    fun getBacklogListInCategory(categoryIndex: Int , categoryList: List<CategoryItemModel> = uiState.value.categoryList) {
+    fun getBacklogListInCategory(categoryIndex: Int, categoryList: List<CategoryItemModel> = uiState.value.categoryList) {
         updateSelectedCategory(categoryIndex, categoryList)
         getBacklogList(uiState.value.selectedCategoryId, 0, 100)
     }
 
     private fun updateSelectedCategory(categoryIndex: Int, categoryList: List<CategoryItemModel> = uiState.value.categoryList) {
-        updateState(
+        updateStateSync(
             uiState.value.copy(
                 selectedCategoryIndex = categoryIndex,
                 selectedCategoryId = categoryList[categoryIndex].categoryId
@@ -160,7 +159,7 @@ class BacklogViewModel @Inject constructor(
 
         val backlogs: List<TodoItemModel> = response.backlogs.map { it.apply { categoryId = uiState.value.selectedCategoryId } }
 
-        updateState(
+        updateStateSync(
             uiState.value.copy(
                 backlogList = backlogs,
                 totalPageCount = response.totalPageCount,

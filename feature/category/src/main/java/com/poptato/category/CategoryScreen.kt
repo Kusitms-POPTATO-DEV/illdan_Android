@@ -34,6 +34,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -65,6 +67,7 @@ import com.poptato.domain.model.response.category.CategoryIconItemModel
 import com.poptato.domain.model.response.category.CategoryIconTotalListModel
 import com.poptato.domain.model.response.category.CategoryScreenContentModel
 import com.poptato.domain.model.response.dialog.DialogContentModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
 
 @Composable
@@ -320,8 +323,14 @@ fun CategoryNameTextField(
     focusManager: FocusManager = LocalFocusManager.current,
     onValueChange: (String) -> Unit = {}
 ) {
-    var isFocused by remember { mutableStateOf(true) }
+    var isFocused by remember { mutableStateOf(false) }
     val imeVisible = WindowInsets.isImeVisible
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        delay(300)
+        focusRequester.requestFocus()
+    }
 
     LaunchedEffect(imeVisible) {
         if (!imeVisible) {
@@ -343,6 +352,7 @@ fun CategoryNameTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp)
+                .focusRequester(focusRequester)
                 .onFocusChanged { focusState ->
                     isFocused = focusState.isFocused
                 },

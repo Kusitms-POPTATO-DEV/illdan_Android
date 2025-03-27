@@ -2,7 +2,9 @@ package com.poptato.navigation
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.poptato.backlog.BacklogScreen
 import com.poptato.category.CategoryScreen
@@ -65,8 +67,8 @@ fun NavGraphBuilder.loginNavGraph(
     ) {
         composable(NavRoutes.KaKaoLoginScreen.route) {
             KaKaoLoginScreen(
-                goToBacklog = {
-                    navController.navigate(NavRoutes.BacklogScreen.route) {
+                goToToday = {
+                    navController.navigate(NavRoutes.TodayScreen.route) {
                         popUpTo(NavRoutes.KaKaoLoginScreen.route) {
                             inclusive = true
                         }
@@ -103,10 +105,17 @@ fun NavGraphBuilder.backlogNavGraph(
     updateTodoRepeatFlow: SharedFlow<Long>,
 ) {
     navigation(
-        startDestination = NavRoutes.BacklogScreen.route,
+        startDestination = NavRoutes.BacklogScreen.createRoute(0),
         route = NavRoutes.BacklogGraph.route
     ) {
-        composable(NavRoutes.BacklogScreen.route) {
+        composable(
+            route = NavRoutes.BacklogScreen.route,
+            arguments = listOf(
+                navArgument("index") { type = NavType.IntType }
+            )
+        ) {
+            val index = it.arguments?.getInt("index") ?: 0
+
             BacklogScreen(
                 goToYesterdayList = { navController.navigate(NavRoutes.YesterdayListScreen.route) },
                 goToCategorySelect = {
@@ -120,7 +129,8 @@ fun NavGraphBuilder.backlogNavGraph(
                 updateCategoryFlow = updateCategoryFlow,
                 updateTodoRepeatFlow = updateTodoRepeatFlow,
                 showSnackBar = showSnackBar,
-                showDialog = showDialog
+                showDialog = showDialog,
+                initialCategoryIndex = index
             )
         }
     }
@@ -140,7 +150,9 @@ fun NavGraphBuilder.categoryNavGraph(
         composable(NavRoutes.CategoryScreen.route) {
             CategoryScreen(
                 popScreen = { navController.popBackStack() },
-                goToBacklog = { navController.navigate(NavRoutes.BacklogScreen.route) },
+                goToBacklog = { index ->
+                    navController.navigate(NavRoutes.BacklogScreen.createRoute(index))
+                },
                 showIconBottomSheet = showCategoryIconBottomSheet,
                 selectedIconInBottomSheet = selectedIconInBottomSheet,
                 showDialog = showDialog,
@@ -164,7 +176,7 @@ fun NavGraphBuilder.yesterdayListNavGraph(navController: NavHostController) {
         composable(NavRoutes.YesterdayAllCheckScreen.route) {
             AllCheckScreen(
                 goBackToBacklog = {
-                    navController.navigate(NavRoutes.BacklogScreen.route) {
+                    navController.navigate(NavRoutes.BacklogScreen.createRoute(0)) {
                         popUpTo(NavRoutes.BacklogScreen.route) { inclusive = true }
                     }
                 }
@@ -266,7 +278,7 @@ fun NavGraphBuilder.todayNavGraph(
     navigation(startDestination = NavRoutes.TodayScreen.route, route = NavRoutes.TodayGraph.route) {
         composable(NavRoutes.TodayScreen.route) {
             TodayScreen(
-                goToBacklog = { navController.navigate(NavRoutes.BacklogScreen.route) },
+                goToBacklog = { navController.navigate(NavRoutes.BacklogScreen.createRoute(0)) },
                 showSnackBar = showSnackBar,
                 showBottomSheet = showBottomSheet,
                 updateDeadlineFlow = updateDeadlineFlow,

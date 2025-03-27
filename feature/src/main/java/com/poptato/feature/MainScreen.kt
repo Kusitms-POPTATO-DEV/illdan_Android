@@ -376,11 +376,20 @@ fun MainScreen() {
                             type = uiState.bottomNavType,
                             onClick = { route: String ->
                                 if (navController.currentDestination?.route != route) {
-                                    navController.navigate(route) {
-                                        popUpTo(navController.currentDestination?.route!!) {
-                                            inclusive = true
+                                    if (route == NavRoutes.BacklogScreen.route) {
+                                        navController.navigate(NavRoutes.BacklogScreen.createRoute(0)) {
+                                            popUpTo(navController.currentDestination?.route!!) {
+                                                inclusive = true
+                                            }
+                                            launchSingleTop = true
                                         }
-                                        launchSingleTop = true
+                                    } else {
+                                        navController.navigate(route) {
+                                            popUpTo(navController.currentDestination?.route!!) {
+                                                inclusive = true
+                                            }
+                                            launchSingleTop = true
+                                        }
                                     }
                                 }
                             },

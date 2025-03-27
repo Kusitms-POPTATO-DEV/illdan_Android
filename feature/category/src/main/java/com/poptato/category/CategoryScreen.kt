@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -75,10 +76,10 @@ fun CategoryScreen(
     showDialog: (DialogContentModel) -> Unit = {},
     screenContent: SharedFlow<CategoryScreenContentModel>
 ) {
-
     val viewModel: CategoryViewModel = hiltViewModel()
     val uiState: CategoryPageState by viewModel.uiState.collectAsStateWithLifecycle()
     val interactionSource = remember { MutableInteractionSource() }
+    val focusManager = LocalFocusManager.current
 
     LaunchedEffect(selectedIconInBottomSheet) {
         selectedIconInBottomSheet.collect {
@@ -119,14 +120,17 @@ fun CategoryScreen(
     CategoryContent(
         uiState = uiState,
         interactionSource = interactionSource,
+        focusManager = focusManager,
         onClickBackBtn = { popScreen() },
         onClickFinishBtn = {
+            focusManager.clearFocus()
             if (viewModel.validateCategoryInput()) {
                 viewModel.finishSettingCategory()
             }
         },
         onValueChange = { newValue -> viewModel.onValueChange(newValue) },
         onClickSelectCategoryIcon = {
+            focusManager.clearFocus()
             showIconBottomSheet(uiState.categoryIconList)
         }
     )
@@ -136,6 +140,7 @@ fun CategoryScreen(
 fun CategoryContent(
     uiState: CategoryPageState = CategoryPageState(),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    focusManager: FocusManager = LocalFocusManager.current,
     onClickBackBtn: () -> Unit = {},
     onClickFinishBtn: () -> Unit = {},
     onValueChange: (String) -> Unit = {},
@@ -145,6 +150,11 @@ fun CategoryContent(
         modifier = Modifier
             .fillMaxSize()
             .background(Gray100)
+            .clickable(
+                indication = null,
+                interactionSource = interactionSource,
+                onClick = { focusManager.clearFocus() }
+            )
     ) {
         CategoryTitle(
             interactionSource = interactionSource,
@@ -156,6 +166,7 @@ fun CategoryContent(
         CategoryAddContent(
             uiState = uiState,
             interactionSource = interactionSource,
+            focusManager = focusManager,
             onValueChange = onValueChange,
             onClickSelectIcon = onClickSelectCategoryIcon
         )
@@ -243,6 +254,7 @@ fun AddFinishBtn(
 fun CategoryAddContent(
     uiState: CategoryPageState = CategoryPageState(),
     interactionSource: MutableInteractionSource,
+    focusManager: FocusManager = LocalFocusManager.current,
     onValueChange: (String) -> Unit = {},
     onClickSelectIcon: () -> Unit = {}
 ) {
@@ -261,6 +273,7 @@ fun CategoryAddContent(
         ) {
             CategoryNameTextField(
                 textInput = uiState.categoryName,
+                focusManager = focusManager,
                 onValueChange = onValueChange
             )
         }
@@ -304,11 +317,10 @@ fun CategoryAddContent(
 @Composable
 fun CategoryNameTextField(
     textInput: String = "",
+    focusManager: FocusManager = LocalFocusManager.current,
     onValueChange: (String) -> Unit = {}
 ) {
-    var isFocused by remember { mutableStateOf(false) }
-    val focusManager = LocalFocusManager.current
-
+    var isFocused by remember { mutableStateOf(true) }
     val imeVisible = WindowInsets.isImeVisible
 
     LaunchedEffect(imeVisible) {

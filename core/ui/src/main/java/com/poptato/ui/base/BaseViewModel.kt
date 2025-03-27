@@ -26,6 +26,10 @@ abstract class BaseViewModel<STATE: PageState>(
         }
     }
 
+    protected fun updateStateSync(state: STATE) {
+        _uiState.update { state }
+    }
+
     protected fun emitEventFlow(event: Event) {
         viewModelScope.launch {
             _eventFlow.emit(event)

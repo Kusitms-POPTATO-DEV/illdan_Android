@@ -11,5 +11,6 @@ data class CategoryPageState(
     val categoryIconImgUrl: String = "",
     val categoryIconList: CategoryIconTotalListModel = CategoryIconTotalListModel(),
     val selectedIcon: CategoryIconItemModel? = null,
-    val modifyCategoryId: Long = -1
+    val modifyCategoryId: Long = -1,
+    val categoryIndex: Int = -1
 ): PageState

@@ -75,7 +75,8 @@ class CategoryViewModel @Inject constructor(
                 categoryName = item.categoryItem.categoryName,
                 selectedIcon = CategoryIconItemModel(item.categoryItem.iconId, item.categoryItem.categoryImgUrl),
                 categoryIconImgUrl = item.categoryItem.categoryImgUrl,
-                modifyCategoryId = item.categoryItem.categoryId
+                modifyCategoryId = item.categoryItem.categoryId,
+                categoryIndex = item.categoryIndex
             )
         )
     }
@@ -97,7 +98,7 @@ class CategoryViewModel @Inject constructor(
         viewModelScope.launch {
             createCategoryUseCase(request = CategoryRequestModel(uiState.value.categoryName, uiState.value.selectedIcon?.iconId ?: -1)).collect {
                 resultResponse(it, {
-                    emitEventFlow(CategoryEvent.GoToBacklog)
+                    emitEventFlow(CategoryEvent.CreateCategoryCompleted)
                 }, { error ->
                     Timber.d("[카테고리] 카테고리 생성 서버통신 실패 -> $error")
                 })
@@ -109,11 +110,19 @@ class CategoryViewModel @Inject constructor(
         viewModelScope.launch {
             modifyCategoryUseCase(request = ModifyCategoryRequestModel(uiState.value.modifyCategoryId, CategoryRequestModel(uiState.value.categoryName, uiState.value.selectedIcon?.iconId ?: -1))).collect {
                 resultResponse(it, {
-                    emitEventFlow(CategoryEvent.GoToBacklog)
+                    emitEventFlow(CategoryEvent.EditCategoryCompleted)
                 }, { error ->
                     Timber.d("[카테고리] 카테고리 수정 서버통신 실패 -> $error")
                 })
             }
         }
+    }
+
+    fun validateCategoryInput(): Boolean {
+        if (uiState.value.categoryName.isEmpty() || uiState.value.selectedIcon?.iconId == -1L) {
+            emitEventFlow(CategoryEvent.InvalidCategoryInput)
+            return false
+        }
+        return true
     }
 }

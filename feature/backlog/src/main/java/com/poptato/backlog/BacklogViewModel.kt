@@ -76,24 +76,24 @@ class BacklogViewModel @Inject constructor(
     private var tempTodoId: Long? = null
 
     init {
-        getCategoryList()
         getYesterdayList(0, 1)
         getDeadlineDateMode()
         getBacklogList(-1, 0, 100)
     }
 
-    private fun getCategoryList() {
+    fun getCategoryList(initialCategoryIndex: Int = 0) {
         viewModelScope.launch {
             getCategoryListUseCase(request = GetCategoryListRequestModel(0, 100)).collect {
                 resultResponse(it, { data ->
-                    onSuccessGetCategoryList(data)
+                    onSuccessGetCategoryList(data, initialCategoryIndex)
                 })
             }
         }
     }
 
-    private fun onSuccessGetCategoryList(response: CategoryListModel) {
-        updateState(
+    private fun onSuccessGetCategoryList(response: CategoryListModel, initialCategoryIndex: Int = 0) {
+        if (initialCategoryIndex != 0) getBacklogListInCategory(initialCategoryIndex, response.categoryList)
+        updateStateSync(
             uiState.value.copy(
                 categoryList = response.categoryList
             )
@@ -122,36 +122,36 @@ class BacklogViewModel @Inject constructor(
         }
     }
 
-    fun getBacklogListInCategory(categoryIndex: Int) {
-        AnalyticsManager.logEvent(
-            eventName = "view_category",
-            params = mapOf("category_name" to uiState.value.categoryList[categoryIndex].categoryName)
-        )
-
-        updateSelectedCategory(categoryIndex)
-
+    fun getBacklogListInCategory(categoryIndex: Int, categoryList: List<CategoryItemModel> = uiState.value.categoryList) {
+        updateSelectedCategory(categoryIndex, categoryList)
         getBacklogList(uiState.value.selectedCategoryId, 0, 100)
     }
 
-    private fun updateSelectedCategory(categoryIndex: Int) {
-        updateState(
+    private fun updateSelectedCategory(categoryIndex: Int, categoryList: List<CategoryItemModel> = uiState.value.categoryList) {
+        updateStateSync(
             uiState.value.copy(
                 selectedCategoryIndex = categoryIndex,
-                selectedCategoryId = uiState.value.categoryList[categoryIndex].categoryId
+                selectedCategoryId = categoryList[categoryIndex].categoryId
             )
+        )
+
+        AnalyticsManager.logEvent(
+            eventName = "view_category",
+            params = mapOf("category_name" to categoryList[categoryIndex].categoryName)
         )
     }
 
     private fun getBacklogList(categoryId: Long, page: Int, size: Int) {
-        AnalyticsManager.logEvent(
-            eventName = "get_backlog_list",
-            params = mapOf("button_name" to "할 일 내비게이션바 버튼", "user_action" to "백로그 전체 조회")
-        )
         viewModelScope.launch {
             getBacklogListUseCase(request = GetBacklogListRequestModel(categoryId = categoryId, page = page, size = size)).collect {
                 resultResponse(it, ::onSuccessGetBacklogList)
             }
         }
+
+        AnalyticsManager.logEvent(
+            eventName = "get_backlog_list",
+            params = mapOf("button_name" to "할 일 내비게이션바 버튼", "user_action" to "백로그 전체 조회")
+        )
     }
 
     private fun onSuccessGetBacklogList(response: BacklogListModel) {
@@ -159,7 +159,7 @@ class BacklogViewModel @Inject constructor(
 
         val backlogs: List<TodoItemModel> = response.backlogs.map { it.apply { categoryId = uiState.value.selectedCategoryId } }
 
-        updateState(
+        updateStateSync(
             uiState.value.copy(
                 backlogList = backlogs,
                 totalPageCount = response.totalPageCount,

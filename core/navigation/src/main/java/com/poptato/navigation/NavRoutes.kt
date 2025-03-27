@@ -14,7 +14,9 @@ sealed class NavRoutes(val route: String) {
 
     // Backlog Graph
     data object BacklogGraph: NavRoutes("backlog_graph")
-    data object BacklogScreen: NavRoutes("backlog")
+    data object BacklogScreen: NavRoutes("backlog/{index}") {
+        fun createRoute(index: Int): String = "backlog/$index"
+    }
 
     // Category Graph
     data object CategoryGraph: NavRoutes("category_graph")

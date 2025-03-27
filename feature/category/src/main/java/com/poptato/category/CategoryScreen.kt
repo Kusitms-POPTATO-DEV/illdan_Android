@@ -33,12 +33,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -64,26 +69,23 @@ import com.poptato.domain.model.response.category.CategoryIconItemModel
 import com.poptato.domain.model.response.category.CategoryIconTotalListModel
 import com.poptato.domain.model.response.category.CategoryScreenContentModel
 import com.poptato.domain.model.response.dialog.DialogContentModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
+import timber.log.Timber
 
 @Composable
 fun CategoryScreen(
-    goBackToBacklog: () -> Unit = {},
-    goToBacklog: () -> Unit = {},
+    popScreen: () -> Unit = {},
+    goToBacklog: (Int) -> Unit = {},
     showIconBottomSheet: (CategoryIconTotalListModel) -> Unit = {},
     selectedIconInBottomSheet: SharedFlow<CategoryIconItemModel>,
     showDialog: (DialogContentModel) -> Unit = {},
     screenContent: SharedFlow<CategoryScreenContentModel>
 ) {
-
     val viewModel: CategoryViewModel = hiltViewModel()
     val uiState: CategoryPageState by viewModel.uiState.collectAsStateWithLifecycle()
     val interactionSource = remember { MutableInteractionSource() }
-    val isCategorySettingValid by remember {
-        derivedStateOf {
-            uiState.categoryName.isNotBlank() && uiState.selectedIcon != null
-        }
-    }
+    val focusManager = LocalFocusManager.current
 
     LaunchedEffect(selectedIconInBottomSheet) {
         selectedIconInBottomSheet.collect {
@@ -100,8 +102,22 @@ fun CategoryScreen(
     LaunchedEffect(Unit) {
         viewModel.eventFlow.collect { event ->
             when (event) {
-                is CategoryEvent.GoToBacklog -> {
-                    goToBacklog()
+                is CategoryEvent.CreateCategoryCompleted -> {
+                    goToBacklog(uiState.categoryIndex)
+                }
+
+                is CategoryEvent.EditCategoryCompleted -> {
+                    goToBacklog(uiState.categoryIndex)
+                }
+
+                is CategoryEvent.InvalidCategoryInput -> {
+                    showDialog(
+                        DialogContentModel(
+                            dialogType = DialogType.OneBtn,
+                            titleText = if (uiState.categoryName.isBlank()) CategoryNameDialogTitle else CategoryIconDialogTitle,
+                            positiveBtnText = Confirm
+                        )
+                    )
                 }
             }
         }
@@ -110,22 +126,17 @@ fun CategoryScreen(
     CategoryContent(
         uiState = uiState,
         interactionSource = interactionSource,
-        onClickBackBtn = { goBackToBacklog() },
+        focusManager = focusManager,
+        onClickBackBtn = { popScreen() },
         onClickFinishBtn = {
-            if (isCategorySettingValid) {
+            focusManager.clearFocus()
+            if (viewModel.validateCategoryInput()) {
                 viewModel.finishSettingCategory()
-            } else {
-                showDialog(
-                    DialogContentModel(
-                        dialogType = DialogType.OneBtn,
-                        titleText = if (uiState.categoryName.isBlank()) CategoryNameDialogTitle else CategoryIconDialogTitle,
-                        positiveBtnText = Confirm
-                    )
-                )
             }
         },
         onValueChange = { newValue -> viewModel.onValueChange(newValue) },
         onClickSelectCategoryIcon = {
+            focusManager.clearFocus()
             showIconBottomSheet(uiState.categoryIconList)
         }
     )
@@ -134,7 +145,8 @@ fun CategoryScreen(
 @Composable
 fun CategoryContent(
     uiState: CategoryPageState = CategoryPageState(),
-    interactionSource: MutableInteractionSource = MutableInteractionSource(),
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    focusManager: FocusManager = LocalFocusManager.current,
     onClickBackBtn: () -> Unit = {},
     onClickFinishBtn: () -> Unit = {},
     onValueChange: (String) -> Unit = {},
@@ -144,6 +156,11 @@ fun CategoryContent(
         modifier = Modifier
             .fillMaxSize()
             .background(Gray100)
+            .clickable(
+                indication = null,
+                interactionSource = interactionSource,
+                onClick = { focusManager.clearFocus() }
+            )
     ) {
         CategoryTitle(
             interactionSource = interactionSource,
@@ -155,6 +172,7 @@ fun CategoryContent(
         CategoryAddContent(
             uiState = uiState,
             interactionSource = interactionSource,
+            focusManager = focusManager,
             onValueChange = onValueChange,
             onClickSelectIcon = onClickSelectCategoryIcon
         )
@@ -242,6 +260,7 @@ fun AddFinishBtn(
 fun CategoryAddContent(
     uiState: CategoryPageState = CategoryPageState(),
     interactionSource: MutableInteractionSource,
+    focusManager: FocusManager = LocalFocusManager.current,
     onValueChange: (String) -> Unit = {},
     onClickSelectIcon: () -> Unit = {}
 ) {
@@ -260,6 +279,7 @@ fun CategoryAddContent(
         ) {
             CategoryNameTextField(
                 textInput = uiState.categoryName,
+                focusManager = focusManager,
                 onValueChange = onValueChange
             )
         }
@@ -303,12 +323,34 @@ fun CategoryAddContent(
 @Composable
 fun CategoryNameTextField(
     textInput: String = "",
+    focusManager: FocusManager = LocalFocusManager.current,
     onValueChange: (String) -> Unit = {}
 ) {
     var isFocused by remember { mutableStateOf(false) }
-    val focusManager = LocalFocusManager.current
-
     val imeVisible = WindowInsets.isImeVisible
+    val focusRequester = remember { FocusRequester() }
+    var textFieldValue by remember {
+        mutableStateOf(
+            TextFieldValue(
+                text = textInput,
+                selection = TextRange(textInput.length)
+            )
+        )
+    }
+
+    LaunchedEffect(Unit) {
+        delay(300)
+        focusRequester.requestFocus()
+    }
+
+    LaunchedEffect(textInput, isFocused) {
+        if (!isFocused) {
+            textFieldValue = TextFieldValue(
+                text = textInput,
+                selection = TextRange(textInput.length)
+            )
+        }
+    }
 
     LaunchedEffect(imeVisible) {
         if (!imeVisible) {
@@ -321,17 +363,24 @@ fun CategoryNameTextField(
             .fillMaxWidth()
     ) {
         BasicTextField(
-            value = textInput,
+            value = textFieldValue,
             onValueChange = { input ->
-                if (input.length <= 15) {
-                    onValueChange(input)
+                if (input.text.length <= 15) {
+                    textFieldValue = input
+                    onValueChange(input.text)
                 }
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp)
+                .focusRequester(focusRequester)
                 .onFocusChanged { focusState ->
                     isFocused = focusState.isFocused
+                    if (focusState.isFocused) {
+                        textFieldValue = textFieldValue.copy(
+                            selection = TextRange(textFieldValue.text.length)
+                        )
+                    }
                 },
             textStyle = PoptatoTypo.xLMedium.copy(color = Gray00),
             cursorBrush = SolidColor(Gray00),
@@ -352,7 +401,7 @@ fun CategoryNameTextField(
                         modifier = Modifier
                             .fillMaxWidth()
                     ){
-                        if (textInput.isEmpty() && !isFocused) {
+                        if (textFieldValue.text.isEmpty() && !isFocused) {
                             Text(
                                 text = CategoryNameInputTitle,
                                 style = PoptatoTypo.xLMedium,

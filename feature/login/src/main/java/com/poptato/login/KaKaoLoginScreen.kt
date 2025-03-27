@@ -28,8 +28,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.messaging.FirebaseMessaging
 import com.kakao.sdk.user.UserApiClient
 import com.poptato.design_system.BtnKaKaoLoginText
 import com.poptato.design_system.Gray100
@@ -38,14 +36,13 @@ import com.poptato.design_system.KaKaoMain
 import com.poptato.design_system.PoptatoTypo
 import com.poptato.design_system.R
 import com.poptato.design_system.SUCCESS_LOGIN
-import com.poptato.design_system.Splash
 import com.poptato.ui.util.FCMManager
 import com.poptato.ui.util.LoadingManager
 import timber.log.Timber
 
 @Composable
 fun KaKaoLoginScreen(
-    goToBacklog: () -> Unit = {},
+    goToToday: () -> Unit = {},
     showSnackBar: (String) -> Unit,
     goToOnboarding: () -> Unit = {}
 ) {
@@ -60,7 +57,7 @@ fun KaKaoLoginScreen(
         viewModel.eventFlow.collect { event ->
             when(event) {
                 is KaKaoLoginEvent.OnSuccessLogin -> {
-                    goToBacklog()
+                    goToToday()
                     showSnackBar(SUCCESS_LOGIN)
                 }
                 is KaKaoLoginEvent.NewUserLogin -> {

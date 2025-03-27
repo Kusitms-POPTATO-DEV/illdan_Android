@@ -142,7 +142,8 @@ fun BacklogScreen(
     updateCategoryFlow: SharedFlow<Long?>,
     updateTodoRepeatFlow: SharedFlow<Long>,
     showSnackBar: (String) -> Unit,
-    showDialog: (DialogContentModel) -> Unit = {}
+    showDialog: (DialogContentModel) -> Unit = {},
+    initialCategoryIndex: Int = 0
 ) {
     val viewModel: BacklogViewModel = hiltViewModel()
     val interactionSource = remember { MutableInteractionSource() }
@@ -153,6 +154,8 @@ fun BacklogScreen(
     val permissionState = rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
 
     LaunchedEffect(Unit) {
+        viewModel.getCategoryList(initialCategoryIndex)
+
         if (!permissionState.status.isGranted) {
             permissionState.launchPermissionRequest()
         }
@@ -233,7 +236,8 @@ fun BacklogScreen(
             onClickCategoryAdd = {
                 goToCategorySelect(
                     CategoryScreenContentModel(
-                        CategoryScreenType.Add
+                        screenType = CategoryScreenType.Add,
+                        categoryIndex = uiState.categoryList.size
                     )
                 )
             },
@@ -256,8 +260,9 @@ fun BacklogScreen(
                 isDropDownMenuExpanded = false
                 goToCategorySelect(
                     CategoryScreenContentModel(
-                        CategoryScreenType.Modify,
-                        uiState.categoryList[uiState.selectedCategoryIndex]
+                        screenType = CategoryScreenType.Modify,
+                        categoryItem = uiState.categoryList[uiState.selectedCategoryIndex],
+                        categoryIndex = uiState.selectedCategoryIndex
                     )
                 )
             },

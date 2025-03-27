@@ -79,11 +79,6 @@ fun CategoryScreen(
     val viewModel: CategoryViewModel = hiltViewModel()
     val uiState: CategoryPageState by viewModel.uiState.collectAsStateWithLifecycle()
     val interactionSource = remember { MutableInteractionSource() }
-    val isCategorySettingValid by remember {
-        derivedStateOf {
-            uiState.categoryName.isNotBlank() && uiState.selectedIcon != null
-        }
-    }
 
     LaunchedEffect(selectedIconInBottomSheet) {
         selectedIconInBottomSheet.collect {
@@ -107,6 +102,16 @@ fun CategoryScreen(
                 is CategoryEvent.EditCategoryCompleted -> {
                     goToBacklog(uiState.categoryIndex)
                 }
+
+                is CategoryEvent.InvalidCategoryInput -> {
+                    showDialog(
+                        DialogContentModel(
+                            dialogType = DialogType.OneBtn,
+                            titleText = if (uiState.categoryName.isBlank()) CategoryNameDialogTitle else CategoryIconDialogTitle,
+                            positiveBtnText = Confirm
+                        )
+                    )
+                }
             }
         }
     }
@@ -116,16 +121,8 @@ fun CategoryScreen(
         interactionSource = interactionSource,
         onClickBackBtn = { popScreen() },
         onClickFinishBtn = {
-            if (isCategorySettingValid) {
+            if (viewModel.validateCategoryInput()) {
                 viewModel.finishSettingCategory()
-            } else {
-                showDialog(
-                    DialogContentModel(
-                        dialogType = DialogType.OneBtn,
-                        titleText = if (uiState.categoryName.isBlank()) CategoryNameDialogTitle else CategoryIconDialogTitle,
-                        positiveBtnText = Confirm
-                    )
-                )
             }
         },
         onValueChange = { newValue -> viewModel.onValueChange(newValue) },
@@ -138,7 +135,7 @@ fun CategoryScreen(
 @Composable
 fun CategoryContent(
     uiState: CategoryPageState = CategoryPageState(),
-    interactionSource: MutableInteractionSource = MutableInteractionSource(),
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     onClickBackBtn: () -> Unit = {},
     onClickFinishBtn: () -> Unit = {},
     onValueChange: (String) -> Unit = {},

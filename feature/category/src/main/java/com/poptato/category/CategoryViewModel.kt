@@ -117,4 +117,12 @@ class CategoryViewModel @Inject constructor(
             }
         }
     }
+
+    fun validateCategoryInput(): Boolean {
+        if (uiState.value.categoryName.isEmpty() || uiState.value.selectedIcon?.iconId == -1L) {
+            emitEventFlow(CategoryEvent.InvalidCategoryInput)
+            return false
+        }
+        return true
+    }
 }

@@ -182,14 +182,6 @@ class BacklogViewModel @Inject constructor(
         }
     }
 
-    fun onValueChange(newValue: String) {
-        updateState(
-            uiState.value.copy(
-                taskInput = newValue
-            )
-        )
-    }
-
     fun createBacklog(content: String) {
         addTemporaryBacklog(content)
 

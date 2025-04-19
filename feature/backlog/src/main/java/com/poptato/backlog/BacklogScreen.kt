@@ -47,6 +47,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -227,7 +228,6 @@ fun BacklogScreen(
     if (uiState.isFinishedInitialization) {
         BacklogContent(
             uiState = uiState,
-            onValueChange = { newValue -> viewModel.onValueChange(newValue) },
             createBacklog = { newItem -> viewModel.createBacklog(newItem) },
             onItemSwiped = { itemToRemove -> viewModel.swipeBacklogItem(itemToRemove) },
             onSelectCategory = { index ->
@@ -305,7 +305,6 @@ fun BacklogScreen(
 @Composable
 fun BacklogContent(
     uiState: BacklogPageState = BacklogPageState(),
-    onValueChange: (String) -> Unit = {},
     createBacklog: (String) -> Unit = {},
     onSelectCategory: (Int) -> Unit = {},
     onClickCategoryAdd: () -> Unit = {},
@@ -395,8 +394,6 @@ fun BacklogContent(
             ) {
 
                 CreateBacklogTextFiled(
-                    onValueChange = onValueChange,
-                    taskInput = uiState.taskInput,
                     createBacklog = createBacklog
                 )
 
@@ -917,21 +914,20 @@ fun BacklogItem(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CreateBacklogTextFiled(
-    taskInput: String = "",
-    onValueChange: (String) -> Unit = {},
+//    taskInput: String = "",
+//    onValueChange: (String) -> Unit = {},
     createBacklog: (String) -> Unit = {}
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
-
     val imeVisible = WindowInsets.isImeVisible
+    var taskInput by remember { mutableStateOf("") }
 
     LaunchedEffect(imeVisible) {
         if (!imeVisible) {
             focusManager.clearFocus()
         }
     }
-
 
     Box(
         modifier = Modifier
@@ -945,7 +941,7 @@ fun CreateBacklogTextFiled(
     ) {
         BasicTextField(
             value = taskInput,
-            onValueChange = { onValueChange(it) },
+            onValueChange = { taskInput = it },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp)
@@ -962,7 +958,7 @@ fun CreateBacklogTextFiled(
                 onDone = {
                     if (taskInput.isNotEmpty()) {
                         createBacklog(taskInput)
-                        onValueChange("")
+                        taskInput = ""
                     } else {
                         focusManager.clearFocus()
                     }
@@ -993,7 +989,7 @@ fun CreateBacklogTextFiled(
         )
         if (taskInput.isNotEmpty()) {
             IconButton(
-                onClick = { onValueChange("") },
+                onClick = { taskInput = "" },
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
             ) {

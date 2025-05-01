@@ -48,38 +48,13 @@ fun SplashContent() {
         modifier = Modifier
             .fillMaxSize()
             .background(Gray100),
-        contentAlignment = Alignment.TopCenter
+        contentAlignment = Alignment.Center
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_splash),
-            contentDescription = "ic_splash",
-            modifier = Modifier
-                .padding(top = 80.dp),
-            contentScale = ContentScale.FillWidth
-        )
-
         Icon(
-            painter = painterResource(id = R.drawable.ic_stairs),
+            painter = painterResource(id = R.drawable.ic_fire_splash),
             contentDescription = null,
-            tint = Color.Unspecified,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(360f / 420f)
-                .align(Alignment.BottomCenter)
+            tint = Color.Unspecified
         )
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-        )  {
-            Image(
-                painter = painterResource(id = R.drawable.splash_dotted_texture),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-                alpha = 0.3f
-            )
-        }
     }
 }
 

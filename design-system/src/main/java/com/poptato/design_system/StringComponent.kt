@@ -60,7 +60,7 @@ const val CategoryDeleteDropDownContent = "카테고리에 저장된 할 일도 
 const val CategoryEmptyBottomSheet = "생성된\n카테고리가 없어요."
 
 // YesterdayList
-const val YesterdayListTitle = "어제 한 일을\n모두 체크하세요!"
+const val YesterdayListTitle = "어제 한 일 체크하기"
 const val YesterdayAllCheckBtn = "완료"
 const val YesterdayAllCheckContent = "좋아요! 오늘 하루도\n힘차게 시작해볼까요?"
 

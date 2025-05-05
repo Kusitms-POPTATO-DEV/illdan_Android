@@ -24,6 +24,8 @@ val fontFamily = FontFamily(
 )
 
 object PoptatoTypo {
+
+    // XXXL
     val xxxLSemiBold: TextStyle = TextStyle(
         fontSize = 24.sp,
         fontFamily = fontFamily,
@@ -45,6 +47,14 @@ object PoptatoTypo {
         lineHeight = 36.sp
     )
 
+    val xxxLBold: TextStyle = TextStyle(
+        fontSize = 24.sp,
+        fontFamily = fontFamily,
+        fontWeight = FontWeight.Bold,
+        lineHeight = 36.sp
+    )
+
+    // XXL
     val xxLSemiBold: TextStyle = TextStyle(
         fontSize = 22.sp,
         fontFamily = fontFamily,
@@ -66,6 +76,14 @@ object PoptatoTypo {
         lineHeight = 33.sp
     )
 
+    val xxLBold: TextStyle = TextStyle(
+        fontSize = 22.sp,
+        fontFamily = fontFamily,
+        fontWeight = FontWeight.Bold,
+        lineHeight = 33.sp
+    )
+
+    // XL
     val xLSemiBold: TextStyle = TextStyle(
         fontSize = 20.sp,
         fontFamily = fontFamily,
@@ -87,6 +105,14 @@ object PoptatoTypo {
         lineHeight = 30.sp
     )
 
+    val xLBold: TextStyle = TextStyle(
+        fontSize = 20.sp,
+        fontFamily = fontFamily,
+        fontWeight = FontWeight.Bold,
+        lineHeight = 30.sp
+    )
+
+    // lg
     val lgSemiBold: TextStyle = TextStyle(
         fontSize = 18.sp,
         fontFamily = fontFamily,
@@ -108,6 +134,14 @@ object PoptatoTypo {
         lineHeight = 27.sp
     )
 
+    val lgBold: TextStyle = TextStyle(
+        fontSize = 18.sp,
+        fontFamily = fontFamily,
+        fontWeight = FontWeight.Bold,
+        lineHeight = 27.sp
+    )
+
+    // md
     val mdSemiBold: TextStyle = TextStyle(
         fontSize = 16.sp,
         fontFamily = fontFamily,
@@ -130,6 +164,14 @@ object PoptatoTypo {
         color = Gray00
     )
 
+    val mdBold: TextStyle = TextStyle(
+        fontSize = 16.sp,
+        fontFamily = fontFamily,
+        fontWeight = FontWeight.Bold,
+        lineHeight = 24.sp
+    )
+
+    // sm
     val smSemiBold: TextStyle = TextStyle(
         fontSize = 14.sp,
         fontFamily = fontFamily,
@@ -151,6 +193,14 @@ object PoptatoTypo {
         lineHeight = 21.sp
     )
 
+    val smBold: TextStyle = TextStyle(
+        fontSize = 14.sp,
+        fontFamily = fontFamily,
+        fontWeight = FontWeight.Bold,
+        lineHeight = 21.sp
+    )
+
+    // xs
     val xsSemiBold: TextStyle = TextStyle(
         fontSize = 12.sp,
         fontFamily = fontFamily,
@@ -169,6 +219,13 @@ object PoptatoTypo {
         fontSize = 12.sp,
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
+        lineHeight = 18.sp
+    )
+
+    val xsBold: TextStyle = TextStyle(
+        fontSize = 12.sp,
+        fontFamily = fontFamily,
+        fontWeight = FontWeight.Bold,
         lineHeight = 18.sp
     )
 

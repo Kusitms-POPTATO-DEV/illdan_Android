@@ -293,7 +293,7 @@ private fun TodoInfoChip(
                 painter = painterResource(id = R.drawable.ic_star_filled),
                 contentDescription = "",
                 modifier = Modifier.size(12.dp),
-                tint = Primary60
+                tint = Primary40
             )
         } else {
             AsyncImage(

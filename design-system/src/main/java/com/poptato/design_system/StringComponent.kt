@@ -43,9 +43,13 @@ const val ONBOARDING2 = "강력한 기능으로\n효율적인 할 일 관리!"
 const val ONBOARDING3 = "쌓인 할 일 중에\n‘오늘’ 할 일만 스와이프!"
 const val ONBOARDING4 = "오늘 할 일을 해낸 당신!\n어제보다 한 걸음 성장하셨어요"
 
+// Todo
+const val REPEAT_TODO = "반복 할 일"
+const val DOT = "·"
+
 // Backlog
 const val BacklogTitle = "오늘 할 일은 무엇인가요?\n일단 추가해 보세요!"
-const val BacklogHint = "새로 추가하기..."
+const val BacklogHint = "할 일 추가하기..."
 const val EmptyBacklogTitle = "할 일을 생각나는 대로\n추가해보세요."
 const val BACKLOG_YESTERDAY_TASK_GUIDE = "어제 한 일 체크를 깜빡했다면?"
 

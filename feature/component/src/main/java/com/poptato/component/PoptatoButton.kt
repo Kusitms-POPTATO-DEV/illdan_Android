@@ -1,4 +1,4 @@
-package com.poptato.design_system.components
+package com.poptato.feature.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

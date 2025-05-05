@@ -19,7 +19,9 @@ object TodayListResponseMapper: Mapper<TodayListResponse, TodayListModel> {
                         isBookmark = item.isBookmark,
                         isRepeat = item.isRepeat,
                         deadline = item.deadline ?: "",
-                        dDay = item.dDay
+                        dDay = item.dDay,
+                        categoryName = item.categoryName ?: "",
+                        imageUrl = item.imageUrl ?: ""
                     )
                 },
                 totalPageCount = it.totalPageCount

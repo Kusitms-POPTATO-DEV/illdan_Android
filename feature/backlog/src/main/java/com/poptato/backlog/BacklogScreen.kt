@@ -88,6 +88,8 @@ import coil.decode.SvgDecoder
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.poptato.component.todo.TodoItem
+import com.poptato.core.enums.TodoType
 import com.poptato.design_system.ALL
 import com.poptato.design_system.BacklogHint
 import com.poptato.design_system.Cancel
@@ -266,8 +268,8 @@ fun BacklogScreen(
                     )
                 )
             },
-            onClickBtnTodoSettings = {
-                viewModel.getSelectedItemDetailContent(uiState.backlogList[it]) { callback ->
+            showBottomSheet = {
+                viewModel.getSelectedItemDetailContent(it) { callback ->
                     showBottomSheet(callback, uiState.categoryList)
                 }
             },
@@ -311,7 +313,7 @@ fun BacklogContent(
     onClickCategoryDeleteDropdown: () -> Unit = {},
     onClickCategoryModifyDropdown: () -> Unit = {},
     onItemSwiped: (TodoItemModel) -> Unit = {},
-    onClickBtnTodoSettings: (Int) -> Unit = {},
+    showBottomSheet: (TodoItemModel) -> Unit,
     interactionSource: MutableInteractionSource,
     activeItemId: Long?,
     onClearActiveItem: () -> Unit = {},
@@ -416,7 +418,7 @@ fun BacklogContent(
                     BacklogTaskList(
                         backlogList = uiState.backlogList,
                         onItemSwiped = onItemSwiped,
-                        onClickBtnTodoSettings = onClickBtnTodoSettings,
+                        showBottomSheet = showBottomSheet,
                         activeItemId = activeItemId,
                         onClearActiveItem = onClearActiveItem,
                         onTodoItemModified = onTodoItemModified,
@@ -632,7 +634,7 @@ fun CategoryListIcon(
 fun BacklogTaskList(
     backlogList: List<TodoItemModel> = emptyList(),
     onItemSwiped: (TodoItemModel) -> Unit = {},
-    onClickBtnTodoSettings: (Int) -> Unit = {},
+    showBottomSheet: (TodoItemModel) -> Unit = {},
     activeItemId: Long?,
     onClearActiveItem: () -> Unit = {},
     onTodoItemModified: (Long, String) -> Unit = { _, _ -> },
@@ -746,14 +748,14 @@ fun BacklogTaskList(
                         RoundedCornerShape(8.dp)
                     )
             ) {
-                BacklogItem(
+                TodoItem(
                     item = item,
-                    index = index,
                     isActive = isActive,
                     isDeadlineDateMode = isDeadlineDateMode,
-                    onClickBtnTodoSettings = onClickBtnTodoSettings,
+                    showBottomSheet = showBottomSheet,
                     onClearActiveItem = onClearActiveItem,
-                    onTodoItemModified = onTodoItemModified
+                    onTodoItemModified = onTodoItemModified,
+                    todoType = TodoType.BACKLOG
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))

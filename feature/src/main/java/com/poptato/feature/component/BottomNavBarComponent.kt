@@ -53,21 +53,21 @@ fun BottomNavBar(
             interactionSource = interactionSource
         )
         BottomNavItem(
-            iconId = if(type == BottomNavType.BACK_LOG) R.drawable.ic_list_selected else R.drawable.ic_list_unselected,
+            iconId = if(type == BottomNavType.BACK_LOG) R.drawable.ic_backlog_selected else R.drawable.ic_backlog_unselected,
             isSelected = type == BottomNavType.BACK_LOG,
             type = BottomNavType.BACK_LOG,
             onClick = onClick,
             interactionSource = interactionSource
         )
         BottomNavItem(
-            iconId = if(type == BottomNavType.HISTORY) R.drawable.ic_clock_selected else R.drawable.ic_clock_unselected,
+            iconId = if(type == BottomNavType.HISTORY) R.drawable.ic_calendar_selected else R.drawable.ic_calendar_unselected,
             isSelected = type == BottomNavType.HISTORY,
             type = BottomNavType.HISTORY,
             onClick = onClick,
             interactionSource = interactionSource
         )
         BottomNavItem(
-            iconId = if(type == BottomNavType.SETTINGS) R.drawable.ic_settings_selected else R.drawable.ic_settings_unselected,
+            iconId = if(type == BottomNavType.SETTINGS) R.drawable.ic_my_selected else R.drawable.ic_my_unselected,
             isSelected = type == BottomNavType.SETTINGS,
             type = BottomNavType.SETTINGS,
             onClick = onClick,
@@ -88,7 +88,7 @@ fun BottomNavItem(
 
     Column(
         modifier = Modifier
-            .size(width = 42.dp, height = 46.dp)
+            .size(width = 42.dp, height = 80.dp)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -117,18 +117,12 @@ fun BottomNavItem(
             ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(10.dp))
         Icon(
             painter = painterResource(id = iconId),
             contentDescription = "",
             tint = Color.Unspecified
         )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = type.navName,
-            style = PoptatoTypo.xsMedium,
-            color = if (isSelected) Primary60 else Gray80
-        )
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }

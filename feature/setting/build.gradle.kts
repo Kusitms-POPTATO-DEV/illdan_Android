@@ -16,6 +16,7 @@ dependencies {
     implementation(projects.domain)
     implementation(projects.core.ui)
     implementation(projects.designSystem)
+    implementation(projects.feature.component)
 
     implementation(libs.coil.compose)
     implementation(libs.coil.svg)

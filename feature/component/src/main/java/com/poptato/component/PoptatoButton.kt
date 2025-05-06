@@ -1,5 +1,6 @@
 package com.poptato.component
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -16,14 +17,17 @@ import androidx.compose.ui.unit.dp
 import com.poptato.design_system.Gray90
 import com.poptato.design_system.PoptatoTypo
 
+@SuppressLint("ModifierParameter")
 @Composable
 fun PoptatoButton(
     buttonText: String,
+    textColor: Color = Gray90,
     backgroundColor: Color,
+    modifier: Modifier = Modifier,
     onClickButton: () -> Unit
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(shape = RoundedCornerShape(16.dp))
             .background(color = backgroundColor)
@@ -34,7 +38,7 @@ fun PoptatoButton(
         Text(
             text = buttonText,
             style = PoptatoTypo.lgSemiBold,
-            color = Gray90
+            color = textColor
         )
     }
 }

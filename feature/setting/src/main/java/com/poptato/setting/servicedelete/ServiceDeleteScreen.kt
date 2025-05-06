@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -45,6 +46,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.poptato.component.PoptatoButton
 import com.poptato.design_system.Cancel
 import com.poptato.design_system.Danger50
 import com.poptato.design_system.DeleteDialogContent
@@ -54,6 +56,7 @@ import com.poptato.design_system.Gray00
 import com.poptato.design_system.Gray100
 import com.poptato.design_system.Gray40
 import com.poptato.design_system.Gray60
+import com.poptato.design_system.Gray70
 import com.poptato.design_system.Gray80
 import com.poptato.design_system.Gray95
 import com.poptato.design_system.MissingFeature
@@ -64,6 +67,7 @@ import com.poptato.design_system.TooComplex
 import com.poptato.design_system.UserDeleteBtn
 import com.poptato.design_system.UserDeleteContent
 import com.poptato.design_system.UserDeleteTitle
+import com.poptato.design_system.Warning40
 import com.poptato.domain.model.enums.DialogType
 import com.poptato.domain.model.enums.UserDeleteType
 import com.poptato.domain.model.response.dialog.DialogContentModel
@@ -168,10 +172,17 @@ fun ServiceDeleteContent(
             onValueChange = onValueChange
         )
 
-        UserDeleteBtn(
-            onClickDeleteBtn = onClickDeleteBtn,
-            isDeleteBtnValid = isDeleteBtnValid
+        Spacer(modifier = Modifier.weight(1f))
+
+        PoptatoButton(
+            buttonText = UserDeleteBtn,
+            textColor = if (isDeleteBtnValid) Gray100 else Gray70,
+            backgroundColor = if (isDeleteBtnValid) Warning40 else Gray95,
+            modifier = Modifier.padding(horizontal = 20.dp),
+            onClickButton = onClickDeleteBtn
         )
+        
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 

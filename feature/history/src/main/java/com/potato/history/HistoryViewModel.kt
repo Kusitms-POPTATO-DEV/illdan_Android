@@ -61,10 +61,13 @@ class HistoryViewModel @Inject constructor(
     }
 
     fun getImageResourceForDate(date: LocalDate, hasEvent: Boolean): Int {
+        val now = LocalDate.now()
+
         return when {
-            hasEvent -> com.poptato.design_system.R.drawable.ic_history_star
-            date.isAfter(LocalDate.now()) || date.isEqual(LocalDate.now()) -> com.poptato.design_system.R.drawable.ic_history_circle
-            else -> com.poptato.design_system.R.drawable.ic_history_moon
+            date.isAfter(now) -> com.poptato.design_system.R.drawable.ic_fire_empty
+            else -> {
+                if (hasEvent) com.poptato.design_system.R.drawable.ic_fire_filled else com.poptato.design_system.R.drawable.ic_fire_empty
+            }
         }
     }
 
@@ -84,7 +87,9 @@ class HistoryViewModel @Inject constructor(
     private fun onSuccessGetCalendarList(response: HistoryCalendarListModel){
         updateState(
             uiState.value.copy(
-                eventDates = response.dates
+                eventDates = response.dates.map {
+                    mapOf(it.date to it.count)
+                }
             )
         )
     }

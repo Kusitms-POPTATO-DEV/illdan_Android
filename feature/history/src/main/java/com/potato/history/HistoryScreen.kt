@@ -25,6 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
@@ -172,7 +173,7 @@ fun CalendarContent(
     currentMonthStartDate: LocalDate = LocalDate.now().withDayOfMonth(1),
     selectedDate: String = LocalDate.now().toString(),
     onDateSelected: (String) -> Unit = {},
-    eventDates: List<String>,
+    eventDates: List<Map<String, Int>>,
     onNextMonthClick: () -> Unit,
     onPreviousMonthClick: () -> Unit,
     getImageResourceForDate: (LocalDate, Boolean) -> Int,
@@ -214,14 +215,17 @@ fun CalendarContent(
             
             items((1..daysInMonth).toList()) { day ->
                 val date = currentMonthStartDate.withDayOfMonth(day)
+                val hasEvent = eventDates.any { it.containsKey(date.toString()) }
+                val count = eventDates.firstOrNull { it.containsKey(date.toString()) }?.get(date.toString())
+
                 CalendarDayItem(
                     day = day,
                     date = date,
+                    count = count ?: -1,
                     isSelected = selectedDate == date.toString(),
                     isToday = today == date,
-                    hasEvent = eventDates.contains(date.toString()),
                     onClick = { onDateSelected(date.toString()) },
-                    imageResource = getImageResourceForDate(date, eventDates.contains(date.toString()))
+                    imageResource = getImageResourceForDate(date, hasEvent)
                 )
             }
         }
@@ -306,9 +310,9 @@ fun DayOfWeekHeader() {
 fun CalendarDayItem(
     day: Int,
     date: LocalDate,
+    count: Int,
     isSelected: Boolean,
     isToday: Boolean,
-    hasEvent: Boolean,
     onClick: () -> Unit,
     imageResource: Int
 ) {
@@ -330,6 +334,15 @@ fun CalendarDayItem(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            if (count != -1) {
+                Text(
+                    text = count.toString(),
+                    style = PoptatoTypo.xxsMedium,
+                    color = Gray00,
+                    modifier = Modifier
+                        .offset(y = (2).dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(4.dp))

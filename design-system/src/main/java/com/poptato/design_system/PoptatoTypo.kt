@@ -229,6 +229,14 @@ object PoptatoTypo {
         lineHeight = 18.sp
     )
 
+    // xxs
+    val xxsMedium: TextStyle = TextStyle(
+        fontSize = 10.sp,
+        fontFamily = fontFamily,
+        fontWeight = FontWeight.Medium,
+        lineHeight = 15.sp
+    )
+
     val calSemiBold: TextStyle = TextStyle(
         fontSize = 10.sp,
         fontFamily = fontFamily,

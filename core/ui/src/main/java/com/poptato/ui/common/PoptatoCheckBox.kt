@@ -35,9 +35,19 @@ fun PoptatoCheckBox(
         contentAlignment = Alignment.Center
     ) {
         if (isChecked) {
-            Icon(painter = painterResource(id = checkBoxDrawable ?: R.drawable.ic_checked), contentDescription = "", tint = Color.Unspecified)
+            Icon(
+                painter = painterResource(id = checkBoxDrawable ?: R.drawable.ic_checked),
+                contentDescription = "",
+                tint = Color.Unspecified,
+                modifier = Modifier.size(20.dp)
+            )
         } else {
-            Icon(painter = painterResource(id = R.drawable.ic_unchecked), contentDescription = "", tint = Color.Unspecified)
+            Icon(
+                painter = painterResource(id = R.drawable.ic_unchecked),
+                contentDescription = "",
+                tint = Color.Unspecified,
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }

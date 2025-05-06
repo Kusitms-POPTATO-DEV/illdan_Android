@@ -187,7 +187,9 @@ fun TodoItem(
                 Text(
                     text = item.content,
                     color = Gray00,
-                    style = PoptatoTypo.mdRegular
+                    style = PoptatoTypo.mdRegular,
+                    modifier = Modifier
+                        .offset(y = 1.5.dp)
                 )
             }
 
@@ -204,6 +206,8 @@ fun TodoItem(
                 BookmarkCategoryItem(item)
             }
         }
+
+        Spacer(modifier = Modifier.width(12.dp))
 
         Icon(
             painter = painterResource(id = R.drawable.ic_three_dot),

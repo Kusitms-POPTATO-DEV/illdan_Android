@@ -13,7 +13,7 @@ object HistoryResponseMapper : Mapper<HistoryListResponse, HistoryListModel> {
                     HistoryItemModel(
                         todoId = item.todoId,
                         content = item.content,
-                        date = item.date
+                        isCompleted = item.isCompleted
                     )
                 },
                 totalPageCount = it.totalPageCount

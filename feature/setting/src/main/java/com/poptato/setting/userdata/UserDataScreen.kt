@@ -43,6 +43,7 @@ import com.poptato.design_system.Gray00
 import com.poptato.design_system.Gray100
 import com.poptato.design_system.Gray40
 import com.poptato.design_system.Gray70
+import com.poptato.design_system.Gray95
 import com.poptato.design_system.LogOut
 import com.poptato.design_system.LogOutDialogBackBtn
 import com.poptato.design_system.LogOutDialogDoBtn
@@ -203,7 +204,7 @@ fun MyData(
 
             Box(
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(48.dp)
                     .clip(CircleShape)
             ) {
                 AsyncImage(
@@ -223,7 +224,6 @@ fun MyData(
                         }
                     }
                 )
-
             }
 
             Column {
@@ -231,16 +231,12 @@ fun MyData(
                     text = uiState.userDataModel.name,
                     color = Gray00,
                     style = PoptatoTypo.lgSemiBold,
-                    modifier = Modifier
-                        .offset(x = 12.dp, y = 8.dp)
                 )
 
                 Text(
                     text = uiState.userDataModel.email,
                     color = Gray40,
-                    style = PoptatoTypo.smRegular,
-                    modifier = Modifier
-                        .offset(x = 12.dp, y = 10.dp)
+                    style = PoptatoTypo.smRegular
                 )
             }
         }
@@ -256,14 +252,14 @@ fun LogOutBtn(
             .fillMaxWidth()
             .padding(vertical = 16.dp, horizontal = 16.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(Danger50.copy(alpha = 0.1f))
+            .background(Gray95)
             .wrapContentHeight()
             .clickable { onClickLogOutBtn() }
     ) {
         Text(
             text = LogOut,
             style = PoptatoTypo.smSemiBold,
-            color = Danger40,
+            color = Gray40,
             modifier = Modifier
                 .align(Alignment.Center)
                 .padding(vertical = 12.dp)

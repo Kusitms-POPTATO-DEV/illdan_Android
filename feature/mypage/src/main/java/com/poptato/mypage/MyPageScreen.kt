@@ -13,9 +13,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,10 +44,12 @@ import com.poptato.design_system.Gray00
 import com.poptato.design_system.Gray100
 import com.poptato.design_system.Gray20
 import com.poptato.design_system.Gray40
+import com.poptato.design_system.Gray60
 import com.poptato.design_system.Gray95
 import com.poptato.design_system.Notice
 import com.poptato.design_system.Policy
 import com.poptato.design_system.PoptatoTypo
+import com.poptato.design_system.Primary40
 import com.poptato.design_system.Primary60
 import com.poptato.design_system.ProfileDetail
 import com.poptato.design_system.R
@@ -107,10 +111,7 @@ fun MyPageContent(
     ) {
 
         MyData(
-            uiState = uiState
-        )
-
-        UserDataBtn(
+            uiState = uiState,
             onClickUserDataBtn = onClickUserDataBtn
         )
 
@@ -170,7 +171,7 @@ fun DeadlineModeSwitch(
         Text(
             text = DEADLINE_MODE_TEXT,
             color = Gray20,
-            style = PoptatoTypo.mdMedium
+            style = PoptatoTypo.mdRegular
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -184,15 +185,18 @@ fun DeadlineModeSwitch(
 
 @Composable
 fun MyData(
-    uiState: MyPagePageState = MyPagePageState()
+    uiState: MyPagePageState = MyPagePageState(),
+    onClickUserDataBtn: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, top = 16.dp)
+            .padding(top = 16.dp)
+            .padding(horizontal = 16.dp)
     ) {
-        Row {
-
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             val context = LocalContext.current
             val imageLoader = ImageLoader.Builder(context)
                 .components {
@@ -203,11 +207,11 @@ fun MyData(
 
             Box(
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(48.dp)
                     .clip(CircleShape)
             ) {
                 AsyncImage(
-                    model = if (uiState.userDataModel.userImg.isEmpty()) R.drawable.ic_person else uiState.userDataModel.userImg,
+                    model = uiState.userDataModel.userImg.ifEmpty { R.drawable.ic_person },
                     contentDescription = "img_temp_person",
                     modifier = Modifier.size(64.dp),
                     contentScale = ContentScale.Crop,
@@ -223,26 +227,28 @@ fun MyData(
                         }
                     }
                 )
-
             }
 
-            Column {
-                Text(
-                    text = uiState.userDataModel.name,
-                    color = Gray00,
-                    style = PoptatoTypo.lgSemiBold,
-                    modifier = Modifier
-                        .offset(x = 12.dp, y = 8.dp)
-                )
+            Spacer(modifier = Modifier.width(16.dp))
 
-                Text(
-                    text = uiState.userDataModel.email,
-                    color = Gray40,
-                    style = PoptatoTypo.smRegular,
-                    modifier = Modifier
-                        .offset(x = 12.dp, y = 10.dp)
-                )
-            }
+            Text(
+                text = uiState.userDataModel.name,
+                color = Gray00,
+                style = PoptatoTypo.lgMedium,
+                maxLines = 1,
+                modifier = Modifier
+                    .weight(1f)
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Icon(
+                painter = painterResource(id = R.drawable.ic_setting),
+                contentDescription = null,
+                tint = Gray60,
+                modifier = Modifier
+                    .clickable { onClickUserDataBtn() }
+            )
         }
     }
 }
@@ -307,15 +313,15 @@ fun SettingServiceItem(
         Text(
             text = title,
             color = color,
-            style = PoptatoTypo.mdMedium,
+            style = PoptatoTypo.mdRegular,
             modifier = Modifier.padding(vertical = 16.dp)
         )
 
         if (isVersion) {
             Text(
                 text = String.format(VersionSetting, VERSION_NAME),
-                color = Primary60,
-                style = PoptatoTypo.mdMedium,
+                color = Primary40,
+                style = PoptatoTypo.mdRegular,
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .padding(end = 24.dp)

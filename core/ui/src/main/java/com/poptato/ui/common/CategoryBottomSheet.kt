@@ -43,6 +43,7 @@ import com.poptato.design_system.Gray80
 import com.poptato.design_system.Gray90
 import com.poptato.design_system.Gray95
 import com.poptato.design_system.PoptatoTypo
+import com.poptato.design_system.Primary40
 import com.poptato.design_system.Primary60
 import com.poptato.design_system.R
 import com.poptato.domain.model.response.category.CategoryItemModel
@@ -80,7 +81,7 @@ fun CategoryListBottomSheetContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Gray95)
+            .background(Gray100)
     ) {
 
         if (categoryList.size == 2) {
@@ -131,14 +132,16 @@ fun CategoryBottomSheetItem(
 ) {
     Row(
         modifier = Modifier
+            .padding(horizontal = 12.dp)
             .fillMaxWidth()
             .wrapContentHeight()
-            .background(if (isSelected) Gray90 else Gray95)
+            .background(if (isSelected) Gray90 else Gray100, shape = RoundedCornerShape(12.dp))
             .padding(vertical = 12.dp)
-            .padding(horizontal = 24.dp)
+            .padding(horizontal = 8.dp)
             .clickable {
                 onClick()
             },
+        verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
             model = iconImg,
@@ -202,7 +205,7 @@ fun CategoryModifyBtnContent(
 
         CategoryBottomSheetBtn(
             btnText = Complete,
-            btnColor = Primary60,
+            btnColor = Primary40,
             textColor = Gray100,
             textStyle = PoptatoTypo.mdSemiBold,
             modifier = Modifier.weight(1f),

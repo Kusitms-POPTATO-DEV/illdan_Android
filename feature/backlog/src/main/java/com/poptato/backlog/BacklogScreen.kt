@@ -88,6 +88,8 @@ import coil.decode.SvgDecoder
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.poptato.component.todo.TodoItem
+import com.poptato.core.enums.TodoType
 import com.poptato.design_system.ALL
 import com.poptato.design_system.BacklogHint
 import com.poptato.design_system.Cancel
@@ -266,8 +268,8 @@ fun BacklogScreen(
                     )
                 )
             },
-            onClickBtnTodoSettings = {
-                viewModel.getSelectedItemDetailContent(uiState.backlogList[it]) { callback ->
+            showBottomSheet = {
+                viewModel.getSelectedItemDetailContent(it) { callback ->
                     showBottomSheet(callback, uiState.categoryList)
                 }
             },
@@ -311,7 +313,7 @@ fun BacklogContent(
     onClickCategoryDeleteDropdown: () -> Unit = {},
     onClickCategoryModifyDropdown: () -> Unit = {},
     onItemSwiped: (TodoItemModel) -> Unit = {},
-    onClickBtnTodoSettings: (Int) -> Unit = {},
+    showBottomSheet: (TodoItemModel) -> Unit,
     interactionSource: MutableInteractionSource,
     activeItemId: Long?,
     onClearActiveItem: () -> Unit = {},
@@ -347,9 +349,9 @@ fun BacklogContent(
                 } else {
                     ALL
                 },
-                titleTextStyle = PoptatoTypo.lgSemiBold,
+                titleTextStyle = PoptatoTypo.xLSemiBold,
                 subText = uiState.backlogList.size.toString(),
-                subTextStyle = PoptatoTypo.lgMedium,
+                subTextStyle = PoptatoTypo.xLMedium,
                 subTextColor = Gray60,
                 isCategorySettingBtn = (uiState.selectedCategoryIndex != 0 && uiState.selectedCategoryIndex != 1),
                 isCategorySettingBtnSelected = { onDropdownExpandedChange(true) }
@@ -416,7 +418,7 @@ fun BacklogContent(
                     BacklogTaskList(
                         backlogList = uiState.backlogList,
                         onItemSwiped = onItemSwiped,
-                        onClickBtnTodoSettings = onClickBtnTodoSettings,
+                        showBottomSheet = showBottomSheet,
                         activeItemId = activeItemId,
                         onClearActiveItem = onClearActiveItem,
                         onTodoItemModified = onTodoItemModified,
@@ -555,7 +557,7 @@ fun BacklogCategoryList(
                                 0.dp,
                                 Color.Transparent
                             ),
-                            CircleShape
+                            RoundedCornerShape(12.dp)
                         )
                 ) {
                     CategoryListIcon(
@@ -609,7 +611,7 @@ fun CategoryListIcon(
             .padding(start = paddingStart.dp)
             .padding(horizontal = paddingHorizontal.dp)
             .size(40.dp)
-            .border(width = 1.dp, color = if (isSelected) Gray00 else Gray95, shape = CircleShape)
+            .background(color = if (isSelected) Gray90 else Color.Unspecified, shape = RoundedCornerShape(12.dp))
             .clickable(
                 indication = null,
                 interactionSource = interactionSource,
@@ -632,7 +634,7 @@ fun CategoryListIcon(
 fun BacklogTaskList(
     backlogList: List<TodoItemModel> = emptyList(),
     onItemSwiped: (TodoItemModel) -> Unit = {},
-    onClickBtnTodoSettings: (Int) -> Unit = {},
+    showBottomSheet: (TodoItemModel) -> Unit = {},
     activeItemId: Long?,
     onClearActiveItem: () -> Unit = {},
     onTodoItemModified: (Long, String) -> Unit = { _, _ -> },
@@ -746,14 +748,14 @@ fun BacklogTaskList(
                         RoundedCornerShape(8.dp)
                     )
             ) {
-                BacklogItem(
+                TodoItem(
                     item = item,
-                    index = index,
                     isActive = isActive,
                     isDeadlineDateMode = isDeadlineDateMode,
-                    onClickBtnTodoSettings = onClickBtnTodoSettings,
+                    showBottomSheet = showBottomSheet,
                     onClearActiveItem = onClearActiveItem,
-                    onTodoItemModified = onTodoItemModified
+                    onTodoItemModified = onTodoItemModified,
+                    todoType = TodoType.BACKLOG
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -914,8 +916,6 @@ fun BacklogItem(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CreateBacklogTextFiled(
-//    taskInput: String = "",
-//    onValueChange: (String) -> Unit = {},
     createBacklog: (String) -> Unit = {}
 ) {
     var isFocused by remember { mutableStateOf(false) }
@@ -932,11 +932,11 @@ fun CreateBacklogTextFiled(
     Box(
         modifier = Modifier
             .padding(horizontal = 16.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(12.dp))
             .border(
                 width = 1.dp,
                 color = if (isFocused) Gray00 else Gray70,
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(12.dp)
             )
     ) {
         BasicTextField(
@@ -974,13 +974,13 @@ fun CreateBacklogTextFiled(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_add),
                             contentDescription = "",
-                            tint = Color.Gray
+                            tint = Gray80
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = BacklogHint,
-                            style = PoptatoTypo.mdMedium,
-                            color = Color.Gray
+                            style = PoptatoTypo.mdRegular,
+                            color = Gray80
                         )
                     }
                     innerTextField()
@@ -1002,55 +1002,3 @@ fun CreateBacklogTextFiled(
         }
     }
 }
-
-//@SuppressLint("ModifierParameter")
-//@Composable
-//fun BacklogGuideItem(
-//    onClickYesterdayList: () -> Unit = {},
-//    modifier: Modifier = Modifier,
-//    interactionSource: MutableInteractionSource
-//) {
-//    Row(
-//        modifier = modifier
-//            .fillMaxWidth()
-//            .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
-//            .background(Primary60)
-//            .padding(horizontal = 16.dp, vertical = 12.dp),
-//        verticalAlignment = Alignment.CenterVertically
-//    ) {
-//        Text(
-//            text = BACKLOG_YESTERDAY_TASK_GUIDE,
-//            style = PoptatoTypo.smMedium,
-//            color = Gray100,
-//            textAlign = TextAlign.Start,
-//            modifier = Modifier
-//                .weight(1f)
-//        )
-//
-//        Row(
-//            verticalAlignment = Alignment.CenterVertically,
-//            modifier = Modifier
-//                .clickable(
-//                    indication = null,
-//                    interactionSource = interactionSource,
-//                    onClick = { onClickYesterdayList() }
-//                )
-//
-//        ) {
-//            Text(
-//                text = CONFIRM_ACTION,
-//                style = PoptatoTypo.smSemiBold,
-//                color = Gray100
-//            )
-//
-//            Spacer(modifier = Modifier.width(4.dp))
-//
-//            Icon(
-//                painter = painterResource(id = R.drawable.ic_right_arrow),
-//                contentDescription = "",
-//                tint = Color.Unspecified
-//            )
-//        }
-//    }
-//}
-

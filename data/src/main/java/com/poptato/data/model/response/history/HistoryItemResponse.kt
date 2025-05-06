@@ -7,6 +7,6 @@ data class HistoryItemResponse(
     val todoId: Long = -1,
     @SerializedName("content")
     val content: String = "",
-    @SerializedName("date")
-    val date: String = ""
+    @SerializedName("isCompleted")
+    val isCompleted: Boolean = false
 )

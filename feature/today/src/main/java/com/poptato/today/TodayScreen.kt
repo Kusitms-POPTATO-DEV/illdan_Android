@@ -66,6 +66,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.poptato.component.todo.TodoItem
+import com.poptato.core.enums.TodoType
 import com.poptato.core.util.TimeFormatter
 import com.poptato.design_system.BtnGetTodoText
 import com.poptato.design_system.SNACK_BAR_COMPLETE_DELETE_TODO
@@ -356,8 +358,9 @@ fun TodayTodoList(
             val isDragged = index == dragDropState.currentIndexOfDraggedItem
             val isActive = activeItemId == item.todoId
 
-            TodayTodoItem(
+            TodoItem(
                 item = item,
+                todoType = TodoType.TODAY,
                 onCheckedChange = onCheckedChange,
                 modifier = Modifier
                     .zIndex(if (index == dragDropState.currentIndexOfDraggedItem) 1f else 0f)

@@ -7,11 +7,13 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,6 +45,7 @@ import com.poptato.design_system.Gray00
 import com.poptato.design_system.Gray100
 import com.poptato.design_system.Gray40
 import com.poptato.design_system.Gray70
+import com.poptato.design_system.Gray95
 import com.poptato.design_system.LogOut
 import com.poptato.design_system.LogOutDialogBackBtn
 import com.poptato.design_system.LogOutDialogDoBtn
@@ -189,7 +192,9 @@ fun MyData(
             .fillMaxWidth()
             .padding(start = 16.dp, top = 16.dp)
     ) {
-        Row {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
 
             val context = LocalContext.current
             val imageLoader = ImageLoader.Builder(context)
@@ -203,7 +208,7 @@ fun MyData(
 
             Box(
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(48.dp)
                     .clip(CircleShape)
             ) {
                 AsyncImage(
@@ -223,24 +228,21 @@ fun MyData(
                         }
                     }
                 )
-
             }
+            
+            Spacer(modifier = Modifier.width(16.dp))
 
             Column {
                 Text(
                     text = uiState.userDataModel.name,
                     color = Gray00,
                     style = PoptatoTypo.lgSemiBold,
-                    modifier = Modifier
-                        .offset(x = 12.dp, y = 8.dp)
                 )
 
                 Text(
                     text = uiState.userDataModel.email,
                     color = Gray40,
-                    style = PoptatoTypo.smRegular,
-                    modifier = Modifier
-                        .offset(x = 12.dp, y = 10.dp)
+                    style = PoptatoTypo.smRegular
                 )
             }
         }
@@ -256,14 +258,14 @@ fun LogOutBtn(
             .fillMaxWidth()
             .padding(vertical = 16.dp, horizontal = 16.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(Danger50.copy(alpha = 0.1f))
+            .background(Gray95)
             .wrapContentHeight()
             .clickable { onClickLogOutBtn() }
     ) {
         Text(
             text = LogOut,
             style = PoptatoTypo.smSemiBold,
-            color = Danger40,
+            color = Gray40,
             modifier = Modifier
                 .align(Alignment.Center)
                 .padding(vertical = 12.dp)

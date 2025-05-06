@@ -13,7 +13,7 @@ data class HistoryPageState(
     val pageSize: Int = 15,
     val currentMonthStartDate: LocalDate = LocalDate.now().withDayOfMonth(1),
     val selectedDate: String = LocalDate.now().toString(),
-    val eventDates: List<String> = emptyList(),
+    val eventDates: List<Map<String, Int>> = emptyList(),
     val calendarMonth: CalendarMonthModel = CalendarMonthModel(LocalDate.now().year, LocalDate.now().monthValue),
 
     ) : PageState

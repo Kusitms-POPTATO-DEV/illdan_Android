@@ -25,6 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
@@ -51,6 +52,7 @@ import com.poptato.design_system.R
 import com.poptato.domain.model.response.history.HistoryItemModel
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
@@ -59,7 +61,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.poptato.core.util.reachedLastItem
 import com.poptato.design_system.FRI
+import com.poptato.design_system.Gray10
 import com.poptato.design_system.Gray40
+import com.poptato.design_system.Gray90
 import com.poptato.design_system.MON
 import com.poptato.design_system.SAT
 import com.poptato.design_system.SUN
@@ -119,7 +123,7 @@ fun HistoryContent(
         modifier = Modifier
             .fillMaxSize()
             .background(Gray100)
-            .padding(start = 14.dp, end = 14.dp)
+            .padding(start = 20.dp, end = 20.dp)
     ) {
 
         CalendarContent(
@@ -133,7 +137,7 @@ fun HistoryContent(
             onClickCalendarHeader = onClickCalendarHeader
         )
 
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         if (uiState.historyList.isEmpty()) {
             Box(
@@ -154,6 +158,8 @@ fun HistoryContent(
             ) {
                 items(uiState.historyList) { item ->
                     HistoryListItem(item = item)
+
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
 
@@ -172,7 +178,7 @@ fun CalendarContent(
     currentMonthStartDate: LocalDate = LocalDate.now().withDayOfMonth(1),
     selectedDate: String = LocalDate.now().toString(),
     onDateSelected: (String) -> Unit = {},
-    eventDates: List<String>,
+    eventDates: List<Map<String, Int>>,
     onNextMonthClick: () -> Unit,
     onPreviousMonthClick: () -> Unit,
     getImageResourceForDate: (LocalDate, Boolean) -> Int,
@@ -187,7 +193,7 @@ fun CalendarContent(
             .fillMaxWidth()
             .background(Gray100)
     ) {
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(22.dp))
 
         CalendarHeader(
             currentMonth = currentMonthStartDate,
@@ -198,31 +204,42 @@ fun CalendarContent(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        DayOfWeekHeader()
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        LazyVerticalGrid(
-            modifier = Modifier.fillMaxWidth(),
-            columns = GridCells.Fixed(7),
-            horizontalArrangement = Arrangement.spacedBy(0.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Gray95, shape = RoundedCornerShape(16.dp))
+                .padding(16.dp)
         ) {
-            items(firstDayOfWeek) {
-                Box(modifier = Modifier.size(36.dp))
-            }
-            
-            items((1..daysInMonth).toList()) { day ->
-                val date = currentMonthStartDate.withDayOfMonth(day)
-                CalendarDayItem(
-                    day = day,
-                    date = date,
-                    isSelected = selectedDate == date.toString(),
-                    isToday = today == date,
-                    hasEvent = eventDates.contains(date.toString()),
-                    onClick = { onDateSelected(date.toString()) },
-                    imageResource = getImageResourceForDate(date, eventDates.contains(date.toString()))
-                )
+            DayOfWeekHeader()
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            LazyVerticalGrid(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                columns = GridCells.Fixed(7),
+                horizontalArrangement = Arrangement.spacedBy(0.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(firstDayOfWeek) {
+                    Box(modifier = Modifier.size(36.dp))
+                }
+
+                items((1..daysInMonth).toList()) { day ->
+                    val date = currentMonthStartDate.withDayOfMonth(day)
+                    val hasEvent = eventDates.any { it.containsKey(date.toString()) }
+                    val count = eventDates.firstOrNull { it.containsKey(date.toString()) }?.get(date.toString())
+
+                    CalendarDayItem(
+                        day = day,
+                        date = date,
+                        count = count ?: -1,
+                        isSelected = selectedDate == date.toString(),
+                        isToday = today == date,
+                        onClick = { onDateSelected(date.toString()) },
+                        imageResource = getImageResourceForDate(date, hasEvent)
+                    )
+                }
             }
         }
     }
@@ -237,47 +254,33 @@ fun CalendarHeader(
 ) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 30.dp, end = 30.dp),
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = onPreviousMonthClick, modifier = Modifier.size(20.dp)) {
+        Text(
+            text = currentMonth.format(DateTimeFormatter.ofPattern("yyyy년 M월")),
+            style = PoptatoTypo.xLSemiBold,
+            color = Gray00,
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        IconButton(onClick = onPreviousMonthClick, modifier = Modifier.size(24.dp)) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_arrow_left_20),
                 contentDescription = "Previous Month",
-                tint = Gray40
+                tint = Gray00
             )
         }
-        Row(
-            modifier = Modifier
-                .clickable { onHeaderClick() }
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = currentMonth.format(DateTimeFormatter.ofPattern("yyyy년 M월")),
-                style = PoptatoTypo.mdMedium,
-                color = Gray00,
-            )
-            Spacer(modifier = Modifier.width(7.dp))
-            Icon(
-                painter = painterResource(id = R.drawable.ic_triangle_down),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(16.dp),
-                tint = Gray40
-            )
-        }
-        IconButton(onClick = onNextMonthClick, modifier = Modifier.size(20.dp), enabled = currentMonth < LocalDate.now().withDayOfMonth(1)) {
+        
+        Spacer(modifier = Modifier.width(12.dp))
+
+        IconButton(onClick = onNextMonthClick, modifier = Modifier.size(24.dp), enabled = currentMonth < LocalDate.now().withDayOfMonth(1)) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_arrow_right_20),
                 contentDescription = "Next Month",
-                tint = when{
-                    currentMonth >= LocalDate.now().withDayOfMonth(1) -> Gray80
-                    else -> Gray40
-                }
+                tint = Gray00
             )
         }
     }
@@ -292,9 +295,9 @@ fun DayOfWeekHeader() {
         listOf(SUN, MON, TUE, WED, THU, FRI, SAT).forEach { day ->
             Text(
                 text = day,
-                style = PoptatoTypo.smMedium,
+                style = PoptatoTypo.xsMedium,
                 fontSize = 11.sp,
-                color = Gray80,
+                color = Gray00,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.weight(1f)
             )
@@ -306,9 +309,9 @@ fun DayOfWeekHeader() {
 fun CalendarDayItem(
     day: Int,
     date: LocalDate,
+    count: Int,
     isSelected: Boolean,
     isToday: Boolean,
-    hasEvent: Boolean,
     onClick: () -> Unit,
     imageResource: Int
 ) {
@@ -330,6 +333,15 @@ fun CalendarDayItem(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            if (count != -1) {
+                Text(
+                    text = count.toString(),
+                    style = PoptatoTypo.xxsMedium,
+                    color = Gray00,
+                    modifier = Modifier
+                        .offset(y = (2).dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -348,11 +360,11 @@ fun CalendarDayItem(
         ) {
             Text(
                 text = day.toString(),
-                style = PoptatoTypo.smMedium,
+                style = PoptatoTypo.xsMedium,
                 fontSize = 10.sp,
                 color = when {
-                    isSelected -> Gray95
-                    else -> Gray70
+                    isSelected -> Gray90
+                    else -> Gray10
                 }
             )
         }
@@ -364,16 +376,18 @@ fun HistoryListItem(item: HistoryItemModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 8.dp)
             .background(Color.Unspecified, shape = MaterialTheme.shapes.small),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.ic_history_checked),
+            painter = painterResource(id = if (item.isCompleted) R.drawable.ic_checked else R.drawable.ic_unchecked ),
             contentDescription = "Check",
             tint =  Color.Unspecified,
-            modifier = Modifier.padding(top = 3.dp, end = 8.dp, bottom = 3.dp),
+            modifier = Modifier
+                .size(16.dp),
         )
+
+        Spacer(modifier = Modifier.width(8.dp))
 
         Text(
             text = item.content,
@@ -413,7 +427,11 @@ fun InfinityLazyColumn(
     state.onLoadMoreWhenLastItemVisible(action = loadMore)
     CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
         LazyColumn(
-            modifier = modifier.padding(start = 10.dp, end = 10.dp),
+            modifier = modifier
+                .fillMaxWidth()
+                .background(Gray95, shape = RoundedCornerShape(16.dp))
+                .padding(horizontal = 16.dp)
+                .padding(top = 20.dp, bottom = 12.dp),
             state = state,
             reverseLayout = reverseLayout,
             verticalArrangement = verticalArrangement,

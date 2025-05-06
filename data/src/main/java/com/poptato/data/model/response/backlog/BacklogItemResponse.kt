@@ -14,5 +14,9 @@ data class BacklogItemResponse(
     @SerializedName("deadline")
     val deadline: String? = null,
     @SerializedName("dDay")
-    val dDay: Int? = null
+    val dDay: Int? = null,
+    @SerializedName("categoryName")
+    val categoryName: String? = null,
+    @SerializedName("imageUrl")
+    val imageUrl: String? = null
 )

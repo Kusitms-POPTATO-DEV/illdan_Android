@@ -1,6 +1,6 @@
 package com.poptato.yesterdaylist
 
-import androidx.compose.foundation.Image
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,9 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,35 +23,29 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.poptato.component.PoptatoButton
 import com.poptato.design_system.Complete
 import com.poptato.design_system.Gray00
+import com.poptato.design_system.Gray10
 import com.poptato.design_system.Gray100
-import com.poptato.design_system.Gray40
 import com.poptato.design_system.Gray95
 import com.poptato.design_system.PoptatoTypo
-import com.poptato.design_system.Primary60
+import com.poptato.design_system.Primary40
 import com.poptato.design_system.R
 import com.poptato.design_system.YesterdayListTitle
 import com.poptato.domain.model.enums.TodoStatus
 import com.poptato.domain.model.response.yesterday.YesterdayItemModel
-import com.poptato.ui.common.BookmarkItem
-import com.poptato.ui.common.DeadlineItem
 import com.poptato.ui.common.PoptatoCheckBox
-import com.poptato.ui.common.RepeatItem
-import timber.log.Timber
 
 @Composable
 fun YesterdayListScreen(
     goBackToBacklog: () -> Unit = {}
 ) {
-
     val viewModel: YesterdayListViewModel = hiltViewModel()
     val uiState: YesterdayListPageState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -82,100 +74,86 @@ fun YesterdayContent(
             .fillMaxSize()
             .background(Gray100)
     ) {
-
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 24.dp)
         ) {
-            TitleTopBar(
+            YesterdayTopBar(
                 onClickBtnComplete = onClickCloseBtn
             )
 
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-            ) {
-                Text(
-                    text = YesterdayListTitle,
-                    style = PoptatoTypo.xxLSemiBold,
-                    color = Gray00,
-                    modifier = Modifier
-                        .padding(start = 16.dp)
-                )
+            Spacer(modifier = Modifier.height(16.dp))
 
-                Image(
-                    painter = painterResource(id = R.drawable.ic_yesterday_bg),
-                    contentDescription = "",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    contentScale = ContentScale.Crop
-                )
+            YesterdayTodoList(
+                list = uiState.yesterdayList,
+                modifier = Modifier.weight(1f),
+                onCheckedChange = onCheckedChange
+            )
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 70.dp)
-                ) {
-                    YesterdayTodoList(
-                        list = uiState.yesterdayList,
-                        onCheckedChange = onCheckedChange
-                    )
-                }
-            }
+            Spacer(modifier = Modifier.height(16.dp))
 
-            BtnComplete(
-                onClickAllCheckBtn = onClickBtnComplete
+            PoptatoButton(
+                buttonText = Complete,
+                backgroundColor = Primary40,
+                onClickButton = onClickBtnComplete
             )
         }
-
     }
 }
 
 @Composable
-fun TitleTopBar(
+fun YesterdayTopBar(
     onClickBtnComplete: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp)
+            .padding(top = 28.dp, bottom = 4.dp),
+        contentAlignment = Alignment.Center
     ) {
-
-        Icon(
-            painter = painterResource(id = R.drawable.ic_close_no_bg),
-            contentDescription = "",
-            tint = Color.Unspecified,
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(top = 24.dp, bottom = 8.dp)
-                .size(width = 24.dp, height = 24.dp)
-                .clickable { onClickBtnComplete() }
+        Text(
+            text = YesterdayListTitle,
+            style = PoptatoTypo.mdSemiBold,
+            color = Gray00
         )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(
+                painter = painterResource(id = R.drawable.ic_close_no_bg),
+                contentDescription = null,
+                tint = Gray00,
+                modifier = Modifier
+                    .clickable { onClickBtnComplete() }
+            )
+        }
     }
 }
 
+@SuppressLint("ModifierParameter")
 @Composable
 fun YesterdayTodoList(
     list: List<YesterdayItemModel> = emptyList(),
+    modifier: Modifier = Modifier,
     onCheckedChange: (Long, TodoStatus) -> Unit = {_, _ ->},
 ) {
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
+        modifier = modifier
+            .fillMaxSize(),
     ) {
-
         items(list, key = { it.todoId }) { item ->
-            Spacer(modifier = Modifier.height(8.dp))
-
             YesterdayTodoItem(
                 item = item,
                 onCheckedChange = onCheckedChange
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
@@ -185,79 +163,25 @@ fun YesterdayTodoItem(
     item: YesterdayItemModel = YesterdayItemModel(),
     onCheckedChange: (Long, TodoStatus) -> Unit = {_, _ ->},
 ) {
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(12.dp))
             .background(Gray95)
+            .padding(horizontal = 12.dp, vertical = 16.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .padding(top = if (item.bookmark || item.repeat || item.dday != null) 12.dp else 0.dp),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            if (item.bookmark) {
-                BookmarkItem()
-                Spacer(modifier = Modifier.width(6.dp))
-            }
+        PoptatoCheckBox(
+            isChecked = item.todoStatus == TodoStatus.COMPLETED,
+            onCheckedChange = { onCheckedChange(item.todoId, item.todoStatus) }
+        )
 
-            if (item.repeat) {
-                RepeatItem()
-                Spacer(modifier = Modifier.width(6.dp))
-            }
+        Spacer(modifier = Modifier.width(12.dp))
 
-            if (item.dday != null) {
-                DeadlineItem(
-                    dday = item.dday
-                )
-            }
-        }
-
-        Row(
-            modifier = Modifier
-                .padding(start = 16.dp)
-                .padding(bottom = if (item.bookmark || item.repeat || item.dday != null) 12.dp else 16.dp)
-                .padding(top = if (item.bookmark || item.repeat || item.dday != null) 6.dp else 16.dp),
-
-        ) {
-            PoptatoCheckBox(
-                isChecked = item.todoStatus == TodoStatus.COMPLETED,
-                onCheckedChange = { onCheckedChange(item.todoId, item.todoStatus) }
-            )
-
-            Spacer(modifier = Modifier.width(10.dp))
-
-            Text(
-                text = item.content,
-                color = Gray40,
-                style = PoptatoTypo.mdRegular,
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}
-
-@Composable
-fun BtnComplete(
-    onClickAllCheckBtn: () -> Unit = {}
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 8.dp)
-            .background(Primary60, shape = RoundedCornerShape(12.dp))
-            .clickable { onClickAllCheckBtn() }
-    ) {
         Text(
-            text = Complete,
-            style = PoptatoTypo.lgSemiBold,
-            color = Gray100,
-            modifier = Modifier
-                .padding(vertical = 15.dp)
-                .align(Alignment.Center)
+            text = item.content,
+            color = Gray10,
+            style = PoptatoTypo.mdRegular,
+            modifier = Modifier.weight(1f)
         )
     }
 }

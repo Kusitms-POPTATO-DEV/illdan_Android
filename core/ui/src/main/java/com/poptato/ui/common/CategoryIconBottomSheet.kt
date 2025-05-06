@@ -31,6 +31,7 @@ import coil.Coil
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.decode.SvgDecoder
+import com.poptato.design_system.Gray100
 import com.poptato.design_system.Gray60
 import com.poptato.design_system.Gray80
 import com.poptato.design_system.Gray90
@@ -60,7 +61,7 @@ fun CategoryBottomSheetContent(
         modifier = Modifier
             .fillMaxWidth()
             .height(610.dp)
-            .background(Gray90)
+            .background(Gray100)
     ) {
         Box(
             modifier = Modifier

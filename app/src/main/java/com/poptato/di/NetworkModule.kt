@@ -39,6 +39,8 @@ object NetworkModule {
                 request.addHeader(AUTHORIZATION, "Bearer $it")
             }
 
+            request.addHeader("X-App-Version", "V2")
+
             val requestWithHeaders = request.build()
             Timber.i("Request Headers: ${requestWithHeaders.headers}")
 

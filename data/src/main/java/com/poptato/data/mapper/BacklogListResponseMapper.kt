@@ -17,7 +17,9 @@ object BacklogListResponseMapper: Mapper<BacklogListResponse, BacklogListModel> 
                         isBookmark = item.isBookmark,
                         isRepeat = item.isRepeat,
                         deadline = item.deadline ?: "",
-                        dDay = item.dDay
+                        dDay = item.dDay,
+                        categoryName = item.categoryName ?: "",
+                        imageUrl = item.imageUrl ?: ""
                     )
                 },
                 totalPageCount = it.totalPageCount,

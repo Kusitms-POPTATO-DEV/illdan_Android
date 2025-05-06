@@ -88,50 +88,19 @@ fun KaKaoLoginContent(
         modifier = Modifier
             .fillMaxSize()
             .background(Gray100),
-        contentAlignment = Alignment.TopCenter
+        contentAlignment = Alignment.Center
     ) {
-
         Icon(
-            painter = painterResource(id = R.drawable.ic_stairs),
-            contentDescription = null,
-            tint = Color.Unspecified,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(360f / 420f)
-                .align(Alignment.BottomCenter)
-        )
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-        )  {
-            Image(
-                painter = painterResource(id = R.drawable.splash_dotted_texture),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-                alpha = 0.3f
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(KaKaoLogin)
-        )
-
-        Image(
             painter = painterResource(id = R.drawable.ic_login),
-            contentDescription = "ic_splash",
-            modifier = Modifier
-                .padding(top = 80.dp)
+            contentDescription = null,
+            tint = Color.Unspecified
         )
 
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
+                .fillMaxSize()
         ) {
+            Spacer(modifier = Modifier.weight(1f))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

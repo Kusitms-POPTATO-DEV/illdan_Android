@@ -291,11 +291,11 @@ fun CategoryAddContent(
         ) {
             if (uiState.categoryIconImgUrl.isEmpty()) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_add_category_icon),
+                    painter = painterResource(id = R.drawable.ic_add_category),
                     contentDescription = "add category icon",
                     tint = Color.Unspecified,
                     modifier = Modifier
-                        .fillMaxSize()
+                        .size(40.dp)
                         .clickable(
                             indication = null,
                             interactionSource = interactionSource,

@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.poptato.design_system.Gray00
 import com.poptato.design_system.Gray80
+import com.poptato.design_system.Primary40
 import com.poptato.design_system.Primary60
 import kotlin.math.roundToInt
 
@@ -46,7 +47,7 @@ fun PoptatoSwitchButton(
         modifier = modifier
             .size(width = 44.dp, height = 24.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(if (check) Primary60 else Gray80)
+            .background(if (check) Primary40 else Gray80)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.CenterStart
     ) {

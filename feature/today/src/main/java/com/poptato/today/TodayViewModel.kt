@@ -396,6 +396,7 @@ class TodayViewModel @Inject constructor(
             )
             ).collect {
                 resultResponse(it, {
+                    getTodayList(0, 100)
                 }, { error ->
                     Timber.d("[카테고리] 수정 서버통신 실패 -> $error")
                 })

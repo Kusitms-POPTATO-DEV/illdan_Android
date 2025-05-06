@@ -49,6 +49,7 @@ import com.poptato.design_system.R
 import com.poptato.design_system.YEAR_MONTH
 import com.poptato.design_system.Gray90
 import com.poptato.design_system.MON
+import com.poptato.design_system.Primary40
 import com.poptato.design_system.Primary60
 import com.poptato.design_system.SAT
 import com.poptato.design_system.SUN
@@ -125,7 +126,7 @@ fun CalendarBottomSheetContent(
 ) {
     Column(
         modifier = Modifier
-            .background(Gray95)
+            .background(Gray100)
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -172,7 +173,7 @@ fun CalendarBottomSheetContent(
                         )
                         .padding(horizontal = 4.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(if (day == selectedDate) Primary60 else Gray95),
+                        .background(if (day == selectedDate) Primary40 else Gray100),
                     contentAlignment = Alignment.Center
                 ) {
                     day?.let {
@@ -211,7 +212,7 @@ fun CalendarBottomSheetContent(
 
             DatePickerButtons(
                 btnText = Complete,
-                btnColor = Primary60,
+                btnColor = Primary40,
                 textColor = Gray100,
                 textStyle = PoptatoTypo.mdSemiBold,
                 modifier = Modifier.weight(1f),

@@ -73,9 +73,16 @@ class MainViewModel @Inject constructor() : BaseViewModel<MainPageState>(MainPag
     }
 
     fun onUpdatedCategory(selectedId: Long?) {
+        val selectedCategory = uiState.value.categoryList.firstOrNull { it.categoryId == selectedId }
+        val updatedTodo = uiState.value.selectedTodoItem.copy(
+            categoryName = selectedCategory?.categoryName ?: "",
+            imageUrl = selectedCategory?.categoryImgUrl ?: ""
+        )
+
         updateState(
             uiState.value.copy(
-                selectedTodoCategoryItem = uiState.value.categoryList.firstOrNull { it.categoryId == selectedId }
+                selectedTodoCategoryItem = selectedCategory,
+                selectedTodoItem = updatedTodo
             )
         )
     }

@@ -3,6 +3,7 @@ package com.poptato.ui.common
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -47,6 +48,7 @@ import com.poptato.design_system.R
 import com.poptato.design_system.REPEAT_TASK_OPTION
 import com.poptato.design_system.DELETE_ACTION
 import com.poptato.design_system.Gray95
+import com.poptato.design_system.Primary40
 import com.poptato.design_system.Settings
 import com.poptato.design_system.modify
 import com.poptato.domain.model.response.category.CategoryItemModel
@@ -104,12 +106,12 @@ fun TodoBottomSheetContent(
         modifier = Modifier
             .fillMaxWidth()
             .height(324.dp)
-            .background(Gray95)
+            .background(Gray100)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Gray95)
+                .background(Gray100)
                 .padding(top = 24.dp)
                 .padding(horizontal = 24.dp)
         ) {
@@ -130,7 +132,7 @@ fun TodoBottomSheetContent(
                 Icon(
                     painter = painterResource(id = R.drawable.ic_star_filled),
                     contentDescription = "",
-                    tint = Color.Unspecified,
+                    tint = Primary40,
                     modifier = Modifier.clickable { onClickBtnBookmark(item.todoId) }
                 )
             } else {
@@ -143,20 +145,64 @@ fun TodoBottomSheetContent(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-        BottomSheetBtn(resourceId = R.drawable.ic_pen, buttonText = modify, textColor = Gray30, modifier = Modifier.clickable {
-            onClickBtnModify(item.todoId)
-            AnalyticsManager.logEvent(
-                eventName = "edit_task"
-            )
-        })
-        BottomSheetBtn(resourceId = R.drawable.ic_trash, buttonText = DELETE_ACTION, textColor = Danger50, modifier = Modifier.clickable {
-            onClickBtnDelete(item.todoId)
-            AnalyticsManager.logEvent(
-                eventName = "delete_task"
-            )
-        })
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+                .fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .background(Gray95, shape = RoundedCornerShape(12.dp))
+                    .padding(vertical = 12.dp)
+                    .clickable { onClickBtnDelete(item.todoId) },
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_trash),
+                    contentDescription = null,
+                    tint = Color.Unspecified
+                )
+
+                Spacer(modifier = Modifier.width(2.dp))
+
+                Text(
+                    text = DELETE_ACTION,
+                    style = PoptatoTypo.mdRegular,
+                    color = Danger50
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .background(Gray95, shape = RoundedCornerShape(12.dp))
+                    .padding(vertical = 12.dp)
+                    .clickable { onClickBtnModify(item.todoId) },
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_pen),
+                    contentDescription = null,
+                    tint = Color.Unspecified
+                )
+                
+                Spacer(modifier = Modifier.width(2.dp))
+
+                Text(
+                    text = modify,
+                    style = PoptatoTypo.mdRegular,
+                    color = Gray30
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
         BottomSheetBtn(
             resourceId = R.drawable.ic_refresh,
             buttonText = REPEAT_TASK_OPTION,
@@ -182,7 +228,7 @@ fun TodoBottomSheetContent(
             deadline = item.deadline
         )
         BottomSheetBtn(
-            resourceId = R.drawable.ic_add_category_icon,
+            resourceId = R.drawable.ic_add_category,
             buttonText = Category,
             textColor = Gray30,
             category = categoryItem,
@@ -215,7 +261,7 @@ fun BottomSheetBtn(
     ) {
         Icon(painter = painterResource(id = resourceId), contentDescription = null, tint = resourceColor, modifier = Modifier.size(20.dp))
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text = buttonText, style = PoptatoTypo.mdRegular, color = textColor)
+        Text(text = buttonText, style = PoptatoTypo.mdMedium, color = textColor)
         Spacer(modifier = Modifier.weight(1f))
         if (isRepeatBtn) PoptatoSwitchButton(
             check = isRepeat,

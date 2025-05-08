@@ -51,7 +51,10 @@ fun YesterdayListScreen(
 
     YesterdayContent(
         uiState = uiState,
-        onClickCloseBtn = { goBackToBacklog() },
+        onClickCloseBtn = {
+            viewModel.updateYesterdayTodoCompletion()
+            goBackToBacklog()
+        },
         onCheckedChange = { id, status ->
             viewModel.onCheckedTodo(id, status)
         },

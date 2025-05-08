@@ -291,6 +291,7 @@ fun MainScreen() {
                             )
                         }
 
+                        // 카테고리 생성 화면 카테고리 리스트 바텀시트
                         BottomSheetType.CategoryIcon -> {
                             CategoryIconBottomSheet(
                                 categoryIconList = uiState.categoryIconList,
@@ -299,7 +300,8 @@ fun MainScreen() {
                                         viewModel.selectedIconInBottomSheet.emit(it)
                                         sheetState.hide()
                                     }
-                                }
+                                },
+                                onClickBackButton = backPressHandler
                             )
                         }
 

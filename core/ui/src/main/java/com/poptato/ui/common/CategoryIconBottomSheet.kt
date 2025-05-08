@@ -1,5 +1,6 @@
 package com.poptato.ui.common
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -43,8 +44,12 @@ import com.poptato.domain.model.response.category.CategoryIconTypeListModel
 @Composable
 fun CategoryIconBottomSheet(
     categoryIconList: CategoryIconTotalListModel = CategoryIconTotalListModel(),
-    onSelectCategoryIcon: (CategoryIconItemModel) -> Unit = {}
+    onSelectCategoryIcon: (CategoryIconItemModel) -> Unit = {},
+    onClickBackButton: () -> Unit,
 ) {
+    BackHandler {
+        onClickBackButton()
+    }
 
     CategoryBottomSheetContent(
         categoryIconList = categoryIconList,

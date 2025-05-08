@@ -189,24 +189,17 @@ class TodayViewModel @Inject constructor(
 
     fun moveItem(fromIndex: Int, toIndex: Int) {
         val currentList = uiState.value.todayList.toMutableList()
-        val lastIncompleteIndex = currentList.indexOfLast { it.todoStatus == TodoStatus.INCOMPLETE }
-        var safeToIndex = toIndex
+        val firstCompletedIndex = currentList.indexOfFirst { it.todoStatus == TodoStatus.COMPLETED }
 
-        if (lastIncompleteIndex in fromIndex..<toIndex) {
-            safeToIndex = lastIncompleteIndex
-        } else if (lastIncompleteIndex in toIndex..<fromIndex) {
-            safeToIndex = lastIncompleteIndex + 1
-        }
+        if (fromIndex >= firstCompletedIndex || toIndex >= firstCompletedIndex) return
 
-        if (fromIndex != safeToIndex) {
-            AnalyticsManager.logEvent(
-                eventName = "drag_today",
-                params = mapOf("task_ID" to "${uiState.value.todayList[fromIndex].todoId}")
-            )
+        AnalyticsManager.logEvent(
+            eventName = "drag_today",
+            params = mapOf("task_ID" to "${uiState.value.todayList[fromIndex].todoId}")
+        )
 
-            currentList.move(fromIndex, safeToIndex)
-            updateList(currentList)
-        }
+        currentList.move(fromIndex, toIndex)
+        updateList(currentList)
     }
 
     fun onDragEnd() {

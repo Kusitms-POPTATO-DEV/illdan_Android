@@ -82,6 +82,7 @@ import com.poptato.design_system.Gray90
 import com.poptato.design_system.Gray95
 import com.poptato.design_system.PoptatoTypo
 import com.poptato.design_system.Primary100
+import com.poptato.design_system.Primary40
 import com.poptato.design_system.Primary60
 import com.poptato.design_system.R
 import com.poptato.design_system.SNACK_BAR_TODAY_ALL_CHECKED
@@ -613,7 +614,7 @@ fun EmptyTodoView(
             modifier = Modifier
                 .size(width = 132.dp, height = 37.dp)
                 .clip(RoundedCornerShape(32.dp))
-                .background(Primary60)
+                .background(Primary40)
                 .clickable { onClickBtnGetTodo() },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center

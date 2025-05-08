@@ -198,8 +198,7 @@ fun CalendarContent(
         CalendarHeader(
             currentMonth = currentMonthStartDate,
             onPreviousMonthClick = { onPreviousMonthClick() },
-            onNextMonthClick = { onNextMonthClick() },
-            onHeaderClick = { onClickCalendarHeader() }
+            onNextMonthClick = { onNextMonthClick() }
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -249,8 +248,7 @@ fun CalendarContent(
 fun CalendarHeader(
     currentMonth: LocalDate,
     onPreviousMonthClick: () -> Unit,
-    onNextMonthClick: () -> Unit,
-    onHeaderClick: () -> Unit
+    onNextMonthClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -276,7 +274,7 @@ fun CalendarHeader(
         
         Spacer(modifier = Modifier.width(12.dp))
 
-        IconButton(onClick = onNextMonthClick, modifier = Modifier.size(24.dp), enabled = currentMonth < LocalDate.now().withDayOfMonth(1)) {
+        IconButton(onClick = onNextMonthClick, modifier = Modifier.size(24.dp)) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_arrow_right_20),
                 contentDescription = "Next Month",

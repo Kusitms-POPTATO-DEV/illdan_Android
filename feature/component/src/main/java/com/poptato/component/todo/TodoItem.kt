@@ -233,15 +233,17 @@ private fun RepeatDeadlineRow(
                 style = PoptatoTypo.xsRegular
             )
 
-            Spacer(modifier = Modifier.width(4.dp))
+            if (item.dDay != null) {
+                Spacer(modifier = Modifier.width(4.dp))
 
-            Text(
-                text = DOT,
-                color = Gray50,
-                style = PoptatoTypo.xsRegular
-            )
+                Text(
+                    text = DOT,
+                    color = Gray50,
+                    style = PoptatoTypo.xsRegular
+                )
 
-            Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+            }
         }
 
         if (item.dDay != null) {

@@ -1,6 +1,7 @@
 package com.poptato.today
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.spring
@@ -54,6 +55,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -82,6 +84,7 @@ import com.poptato.design_system.Gray90
 import com.poptato.design_system.Gray95
 import com.poptato.design_system.PoptatoTypo
 import com.poptato.design_system.Primary100
+import com.poptato.design_system.Primary40
 import com.poptato.design_system.Primary60
 import com.poptato.design_system.R
 import com.poptato.design_system.SNACK_BAR_TODAY_ALL_CHECKED
@@ -108,6 +111,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun TodayScreen(
     goToBacklog: () -> Unit = {},
+    goToYesterdayList: () -> Unit = {},
     showSnackBar: (String) -> Unit,
     showBottomSheet: (TodoItemModel, List<CategoryItemModel>) -> Unit = { _, _ -> },
     updateDeadlineFlow: SharedFlow<String?>,
@@ -123,6 +127,13 @@ fun TodayScreen(
     val date = TimeFormatter.getTodayMonthDay()
     var activeItemId by remember { mutableStateOf<Long?>(null) }
     val haptic = LocalHapticFeedback.current
+
+    LaunchedEffect(uiState.isExistYesterdayTodo) {
+        if (uiState.isExistYesterdayTodo) {
+            goToYesterdayList()
+            viewModel.completeYesterdayTodoDisplay()
+        }
+    }
 
     LaunchedEffect(activateItemFlow) {
         activateItemFlow.collect { id ->
@@ -302,6 +313,7 @@ fun TodayTodoList(
     haptic: HapticFeedback = LocalHapticFeedback.current,
     isDeadlineDateMode: Boolean = false
 ) {
+    val focusManager = LocalFocusManager.current
     var draggedItem by remember { mutableStateOf<TodoItemModel?>(null) }
     var isDragging by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -309,6 +321,10 @@ fun TodayTodoList(
         lazyListState = rememberLazyListState(),
         onMove = onMove
     )
+
+    BackHandler {
+        focusManager.clearFocus()
+    }
 
     LazyColumn(
         state = dragDropState.lazyListState,
@@ -613,7 +629,7 @@ fun EmptyTodoView(
             modifier = Modifier
                 .size(width = 132.dp, height = 37.dp)
                 .clip(RoundedCornerShape(32.dp))
-                .background(Primary60)
+                .background(Primary40)
                 .clickable { onClickBtnGetTodo() },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center

@@ -5,6 +5,7 @@ import com.poptato.core.enums.TodoType
 import com.poptato.core.util.TimeFormatter
 import com.poptato.core.util.move
 import com.poptato.domain.model.enums.TodoStatus
+import com.poptato.domain.model.request.ListRequestModel
 import com.poptato.domain.model.request.category.GetCategoryListRequestModel
 import com.poptato.domain.model.request.today.GetTodayListRequestModel
 import com.poptato.domain.model.request.todo.DeadlineContentModel
@@ -31,6 +32,7 @@ import com.poptato.domain.usecase.todo.UpdateDeadlineUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoCategoryUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoCompletionUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoRepeatUseCase
+import com.poptato.domain.usecase.yesterday.GetYesterdayListUseCase
 import com.poptato.ui.base.BaseViewModel
 import com.poptato.ui.util.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -55,11 +57,13 @@ class TodayViewModel @Inject constructor(
     private val updateTodoCategoryUseCase: UpdateTodoCategoryUseCase,
     private val deleteTodoUseCase: DeleteTodoUseCase,
     private val updateTodoRepeatUseCase: UpdateTodoRepeatUseCase,
-    private val getDeadlineDateModeUseCase: GetDeadlineDateModeUseCase
+    private val getDeadlineDateModeUseCase: GetDeadlineDateModeUseCase,
+    private var getYesterdayListUseCase: GetYesterdayListUseCase
 ) : BaseViewModel<TodayPageState>(TodayPageState()) {
     private var snapshotList: List<TodoItemModel> = emptyList()
 
     init {
+        getYesterdayList(0, 1)
         getDeadlineDateMode()
         getTodayList(0, 50)
         getCategoryList()
@@ -189,24 +193,17 @@ class TodayViewModel @Inject constructor(
 
     fun moveItem(fromIndex: Int, toIndex: Int) {
         val currentList = uiState.value.todayList.toMutableList()
-        val lastIncompleteIndex = currentList.indexOfLast { it.todoStatus == TodoStatus.INCOMPLETE }
-        var safeToIndex = toIndex
+        val firstCompletedIndex = currentList.indexOfFirst { it.todoStatus == TodoStatus.COMPLETED }
 
-        if (lastIncompleteIndex in fromIndex..<toIndex) {
-            safeToIndex = lastIncompleteIndex
-        } else if (lastIncompleteIndex in toIndex..<fromIndex) {
-            safeToIndex = lastIncompleteIndex + 1
-        }
+        if (fromIndex >= firstCompletedIndex || toIndex >= firstCompletedIndex) return
 
-        if (fromIndex != safeToIndex) {
-            AnalyticsManager.logEvent(
-                eventName = "drag_today",
-                params = mapOf("task_ID" to "${uiState.value.todayList[fromIndex].todoId}")
-            )
+        AnalyticsManager.logEvent(
+            eventName = "drag_today",
+            params = mapOf("task_ID" to "${uiState.value.todayList[fromIndex].todoId}")
+        )
 
-            currentList.move(fromIndex, safeToIndex)
-            updateList(currentList)
-        }
+        currentList.move(fromIndex, toIndex)
+        updateList(currentList)
     }
 
     fun onDragEnd() {
@@ -411,5 +408,23 @@ class TodayViewModel @Inject constructor(
                 updateState(uiState.value.copy(isDeadlineDateMode = it))
             }
         }
+    }
+
+    // YesterdayTodo
+    private fun getYesterdayList(page: Int, size: Int) {
+        viewModelScope.launch {
+            getYesterdayListUseCase(request = ListRequestModel(page = page, size = size)).collect {
+                resultResponse(it, { data ->
+                    updateState(uiState.value.copy(isExistYesterdayTodo = data.yesterdays.isNotEmpty()))
+                    Timber.d("[어제 한 일] 서버통신 성공(Backlog) -> $data")
+                }, { error ->
+                    Timber.d("[어제 한 일] 서버통신 실패(Backlog) -> $error")
+                })
+            }
+        }
+    }
+
+    fun completeYesterdayTodoDisplay() {
+        updateState(uiState.value.copy(isExistYesterdayTodo = false))
     }
 }

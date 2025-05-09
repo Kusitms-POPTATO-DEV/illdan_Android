@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 
 @Composable
 fun DismissKeyboardOnClick(
+    callback: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
@@ -33,6 +34,7 @@ fun DismissKeyboardOnClick(
                             inputMethodManager.hideSoftInputFromWindow(it.windowToken, 0)
                         }
                         keyboardController?.hide()
+                        callback()
                     }
                 })
             }

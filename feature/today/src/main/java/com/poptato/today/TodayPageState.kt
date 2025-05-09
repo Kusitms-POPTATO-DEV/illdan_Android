@@ -10,5 +10,6 @@ data class TodayPageState(
     val selectedItem: TodoItemModel = TodoItemModel(),
     val isFinishedInitialization: Boolean = false,
     val categoryList: List<CategoryItemModel> = emptyList(),
-    val isDeadlineDateMode: Boolean = false
+    val isDeadlineDateMode: Boolean = false,
+    val isExistYesterdayTodo: Boolean = false
 ) : PageState

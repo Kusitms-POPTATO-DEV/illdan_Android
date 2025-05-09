@@ -111,6 +111,7 @@ fun MainScreen() {
         scope.launch { sheetState.show() }
     }
     val backPressHandler: () -> Unit = {
+        scope.launch { viewModel.activateItemFlow.emit(-1L) }
         if (sheetState.isVisible) {
             scope.launch { sheetState.hide() }
         } else if (uiState.backPressedOnce) {
@@ -182,7 +183,11 @@ fun MainScreen() {
         }
     }
 
-    DismissKeyboardOnClick {
+    DismissKeyboardOnClick(
+        callback = {
+            scope.launch { viewModel.activateItemFlow.emit(-1L)  }
+        }
+    ) {
         if (isShowDialog.value) {
             when (uiState.dialogContent.dialogType) {
                 DialogType.OneBtn -> {
@@ -291,6 +296,7 @@ fun MainScreen() {
                             )
                         }
 
+                        // 카테고리 생성 화면 카테고리 리스트 바텀시트
                         BottomSheetType.CategoryIcon -> {
                             CategoryIconBottomSheet(
                                 categoryIconList = uiState.categoryIconList,
@@ -299,7 +305,8 @@ fun MainScreen() {
                                         viewModel.selectedIconInBottomSheet.emit(it)
                                         sheetState.hide()
                                     }
-                                }
+                                },
+                                onClickBackButton = backPressHandler
                             )
                         }
 

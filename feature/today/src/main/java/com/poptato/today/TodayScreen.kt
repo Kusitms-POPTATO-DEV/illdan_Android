@@ -261,15 +261,7 @@ fun TodayContent(
             .fillMaxSize()
             .background(Gray100)
     ) {
-        TopBar(
-            titleText = date,
-            titleTextStyle = PoptatoTypo.xxxLSemiBold,
-            titleTextColor = Gray00,
-            subText = TodayTopBarSub,
-            subTextStyle = PoptatoTypo.mdMedium,
-            subTextColor = Gray40,
-            isTodayTopBar = true
-        )
+        TodayTopBar(date = date)
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -645,6 +637,48 @@ fun EmptyTodoView(
                 text = BtnGetTodoText,
                 style = PoptatoTypo.smSemiBold,
                 color = Primary100
+            )
+        }
+    }
+}
+
+@Composable
+private fun TodayTopBar(
+    date: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Primary40)
+            .height(76.dp)
+            .padding(start = 20.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+        ) {
+            Text(
+                text = date,
+                style = PoptatoTypo.xxxLBold,
+                color = Gray100
+            )
+
+            Text(
+                text = TodayTopBarSub,
+                style = PoptatoTypo.mdMedium,
+                color = Gray100
+            )
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Column {
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(
+                painter = painterResource(id = R.drawable.ic_today_top_bar),
+                contentDescription = null,
+                tint = Color.Unspecified
             )
         }
     }

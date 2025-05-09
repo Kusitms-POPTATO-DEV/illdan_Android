@@ -108,7 +108,7 @@ const val UserDataEmail = "카카오 로그인"
 const val DEADLINE_MODE_TEXT = "마감기한 날짜로 보기"
 
 // Today
-const val TodayTopBarSub = "오늘도 하나씩 해보는 거야!"
+const val TodayTopBarSub = "오늘도 일단 해보는 거야!"
 const val EmptyTodoTitle = "오늘 할 일은 무엇인가요?"
 const val BtnGetTodoText = "할 일 가져오기"
 

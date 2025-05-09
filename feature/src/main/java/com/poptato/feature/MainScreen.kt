@@ -111,6 +111,7 @@ fun MainScreen() {
         scope.launch { sheetState.show() }
     }
     val backPressHandler: () -> Unit = {
+        scope.launch { viewModel.activateItemFlow.emit(-1L) }
         if (sheetState.isVisible) {
             scope.launch { sheetState.hide() }
         } else if (uiState.backPressedOnce) {
@@ -182,7 +183,11 @@ fun MainScreen() {
         }
     }
 
-    DismissKeyboardOnClick {
+    DismissKeyboardOnClick(
+        callback = {
+            scope.launch { viewModel.activateItemFlow.emit(-1L)  }
+        }
+    ) {
         if (isShowDialog.value) {
             when (uiState.dialogContent.dialogType) {
                 DialogType.OneBtn -> {

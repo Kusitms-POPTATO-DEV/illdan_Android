@@ -1,6 +1,7 @@
 package com.poptato.today
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.spring
@@ -54,6 +55,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -311,6 +313,7 @@ fun TodayTodoList(
     haptic: HapticFeedback = LocalHapticFeedback.current,
     isDeadlineDateMode: Boolean = false
 ) {
+    val focusManager = LocalFocusManager.current
     var draggedItem by remember { mutableStateOf<TodoItemModel?>(null) }
     var isDragging by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -318,6 +321,10 @@ fun TodayTodoList(
         lazyListState = rememberLazyListState(),
         onMove = onMove
     )
+
+    BackHandler {
+        focusManager.clearFocus()
+    }
 
     LazyColumn(
         state = dragDropState.lazyListState,

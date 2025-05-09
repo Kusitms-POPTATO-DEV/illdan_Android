@@ -109,6 +109,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun TodayScreen(
     goToBacklog: () -> Unit = {},
+    goToYesterdayList: () -> Unit = {},
     showSnackBar: (String) -> Unit,
     showBottomSheet: (TodoItemModel, List<CategoryItemModel>) -> Unit = { _, _ -> },
     updateDeadlineFlow: SharedFlow<String?>,
@@ -124,6 +125,13 @@ fun TodayScreen(
     val date = TimeFormatter.getTodayMonthDay()
     var activeItemId by remember { mutableStateOf<Long?>(null) }
     val haptic = LocalHapticFeedback.current
+
+    LaunchedEffect(uiState.isExistYesterdayTodo) {
+        if (uiState.isExistYesterdayTodo) {
+            goToYesterdayList()
+            viewModel.completeYesterdayTodoDisplay()
+        }
+    }
 
     LaunchedEffect(activateItemFlow) {
         activateItemFlow.collect { id ->

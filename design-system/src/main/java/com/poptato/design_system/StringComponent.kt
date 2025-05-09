@@ -50,7 +50,7 @@ const val DOT = "·"
 // Backlog
 const val BacklogTitle = "오늘 할 일은 무엇인가요?\n일단 추가해 보세요!"
 const val BacklogHint = "할 일 추가하기..."
-const val EmptyBacklogTitle = "할 일을 생각나는 대로\n추가해보세요."
+const val EmptyBacklogTitle = "일단, 할 일을\n모두 추가해 보세요."
 const val BACKLOG_YESTERDAY_TASK_GUIDE = "어제 한 일 체크를 깜빡했다면?"
 
 // Category

@@ -179,6 +179,7 @@ fun ServiceDeleteContent(
             textColor = if (isDeleteBtnValid) Gray100 else Gray70,
             backgroundColor = if (isDeleteBtnValid) Warning40 else Gray95,
             modifier = Modifier.padding(horizontal = 20.dp),
+            isEnabled = isDeleteBtnValid,
             onClickButton = onClickDeleteBtn
         )
         

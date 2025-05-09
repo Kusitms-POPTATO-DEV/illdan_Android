@@ -38,15 +38,17 @@ import com.poptato.design_system.R
 import com.poptato.design_system.SUCCESS_LOGIN
 import com.poptato.ui.util.FCMManager
 import com.poptato.ui.util.LoadingManager
+import com.poptato.ui.viewModel.GuideViewModel
 import timber.log.Timber
 
 @Composable
 fun KaKaoLoginScreen(
     goToToday: () -> Unit = {},
     showSnackBar: (String) -> Unit,
-    goToOnboarding: () -> Unit = {}
+    goToBacklog: () -> Unit = {}
 ) {
     val viewModel: KaKaoLoginViewModel = hiltViewModel()
+    val guideViewModel: GuideViewModel = hiltViewModel()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -61,7 +63,9 @@ fun KaKaoLoginScreen(
                     showSnackBar(SUCCESS_LOGIN)
                 }
                 is KaKaoLoginEvent.NewUserLogin -> {
-                    goToOnboarding()
+                    guideViewModel.updateIsNewUser(true)
+                    showSnackBar(SUCCESS_LOGIN)
+                    goToBacklog()
                 }
             }
         }

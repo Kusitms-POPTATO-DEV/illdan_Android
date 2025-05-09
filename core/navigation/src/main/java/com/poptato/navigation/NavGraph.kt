@@ -75,8 +75,8 @@ fun NavGraphBuilder.loginNavGraph(
                     }
                 },
                 showSnackBar = showSnackBar,
-                goToOnboarding = {
-                    navController.navigate(NavRoutes.OnboardingScreen.route) {
+                goToBacklog = {
+                    navController.navigate(NavRoutes.BacklogGraph.route) {
                         popUpTo(NavRoutes.KaKaoLoginScreen.route) {
                             inclusive = true
                         }

@@ -29,6 +29,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,6 +77,7 @@ import com.poptato.ui.common.TwoBtnTypeDialog
 import com.poptato.ui.util.AnalyticsManager
 import com.poptato.ui.util.CommonEventManager
 import com.poptato.ui.util.DismissKeyboardOnClick
+import com.poptato.ui.viewModel.GuideViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -84,6 +86,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainScreen() {
     val viewModel: MainViewModel = hiltViewModel()
+    val guideViewModel: GuideViewModel = hiltViewModel()
+    val showSecondGuide by guideViewModel.showSecondGuide.collectAsState()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val navController = rememberNavController()
     val context = LocalContext.current
@@ -391,6 +395,7 @@ fun MainScreen() {
                                             launchSingleTop = true
                                         }
                                     } else {
+                                        if (route == NavRoutes.TodayScreen.route && showSecondGuide) { guideViewModel.updateSecondGuide(false) }
                                         navController.navigate(route) {
                                             popUpTo(navController.currentDestination?.route!!) {
                                                 inclusive = true

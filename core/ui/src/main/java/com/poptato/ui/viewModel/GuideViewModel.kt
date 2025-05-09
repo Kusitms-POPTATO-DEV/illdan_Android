@@ -11,21 +11,21 @@ class GuideViewModel @Inject constructor(): ViewModel() {
     private val _isNewUser = MutableStateFlow(false)
     val isNewUser: StateFlow<Boolean> = _isNewUser
 
-    private val _showFirstGuide = MutableStateFlow(true)
+    private val _showFirstGuide = MutableStateFlow(false)
     val showFirstGuide: StateFlow<Boolean> = _showFirstGuide
 
-    private val _showSecondGuide = MutableStateFlow(true)
+    private val _showSecondGuide = MutableStateFlow(false)
     val showSecondGuide: StateFlow<Boolean> = _showSecondGuide
 
     fun updateIsNewUser(value: Boolean) {
         _isNewUser.value = value
     }
 
-    fun hideFirstGuide() {
-        _showFirstGuide.value = false
+    fun updateFirstGuide(value: Boolean) {
+        _showFirstGuide.value = value
     }
 
-    fun hideSecondGuide() {
-        _showSecondGuide.value = false
+    fun updateSecondGuide(value: Boolean) {
+        _showSecondGuide.value = value
     }
 }

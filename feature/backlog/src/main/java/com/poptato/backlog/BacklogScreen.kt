@@ -47,6 +47,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -128,6 +129,7 @@ import com.poptato.ui.common.formatDeadline
 import com.poptato.ui.util.AnalyticsManager
 import com.poptato.ui.util.LoadingManager
 import com.poptato.ui.util.rememberDragDropListState
+import com.poptato.ui.viewModel.GuideViewModel
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
@@ -149,6 +151,10 @@ fun BacklogScreen(
     initialCategoryIndex: Int = 0
 ) {
     val viewModel: BacklogViewModel = hiltViewModel()
+    val guideViewModel: GuideViewModel = hiltViewModel()
+    val isNewUser by guideViewModel.isNewUser.collectAsState()
+    val showFirstGuide by guideViewModel.showFirstGuide.collectAsState()
+    val showSecondGuide by guideViewModel.showSecondGuide.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     val uiState: BacklogPageState by viewModel.uiState.collectAsStateWithLifecycle()
     var activeItemId by remember { mutableStateOf<Long?>(null) }
@@ -161,6 +167,12 @@ fun BacklogScreen(
 
         if (!permissionState.status.isGranted) {
             permissionState.launchPermissionRequest()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (isNewUser) {
+            guideViewModel.updateFirstGuide(true)
         }
     }
 
@@ -230,8 +242,17 @@ fun BacklogScreen(
     if (uiState.isFinishedInitialization) {
         BacklogContent(
             uiState = uiState,
+            showFirstGuide = showFirstGuide,
+            showSecondGuide = showSecondGuide,
             createBacklog = { newItem -> viewModel.createBacklog(newItem) },
-            onItemSwiped = { itemToRemove -> viewModel.swipeBacklogItem(itemToRemove) },
+            onItemSwiped = { itemToRemove ->
+                viewModel.swipeBacklogItem(itemToRemove)
+                if (showFirstGuide) {
+                    guideViewModel.updateIsNewUser(false)
+                    guideViewModel.updateFirstGuide(false)
+                    guideViewModel.updateSecondGuide(true)
+                }
+            },
             onSelectCategory = { index ->
                 viewModel.getBacklogListInCategory(index)
             },
@@ -307,6 +328,8 @@ fun BacklogScreen(
 @Composable
 fun BacklogContent(
     uiState: BacklogPageState = BacklogPageState(),
+    showFirstGuide: Boolean = false,
+    showSecondGuide: Boolean = false,
     createBacklog: (String) -> Unit = {},
     onSelectCategory: (Int) -> Unit = {},
     onClickCategoryAdd: () -> Unit = {},
@@ -400,36 +423,85 @@ fun BacklogContent(
                 )
 
                 if (uiState.backlogList.isEmpty()) {
-                    Box(
+                    Column(
                         modifier = Modifier
                             .fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Spacer(modifier = Modifier.width(37.dp))
+
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_empty_backlog_arrow),
+                                contentDescription = null,
+                                tint = Color.Unspecified
+                            )
+
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_empty_backlog_fire),
+                            contentDescription = null,
+                            tint = Color.Unspecified
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
                         Text(
                             text = EmptyBacklogTitle,
-                            style = PoptatoTypo.lgMedium,
+                            style = PoptatoTypo.mdMedium,
                             textAlign = TextAlign.Center,
-                            color = Gray80
+                            color = Gray70
                         )
+
+                        Spacer(modifier = Modifier.height(130.dp))
                     }
                 } else {
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    BacklogTaskList(
-                        backlogList = uiState.backlogList,
-                        onItemSwiped = onItemSwiped,
-                        showBottomSheet = showBottomSheet,
-                        activeItemId = activeItemId,
-                        onClearActiveItem = onClearActiveItem,
-                        onTodoItemModified = onTodoItemModified,
-                        isNewItemCreated = uiState.isNewItemCreated,
-                        resetNewItemFlag = resetNewItemFlag,
-                        onDragEnd = onDragEnd,
-                        onMove = onMove,
-                        haptic = haptic,
-                        isDeadlineDateMode = uiState.isDeadlineDateMode
-                    )
+                    Box(
+                        contentAlignment = Alignment.TopCenter
+                    ) {
+                        BacklogTaskList(
+                            backlogList = uiState.backlogList,
+                            onItemSwiped = onItemSwiped,
+                            showBottomSheet = showBottomSheet,
+                            activeItemId = activeItemId,
+                            onClearActiveItem = onClearActiveItem,
+                            onTodoItemModified = onTodoItemModified,
+                            isNewItemCreated = uiState.isNewItemCreated,
+                            resetNewItemFlag = resetNewItemFlag,
+                            onDragEnd = onDragEnd,
+                            onMove = onMove,
+                            haptic = haptic,
+                            isDeadlineDateMode = uiState.isDeadlineDateMode
+                        )
+
+                        if (showFirstGuide) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_guide_bubble_1),
+                                contentDescription = null,
+                                tint = Color.Unspecified,
+                                modifier = Modifier.offset(x = 60.dp, y = (-20).dp)
+                            )
+                        }
+                    }
                 }
+            }
+
+            if (showSecondGuide) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_guide_bubble_2),
+                    contentDescription = null,
+                    tint = Color.Unspecified,
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .offset(x = 20.dp)
+                )
             }
         }
     }
@@ -611,7 +683,10 @@ fun CategoryListIcon(
             .padding(start = paddingStart.dp)
             .padding(horizontal = paddingHorizontal.dp)
             .size(40.dp)
-            .background(color = if (isSelected) Gray90 else Color.Unspecified, shape = RoundedCornerShape(12.dp))
+            .background(
+                color = if (isSelected) Gray90 else Color.Unspecified,
+                shape = RoundedCornerShape(12.dp)
+            )
             .clickable(
                 indication = null,
                 interactionSource = interactionSource,

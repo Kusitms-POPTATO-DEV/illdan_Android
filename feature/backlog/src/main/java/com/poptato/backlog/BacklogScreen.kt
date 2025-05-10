@@ -492,17 +492,6 @@ fun BacklogContent(
                     }
                 }
             }
-
-            if (showSecondGuide) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_guide_bubble_2),
-                    contentDescription = null,
-                    tint = Color.Unspecified,
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .offset(x = 20.dp)
-                )
-            }
         }
     }
 }

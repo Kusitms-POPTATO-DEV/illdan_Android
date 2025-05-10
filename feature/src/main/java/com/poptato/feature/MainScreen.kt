@@ -20,11 +20,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -35,9 +37,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -47,6 +51,7 @@ import com.poptato.core.enums.BottomNavType
 import com.poptato.core.util.TimeFormatter
 import com.poptato.design_system.SNACK_BAR_FINISH_APP_GUIDE
 import com.poptato.design_system.Gray100
+import com.poptato.design_system.R
 import com.poptato.domain.model.enums.BottomSheetType
 import com.poptato.domain.model.enums.DialogType
 import com.poptato.domain.model.response.category.CategoryIconTotalListModel
@@ -497,6 +502,17 @@ fun MainScreen() {
                             navController = navController,
                             showBottomSheet = showMonthPickerBottomSheet,
                             updateMonthFlow = viewModel.updateMonthFlow)
+                    }
+
+                    if (showSecondGuide) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_guide_bubble_2),
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .offset(x = 20.dp)
+                        )
                     }
                 }
             }

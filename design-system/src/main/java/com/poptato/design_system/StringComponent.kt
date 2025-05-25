@@ -30,6 +30,7 @@ const val THU = "목"
 const val FRI = "금"
 const val SAT = "토"
 const val SUN = "일"
+const val TIME = "시간"
 
 // KaKaoLogin
 const val BtnKaKaoLoginText = "카카오 로그인"
@@ -46,6 +47,7 @@ const val ONBOARDING4 = "오늘 할 일을 해낸 당신!\n어제보다 한 걸�
 // Todo
 const val REPEAT_TODO = "반복 할 일"
 const val DOT = "·"
+const val TODO_TIME = "%s %2d:%2d"
 
 // Backlog
 const val BacklogTitle = "오늘 할 일은 무엇인가요?\n일단 추가해 보세요!"

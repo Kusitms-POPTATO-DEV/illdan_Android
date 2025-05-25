@@ -7,6 +7,7 @@ import com.poptato.data.service.TodoService
 import com.poptato.domain.model.request.todo.DragDropRequestModel
 import com.poptato.domain.model.request.todo.ModifyTodoRequestModel
 import com.poptato.domain.model.request.todo.TodoIdModel
+import com.poptato.domain.model.request.todo.TodoTimeModel
 import com.poptato.domain.model.request.todo.UpdateDeadlineRequestModel
 import com.poptato.domain.model.request.todo.UpdateTodoCategoryModel
 import com.poptato.domain.model.response.todo.TodoDetailItemModel
@@ -72,5 +73,9 @@ class TodoRepositoryImpl @Inject constructor(
 
     override suspend fun updateTodoRepeat(todoId: Long): Flow<Result<Unit>> {
         return apiLaunch(apiCall = { todoService.updateTodoRepeat(todoId) }, UnitResponseMapper)
+    }
+
+    override suspend fun updateTodoTime(todoId: Long, request: TodoTimeModel): Flow<Result<Unit>> {
+        return apiLaunch(apiCall = { todoService.updateTodoTime(todoId, request) }, UnitResponseMapper)
     }
 }

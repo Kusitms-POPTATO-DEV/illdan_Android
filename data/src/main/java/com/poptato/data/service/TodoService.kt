@@ -8,6 +8,7 @@ import com.poptato.domain.model.request.todo.DragDropRequestModel
 import com.poptato.domain.model.request.todo.TodoCategoryIdModel
 import com.poptato.domain.model.request.todo.TodoContentModel
 import com.poptato.domain.model.request.todo.TodoIdModel
+import com.poptato.domain.model.request.todo.TodoTimeModel
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -67,5 +68,11 @@ interface TodoService {
     @PATCH(Endpoints.Todo.REPEAT)
     suspend fun updateTodoRepeat(
         @Path("todoId") todoId: Long
+    ): Response<ApiResponse<Unit>>
+
+    @PATCH(Endpoints.Todo.TIME)
+    suspend fun updateTodoTime(
+        @Path("todoId") todoId: Long,
+        @Body request: TodoTimeModel
     ): Response<ApiResponse<Unit>>
 }

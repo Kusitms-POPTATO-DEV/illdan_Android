@@ -35,6 +35,7 @@ object Endpoints {
         const val COMPLETION = "$DELETE/achieve"
         const val REPEAT = "$TODO/{todoId}/repeat"
         const val UPDATECATEGIRY = "$DELETE/category"
+        const val TIME = "$TODO/{todoId}/time"
     }
 
     object MyPage {

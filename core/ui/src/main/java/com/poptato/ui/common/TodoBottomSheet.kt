@@ -50,6 +50,8 @@ import com.poptato.design_system.DELETE_ACTION
 import com.poptato.design_system.Gray95
 import com.poptato.design_system.Primary40
 import com.poptato.design_system.Settings
+import com.poptato.design_system.TIME
+import com.poptato.design_system.TODO_TIME
 import com.poptato.design_system.modify
 import com.poptato.domain.model.response.category.CategoryItemModel
 import com.poptato.domain.model.response.today.TodoItemModel
@@ -64,7 +66,8 @@ fun TodoBottomSheet(
     onClickBtnModify: (Long) -> Unit = {},
     onClickBtnBookmark: (Long) -> Unit = {},
     onClickCategoryBottomSheet: () -> Unit = {},
-    onClickBtnRepeat: (Long) -> Unit = {}
+    onClickBtnRepeat: (Long) -> Unit = {},
+    onClickBtnTime: (Long) -> Unit = {}
 ) {
     var deadline by remember { mutableStateOf(item.deadline) }
     var isBookmark by remember { mutableStateOf(item.isBookmark) }
@@ -87,10 +90,12 @@ fun TodoBottomSheet(
             isBookmark = !isBookmark
         },
         onClickCategoryBottomSheet = onClickCategoryBottomSheet,
-        onClickBtnRepeat = onClickBtnRepeat
+        onClickBtnRepeat = onClickBtnRepeat,
+        onClickBtnTime = onClickBtnTime
     )
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun TodoBottomSheetContent(
     item: TodoItemModel = TodoItemModel(),
@@ -100,7 +105,8 @@ fun TodoBottomSheetContent(
     onClickBtnModify: (Long) -> Unit = {},
     onClickBtnBookmark: (Long) -> Unit = {},
     onClickCategoryBottomSheet: () -> Unit = {},
-    onClickBtnRepeat: (Long) -> Unit = {}
+    onClickBtnRepeat: (Long) -> Unit = {},
+    onClickBtnTime: (Long) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -204,6 +210,15 @@ fun TodoBottomSheetContent(
         Spacer(modifier = Modifier.height(20.dp))
 
         BottomSheetBtn(
+            resourceId = R.drawable.ic_clock,
+            buttonText = TIME,
+            textColor = Gray30,
+            time = if (item.time.isNotEmpty()) String.format(TODO_TIME, item.meridiem, item.hour, item.minute) else "",
+            modifier = Modifier.clickable {
+                onClickBtnTime(item.todoId)
+            }
+        )
+        BottomSheetBtn(
             resourceId = R.drawable.ic_refresh,
             buttonText = REPEAT_TASK_OPTION,
             textColor = Gray30,
@@ -239,7 +254,7 @@ fun TodoBottomSheetContent(
     }
 }
 
-@SuppressLint("ModifierParameter")
+@SuppressLint("ModifierParameter", "DefaultLocale")
 @Composable
 fun BottomSheetBtn(
     resourceId: Int,
@@ -247,6 +262,7 @@ fun BottomSheetBtn(
     buttonText: String,
     textColor: Color,
     deadline: String = "",
+    time: String = "",
     category: CategoryItemModel? = CategoryItemModel(),
     modifier: Modifier = Modifier,
     isRepeatBtn: Boolean = false,
@@ -271,7 +287,9 @@ fun BottomSheetBtn(
         )
         if (buttonText == DEADLINE_OPTION && deadline.isNotEmpty()) {
             Text(text = deadline, style = PoptatoTypo.mdMedium, color = Gray00)
-        } else if (buttonText == DEADLINE_OPTION) {
+        } else if (buttonText == TIME && time.isNotEmpty()) {
+            Text(text = time, style = PoptatoTypo.mdMedium, color = Gray00)
+        } else if (buttonText == DEADLINE_OPTION || buttonText == TIME) {
             Text(text = Settings, style = PoptatoTypo.mdRegular, color = Gray60)
         }
 

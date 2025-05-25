@@ -48,7 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.poptato.core.enums.BottomNavType
-import com.poptato.core.util.TimeFormatter
+import com.poptato.core.util.DateTimeFormatter
 import com.poptato.design_system.SNACK_BAR_FINISH_APP_GUIDE
 import com.poptato.design_system.Gray100
 import com.poptato.design_system.R
@@ -289,7 +289,7 @@ fun MainScreen() {
                                     viewModel.onUpdatedDeadline(date)
                                     AnalyticsManager.logEvent(
                                         eventName = "set_dday",
-                                        params = mapOf("set_date" to TimeFormatter.getTodayFullDate(), "dday" to "$date", "task_ID" to "${uiState.selectedTodoItem.todoId}")
+                                        params = mapOf("set_date" to DateTimeFormatter.getTodayFullDate(), "dday" to "$date", "task_ID" to "${uiState.selectedTodoItem.todoId}")
                                     )
                                     scope.launch { viewModel.updateDeadlineFlow.emit(date) }
                                 },

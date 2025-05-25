@@ -31,19 +31,15 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.poptato.core.enums.DateType
-import com.poptato.core.util.TimeFormatter
+import com.poptato.core.util.DateTimeFormatter
 import com.poptato.design_system.Cancel
-import com.poptato.design_system.Complete
 import com.poptato.design_system.Confirm
-import com.poptato.design_system.Day
 import com.poptato.design_system.Gray00
 import com.poptato.design_system.Gray100
 import com.poptato.design_system.Gray40
 import com.poptato.design_system.Gray95
-import com.poptato.design_system.Month
 import com.poptato.design_system.PoptatoTypo
 import com.poptato.design_system.Primary60
-import com.poptato.design_system.Year
 import com.poptato.domain.model.enums.BottomSheetType
 import com.poptato.ui.util.fadingEdge
 
@@ -54,11 +50,11 @@ fun DatePickerBottomSheet(
     onDismissRequest: () -> Unit = {},
     bottomSheetType: BottomSheetType = BottomSheetType.FullDate
 ) {
-    val todayDate = TimeFormatter.getTodayYearMonthDay()
+    val todayDate = DateTimeFormatter.getTodayYearMonthDay()
     val initialYear = todayDate[0].toInt()
     val initialMonth = todayDate[1].toInt()
     val initialDay = todayDate[2].toInt()
-    val items = TimeFormatter.getDaysInMonth(initialYear, initialMonth)
+    val items = DateTimeFormatter.getDaysInMonth(initialYear, initialMonth)
 
     DatePickerBottomSheetContent(
         initialYear = initialYear,

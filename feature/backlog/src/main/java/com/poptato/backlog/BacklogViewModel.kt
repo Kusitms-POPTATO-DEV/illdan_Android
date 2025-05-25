@@ -2,7 +2,7 @@ package com.poptato.backlog
 
 import androidx.lifecycle.viewModelScope
 import com.poptato.domain.model.enums.TodoType
-import com.poptato.core.util.TimeFormatter
+import com.poptato.core.util.DateTimeFormatter
 import com.poptato.core.util.move
 import com.poptato.domain.model.request.ListRequestModel
 import com.poptato.domain.model.request.backlog.CreateBacklogRequestModel
@@ -103,7 +103,7 @@ class BacklogViewModel @Inject constructor(
             eventName = "delete_category",
             params = mapOf(
                 "category_name" to uiState.value.categoryList[uiState.value.selectedCategoryIndex].categoryName,
-                "delete_date" to TimeFormatter.getTodayFullDate()
+                "delete_date" to DateTimeFormatter.getTodayFullDate()
             )
         )
 
@@ -203,7 +203,7 @@ class BacklogViewModel @Inject constructor(
     private fun onSuccessCreateBacklog(response: TodoIdModel) {
         AnalyticsManager.logEvent(
             eventName = "make_task",
-            params = mapOf("make_date" to TimeFormatter.getToday(), "task_ID" to response.todoId)
+            params = mapOf("make_date" to DateTimeFormatter.getToday(), "task_ID" to response.todoId)
         )
         val updatedList = uiState.value.backlogList.map { item ->
             if (item.todoId == tempTodoId) {
@@ -226,7 +226,7 @@ class BacklogViewModel @Inject constructor(
     fun swipeBacklogItem(item: TodoItemModel) {
         AnalyticsManager.logEvent(
             eventName = "add_today",
-            params = mapOf("add_date" to TimeFormatter.getTodayFullDate(), "task_ID" to "${item.todoId}")
+            params = mapOf("add_date" to DateTimeFormatter.getTodayFullDate(), "task_ID" to "${item.todoId}")
         )
 
         val newList = uiState.value.backlogList.filter { it.todoId != item.todoId }
@@ -338,7 +338,7 @@ class BacklogViewModel @Inject constructor(
     }
 
     private fun updateDeadlineInUI(deadline: String?, id: Long) {
-        val dDay = TimeFormatter.calculateDDay(deadline)
+        val dDay = DateTimeFormatter.calculateDDay(deadline)
         val newList = uiState.value.backlogList.map {
             if (it.todoId == id) {
                 it.copy(deadline = deadline ?: "", dDay = dDay)

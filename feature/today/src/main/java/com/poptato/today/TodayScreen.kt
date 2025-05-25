@@ -70,7 +70,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.poptato.component.todo.TodoItem
 import com.poptato.domain.model.enums.TodoType
-import com.poptato.core.util.TimeFormatter
+import com.poptato.core.util.DateTimeFormatter
 import com.poptato.design_system.BtnGetTodoText
 import com.poptato.design_system.SNACK_BAR_COMPLETE_DELETE_TODO
 import com.poptato.design_system.ERROR_GENERIC_MESSAGE
@@ -121,7 +121,7 @@ fun TodayScreen(
     val viewModel: TodayViewModel = hiltViewModel()
     val scope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val date = TimeFormatter.getTodayMonthDay()
+    val date = DateTimeFormatter.getTodayMonthDay()
     var activeItemId by remember { mutableStateOf<Long?>(null) }
     val haptic = LocalHapticFeedback.current
 

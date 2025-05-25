@@ -2,7 +2,7 @@ package com.poptato.today
 
 import androidx.lifecycle.viewModelScope
 import com.poptato.domain.model.enums.TodoType
-import com.poptato.core.util.TimeFormatter
+import com.poptato.core.util.DateTimeFormatter
 import com.poptato.core.util.move
 import com.poptato.domain.model.enums.TodoStatus
 import com.poptato.domain.model.request.ListRequestModel
@@ -265,7 +265,7 @@ class TodayViewModel @Inject constructor(
     }
 
     private fun updateDeadlineInUI(deadline: String?, id: Long) {
-        val dDay = TimeFormatter.calculateDDay(deadline)
+        val dDay = DateTimeFormatter.calculateDDay(deadline)
         val newList = uiState.value.todayList.map {
             if (it.todoId == id) {
                 it.copy(deadline = deadline ?: "", dDay = dDay)

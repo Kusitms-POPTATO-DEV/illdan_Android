@@ -40,6 +40,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -77,6 +78,7 @@ import com.poptato.ui.common.CommonSnackBar
 import com.poptato.ui.common.DatePickerBottomSheet
 import com.poptato.ui.common.MonthPickerBottomSheet
 import com.poptato.ui.common.OneBtnTypeDialog
+import com.poptato.ui.common.TimePickerBottomSheet
 import com.poptato.ui.common.TodoBottomSheet
 import com.poptato.ui.common.TwoBtnTypeDialog
 import com.poptato.ui.util.AnalyticsManager
@@ -114,11 +116,6 @@ fun MainScreen() {
             viewModel.onSelectedCategoryIcon(categoryList)
             scope.launch { sheetState.show() }
         }
-    val showMonthPickerBottomSheet: (CalendarMonthModel) -> Unit = {
-            currentMonthModel: CalendarMonthModel ->
-        viewModel.showMonthPicker(currentMonthModel)
-        scope.launch { sheetState.show() }
-    }
     val backPressHandler: () -> Unit = {
         scope.launch { viewModel.activateItemFlow.emit(-1L) }
         if (sheetState.isVisible) {
@@ -278,10 +275,12 @@ fun MainScreen() {
                                 onClickBtnRepeat = {
                                     viewModel.onUpdatedTodoRepeat(!uiState.selectedTodoItem.isRepeat)
                                     scope.launch { viewModel.updateTodoRepeatFlow.emit(it) }
+                                },
+                                onClickBtnTime = {
+                                    viewModel.updateBottomSheetType(BottomSheetType.TimePicker)
                                 }
                             )
                         }
-
                         BottomSheetType.FullDate -> {
                             CalendarBottomSheet(
                                 onDismissRequest = { viewModel.updateBottomSheetType(BottomSheetType.Main) },
@@ -296,15 +295,6 @@ fun MainScreen() {
                                 deadline = uiState.selectedTodoItem.deadline
                             )
                         }
-
-                        BottomSheetType.Calendar -> TODO("캘린더 바텀시트 컴포저블을 여기에 추가")
-                        BottomSheetType.SubDate -> {
-                            DatePickerBottomSheet(
-                                onDismissRequest = { viewModel.updateBottomSheetType(BottomSheetType.Calendar) },
-                                bottomSheetType = BottomSheetType.SubDate
-                            )
-                        }
-
                         // 카테고리 생성 화면 카테고리 리스트 바텀시트
                         BottomSheetType.CategoryIcon -> {
                             CategoryIconBottomSheet(
@@ -318,7 +308,7 @@ fun MainScreen() {
                                 onClickBackButton = backPressHandler
                             )
                         }
-
+                        // 할 일 카테고리 설정 바텀시트
                         BottomSheetType.CategoryList -> {
                             CategoryBottomSheet(
                                 categoryId = uiState.selectedTodoCategoryItem?.categoryId ?: -1,
@@ -335,21 +325,11 @@ fun MainScreen() {
                                 }
                             )
                         }
-                        BottomSheetType.MonthPicker -> {
-                            MonthPickerBottomSheet(
-                                initialMonthModel = uiState.selectedMonth,
-                                onYearMonthSelected = { selectedModel ->
-                                    viewModel.onMonthSelected(selectedModel)
-                                    scope.launch {
-                                        viewModel.updateMonthFlow.emit(selectedModel)
-                                    }
-                                    viewModel.updateBottomSheetType(BottomSheetType.Main)
-                                    scope.launch { sheetState.hide() }
-                                },
-                                onDismissRequest = {
-                                    viewModel.updateBottomSheetType(BottomSheetType.Main)
-                                    scope.launch { sheetState.hide() }
-                                }
+                        // 할 일 시간 설정 바텀시트
+                        BottomSheetType.TimePicker -> {
+                            TimePickerBottomSheet(
+                                item = uiState.selectedTodoItem,
+                                onDismissRequest = { viewModel.updateBottomSheetType(BottomSheetType.Main) }
                             )
                         }
                     }
@@ -500,8 +480,8 @@ fun MainScreen() {
                         )
                         historyNavGraph(
                             navController = navController,
-                            showBottomSheet = showMonthPickerBottomSheet,
-                            updateMonthFlow = viewModel.updateMonthFlow)
+                            updateMonthFlow = viewModel.updateMonthFlow
+                        )
                     }
 
                     if (showSecondGuide) {

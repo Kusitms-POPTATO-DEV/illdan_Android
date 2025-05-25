@@ -21,5 +21,7 @@ data class TodayItemResponse(
     @SerializedName("categoryName")
     val categoryName: String? = null,
     @SerializedName("imageUrl")
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    @SerializedName("time")
+    val time: String? = null
 )

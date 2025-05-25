@@ -294,7 +294,6 @@ fun NavGraphBuilder.todayNavGraph(
 
 fun NavGraphBuilder.historyNavGraph(
     navController: NavHostController,
-    showBottomSheet: (CalendarMonthModel) -> Unit,
     updateMonthFlow: SharedFlow<CalendarMonthModel>
 ) {
     navigation(
@@ -303,7 +302,6 @@ fun NavGraphBuilder.historyNavGraph(
     ) {
         composable(NavRoutes.HistoryScreen.route) {
             HistoryScreen(
-                showBottomSheet = showBottomSheet,
                 updateMonthFlow = updateMonthFlow
             )
         }

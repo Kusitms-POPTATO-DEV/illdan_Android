@@ -137,22 +137,4 @@ class MainViewModel @Inject constructor() : BaseViewModel<MainPageState>(MainPag
             )
         )
     }
-
-    fun showMonthPicker(currentMonthModel: CalendarMonthModel) {
-        updateState(
-            uiState.value.copy(
-                selectedMonth = currentMonthModel, // 초기 Month 설정
-                bottomSheetType = BottomSheetType.MonthPicker
-            )
-        )
-    }
-
-    fun onMonthSelected(selectedMonthModel: CalendarMonthModel) {
-            updateState(
-                uiState.value.copy(
-                    selectedMonth = selectedMonthModel,
-                    bottomSheetType = BottomSheetType.Main
-                )
-            )
-    }
 }

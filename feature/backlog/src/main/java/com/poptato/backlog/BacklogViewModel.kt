@@ -1,7 +1,7 @@
 package com.poptato.backlog
 
 import androidx.lifecycle.viewModelScope
-import com.poptato.core.enums.TodoType
+import com.poptato.domain.model.enums.TodoType
 import com.poptato.core.util.TimeFormatter
 import com.poptato.core.util.move
 import com.poptato.domain.model.request.ListRequestModel
@@ -41,8 +41,6 @@ import com.poptato.ui.base.BaseViewModel
 import com.poptato.ui.util.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

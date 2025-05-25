@@ -1,7 +1,7 @@
 package com.poptato.today
 
 import androidx.lifecycle.viewModelScope
-import com.poptato.core.enums.TodoType
+import com.poptato.domain.model.enums.TodoType
 import com.poptato.core.util.TimeFormatter
 import com.poptato.core.util.move
 import com.poptato.domain.model.enums.TodoStatus
@@ -37,8 +37,6 @@ import com.poptato.ui.base.BaseViewModel
 import com.poptato.ui.util.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject

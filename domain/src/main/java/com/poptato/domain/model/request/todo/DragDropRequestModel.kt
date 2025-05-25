@@ -1,6 +1,6 @@
 package com.poptato.domain.model.request.todo
 
-import com.poptato.core.enums.TodoType
+import com.poptato.domain.model.enums.TodoType
 
 data class DragDropRequestModel(
     val type: TodoType,

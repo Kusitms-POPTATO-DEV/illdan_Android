@@ -69,7 +69,7 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.poptato.component.todo.TodoItem
-import com.poptato.core.enums.TodoType
+import com.poptato.domain.model.enums.TodoType
 import com.poptato.core.util.TimeFormatter
 import com.poptato.design_system.BtnGetTodoText
 import com.poptato.design_system.SNACK_BAR_COMPLETE_DELETE_TODO
@@ -79,13 +79,11 @@ import com.poptato.design_system.Gray00
 import com.poptato.design_system.Gray100
 import com.poptato.design_system.Gray40
 import com.poptato.design_system.Gray50
-import com.poptato.design_system.Gray70
 import com.poptato.design_system.Gray90
 import com.poptato.design_system.Gray95
 import com.poptato.design_system.PoptatoTypo
 import com.poptato.design_system.Primary100
 import com.poptato.design_system.Primary40
-import com.poptato.design_system.Primary60
 import com.poptato.design_system.R
 import com.poptato.design_system.SNACK_BAR_TODAY_ALL_CHECKED
 import com.poptato.design_system.TodayTopBarSub
@@ -97,7 +95,6 @@ import com.poptato.domain.model.response.today.TodoItemModel
 import com.poptato.ui.common.BookmarkItem
 import com.poptato.ui.common.PoptatoCheckBox
 import com.poptato.ui.common.RepeatItem
-import com.poptato.ui.common.TopBar
 import com.poptato.ui.common.formatDeadline
 import com.poptato.ui.util.AnalyticsManager
 import com.poptato.ui.util.LoadingManager

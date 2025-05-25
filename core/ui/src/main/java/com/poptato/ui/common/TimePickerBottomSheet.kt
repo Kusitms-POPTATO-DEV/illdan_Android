@@ -1,5 +1,6 @@
 package com.poptato.ui.common
 
+import android.util.Log
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +25,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.poptato.design_system.CONFIRM_ACTION
+import com.poptato.design_system.Confirm
 import com.poptato.design_system.DELETE
 import com.poptato.design_system.Gray00
 import com.poptato.design_system.Gray50
@@ -34,6 +37,7 @@ import com.poptato.design_system.PoptatoTypo
 import com.poptato.design_system.Primary40
 import com.poptato.domain.model.response.today.TodoItemModel
 import com.poptato.ui.util.fadingEdge
+import timber.log.Timber
 
 @Composable
 fun TimePickerBottomSheet(
@@ -98,16 +102,17 @@ fun TimePickerBottomSheet(
             Spacer(modifier = Modifier.width(12.dp))
 
             PoptatoButton(
-                buttonText = DELETE,
+                buttonText = Confirm,
                 textColor = Gray90,
                 backgroundColor = Primary40,
                 modifier = Modifier.weight(1f),
                 onClickButton = {
-                    val selectedPeriod = period[periodState.firstVisibleItemIndex + 1]
-                    val selectedHour = hour[hourState.firstVisibleItemIndex + 1]
-                    val selectedMinute = minute[minuteState.firstVisibleItemIndex + 1]
+                    val selectedPeriod = period[periodState.firstVisibleItemIndex]
+                    val selectedHour = hour[hourState.firstVisibleItemIndex]
+                    val selectedMinute = minute[minuteState.firstVisibleItemIndex]
 
                     onClickCompletionButton(Triple(selectedPeriod, selectedHour, selectedMinute))
+                    Timber.e(Triple(selectedPeriod, selectedHour, selectedMinute).toString())
                     onDismissRequest()
                 }
             )

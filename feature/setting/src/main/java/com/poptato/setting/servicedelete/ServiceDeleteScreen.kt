@@ -46,7 +46,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.poptato.component.PoptatoButton
+import com.poptato.ui.common.PoptatoButton
 import com.poptato.design_system.Cancel
 import com.poptato.design_system.Danger50
 import com.poptato.design_system.DeleteDialogContent
@@ -74,7 +74,6 @@ import com.poptato.domain.model.response.dialog.DialogContentModel
 import com.poptato.ui.common.PoptatoCheckBox
 import com.poptato.ui.util.AnalyticsManager
 import kotlinx.coroutines.flow.SharedFlow
-import timber.log.Timber
 
 @Composable
 fun ServiceDeleteScreen(

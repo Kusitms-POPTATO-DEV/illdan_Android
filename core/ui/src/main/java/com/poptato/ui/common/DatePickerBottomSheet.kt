@@ -169,8 +169,6 @@ fun DatePickerBottomSheetContent(
 
                     if (bottomSheetType == BottomSheetType.FullDate) {
                         onFullDateSelected(formattedDate)
-                    } else if (bottomSheetType == BottomSheetType.SubDate) {
-                        onSubDateSelected(selectedYear, selectedMonth)
                     }
                 },
                 modifier = Modifier

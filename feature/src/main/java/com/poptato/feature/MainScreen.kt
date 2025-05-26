@@ -2,8 +2,10 @@ package com.poptato.feature
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -89,6 +91,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun MainScreen() {
@@ -329,7 +332,15 @@ fun MainScreen() {
                         BottomSheetType.TimePicker -> {
                             TimePickerBottomSheet(
                                 item = uiState.selectedTodoItem,
-                                onDismissRequest = { viewModel.updateBottomSheetType(BottomSheetType.Main) }
+                                onDismissRequest = { viewModel.updateBottomSheetType(BottomSheetType.Main) },
+                                onClickCompletionButton = { info ->
+                                    viewModel.onUpdatedTodoTime(info.second)
+                                    scope.launch {
+                                        viewModel.updateTodoTimeFlow.emit(
+                                            Pair(info.first, uiState.selectedTodoItem.formatTime(info.second))
+                                        )
+                                    }
+                                }
                             )
                         }
                     }
@@ -458,7 +469,8 @@ fun MainScreen() {
                             showSnackBar = showSnackBar,
                             showDialog = showDialog,
                             categoryScreenContent = categoryScreenContent,
-                            updateTodoRepeatFlow = viewModel.updateTodoRepeatFlow
+                            updateTodoRepeatFlow = viewModel.updateTodoRepeatFlow,
+                            updateTodoTimeFlow = viewModel.updateTodoTimeFlow
                         )
                         todayNavGraph(
                             navController = navController,

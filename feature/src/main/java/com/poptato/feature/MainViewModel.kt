@@ -23,6 +23,7 @@ class MainViewModel @Inject constructor() : BaseViewModel<MainPageState>(MainPag
     val updateBookmarkFlow = MutableSharedFlow<Long>()
     val updateCategoryFlow = MutableSharedFlow<Long?>()
     val updateTodoRepeatFlow = MutableSharedFlow<Long>()
+    val updateTodoTimeFlow = MutableSharedFlow<Pair<Long, String>>()
     val animationDuration = 300
     val selectedIconInBottomSheet = MutableSharedFlow<CategoryIconItemModel>()
     val updateMonthFlow = MutableSharedFlow<CalendarMonthModel>()
@@ -109,6 +110,17 @@ class MainViewModel @Inject constructor() : BaseViewModel<MainPageState>(MainPag
 
     fun onUpdatedTodoRepeat(value: Boolean) {
         val updatedItem = uiState.value.selectedTodoItem.copy(isRepeat = value)
+
+        updateState(
+            uiState.value.copy(
+                selectedTodoItem = updatedItem
+            )
+        )
+    }
+
+    fun onUpdatedTodoTime(value: Triple<String, Int, Int>?) {
+        val time = uiState.value.selectedTodoItem.formatTime(value)
+        val updatedItem = uiState.value.selectedTodoItem.copy(time = time)
 
         updateState(
             uiState.value.copy(

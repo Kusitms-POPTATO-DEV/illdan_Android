@@ -144,6 +144,7 @@ fun BacklogScreen(
     updateBookmarkFlow: SharedFlow<Long>,
     updateCategoryFlow: SharedFlow<Long?>,
     updateTodoRepeatFlow: SharedFlow<Long>,
+    updateTodoTimeFlow: SharedFlow<Pair<Long, String>>,
     showSnackBar: (String) -> Unit,
     showDialog: (DialogContentModel) -> Unit = {},
     initialCategoryIndex: Int = 0
@@ -228,6 +229,12 @@ fun BacklogScreen(
     LaunchedEffect(updateTodoRepeatFlow) {
         updateTodoRepeatFlow.collect {
             viewModel.updateTodoRepeat(it)
+        }
+    }
+
+    LaunchedEffect(updateTodoTimeFlow) {
+        updateTodoTimeFlow.collect {
+            viewModel.updateTodoTime(it.first, it.second)
         }
     }
 

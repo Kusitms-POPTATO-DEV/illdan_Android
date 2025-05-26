@@ -1,5 +1,7 @@
 package com.poptato.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -91,6 +93,7 @@ fun NavGraphBuilder.loginNavGraph(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 fun NavGraphBuilder.backlogNavGraph(
     navController: NavHostController,
     showBottomSheet: (TodoItemModel, List<CategoryItemModel>) -> Unit,
@@ -103,6 +106,7 @@ fun NavGraphBuilder.backlogNavGraph(
     showDialog: (DialogContentModel) -> Unit,
     categoryScreenContent: (CategoryScreenContentModel) -> Unit,
     updateTodoRepeatFlow: SharedFlow<Long>,
+    updateTodoTimeFlow: SharedFlow<Pair<Long, String>>
 ) {
     navigation(
         startDestination = NavRoutes.BacklogScreen.createRoute(0),
@@ -128,6 +132,7 @@ fun NavGraphBuilder.backlogNavGraph(
                 updateBookmarkFlow = updateBookmarkFlow,
                 updateCategoryFlow = updateCategoryFlow,
                 updateTodoRepeatFlow = updateTodoRepeatFlow,
+                updateTodoTimeFlow = updateTodoTimeFlow,
                 showSnackBar = showSnackBar,
                 showDialog = showDialog,
                 initialCategoryIndex = index

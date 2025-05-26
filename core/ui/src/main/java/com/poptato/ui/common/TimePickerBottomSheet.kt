@@ -41,19 +41,19 @@ import timber.log.Timber
 
 @Composable
 fun TimePickerBottomSheet(
-    item: TodoItemModel? = null,
+    item: TodoItemModel,
     onDismissRequest: () -> Unit = {},
-    onClickCompletionButton: (Triple<String, Int, Int>?) -> Unit = {}
+    onClickCompletionButton: (Pair<Long, Triple<String, Int, Int>?>) -> Unit = {}
 ) {
     val periodState = rememberLazyListState(
-        initialFirstVisibleItemIndex = when (item?.meridiem) {
+        initialFirstVisibleItemIndex = when (item.meridiem) {
             "오전" -> 0
             "오후" -> 1
             else -> 0
         }
     )
-    val hourState = rememberLazyListState(initialFirstVisibleItemIndex = item?.hour ?: 0)
-    val minuteState = rememberLazyListState(initialFirstVisibleItemIndex = item?.minute?.div(5) ?: 0)
+    val hourState = rememberLazyListState(initialFirstVisibleItemIndex = item.hour)
+    val minuteState = rememberLazyListState(initialFirstVisibleItemIndex = item.minute.div(5))
     val period = listOf("오전", "오후")
     val hour = (1..12).toList()
     val minute = (0..55 step 5).toList()
@@ -94,7 +94,7 @@ fun TimePickerBottomSheet(
                 backgroundColor = Gray95,
                 modifier = Modifier.weight(1f),
                 onClickButton = {
-                    onClickCompletionButton(null)
+                    onClickCompletionButton(Pair(item.todoId, null))
                     onDismissRequest()
                 }
             )
@@ -111,7 +111,7 @@ fun TimePickerBottomSheet(
                     val selectedHour = hour[hourState.firstVisibleItemIndex]
                     val selectedMinute = minute[minuteState.firstVisibleItemIndex]
 
-                    onClickCompletionButton(Triple(selectedPeriod, selectedHour, selectedMinute))
+                    onClickCompletionButton(Pair(item.todoId, Triple(selectedPeriod, selectedHour, selectedMinute)))
                     Timber.e(Triple(selectedPeriod, selectedHour, selectedMinute).toString())
                     onDismissRequest()
                 }

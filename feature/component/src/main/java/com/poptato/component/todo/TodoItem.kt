@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -318,7 +319,7 @@ private fun TodoInfoChip(
                 painter = painterResource(id = R.drawable.ic_clock),
                 contentDescription = "",
                 modifier = Modifier.size(12.dp),
-                tint = Gray40
+                tint = Color.Unspecified
             )
         } else {
             AsyncImage(

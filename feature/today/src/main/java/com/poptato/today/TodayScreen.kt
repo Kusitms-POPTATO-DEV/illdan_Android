@@ -117,6 +117,7 @@ fun TodayScreen(
     updateTodoRepeatFlow: SharedFlow<Long>,
     updateBookmarkFlow: SharedFlow<Long>,
     updateCategoryFlow: SharedFlow<Long?>,
+    updateTodoTimeFlow: SharedFlow<Pair<Long, String>>
 ) {
     val viewModel: TodayViewModel = hiltViewModel()
     val scope = rememberCoroutineScope()
@@ -165,6 +166,12 @@ fun TodayScreen(
     LaunchedEffect(updateTodoRepeatFlow) {
         updateTodoRepeatFlow.collect {
             viewModel.updateTodoRepeat(it)
+        }
+    }
+
+    LaunchedEffect(updateTodoTimeFlow) {
+        updateTodoTimeFlow.collect {
+            viewModel.updateTodoTime(it.first, it.second)
         }
     }
 

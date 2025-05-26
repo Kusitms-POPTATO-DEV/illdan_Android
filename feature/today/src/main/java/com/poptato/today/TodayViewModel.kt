@@ -13,6 +13,7 @@ import com.poptato.domain.model.request.todo.DragDropRequestModel
 import com.poptato.domain.model.request.todo.ModifyTodoRequestModel
 import com.poptato.domain.model.request.todo.TodoCategoryIdModel
 import com.poptato.domain.model.request.todo.TodoIdModel
+import com.poptato.domain.model.request.todo.TodoTimeModel
 import com.poptato.domain.model.request.todo.UpdateDeadlineRequestModel
 import com.poptato.domain.model.request.todo.UpdateTodoCategoryModel
 import com.poptato.domain.model.response.category.CategoryListModel
@@ -32,6 +33,7 @@ import com.poptato.domain.usecase.todo.UpdateDeadlineUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoCategoryUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoCompletionUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoRepeatUseCase
+import com.poptato.domain.usecase.todo.UpdateTodoTimeUseCase
 import com.poptato.domain.usecase.yesterday.GetYesterdayListUseCase
 import com.poptato.ui.base.BaseViewModel
 import com.poptato.ui.util.AnalyticsManager
@@ -55,6 +57,7 @@ class TodayViewModel @Inject constructor(
     private val updateTodoCategoryUseCase: UpdateTodoCategoryUseCase,
     private val deleteTodoUseCase: DeleteTodoUseCase,
     private val updateTodoRepeatUseCase: UpdateTodoRepeatUseCase,
+    private var updateTodoTimeUseCase: UpdateTodoTimeUseCase,
     private val getDeadlineDateModeUseCase: GetDeadlineDateModeUseCase,
     private var getYesterdayListUseCase: GetYesterdayListUseCase
 ) : BaseViewModel<TodayPageState>(TodayPageState()) {
@@ -348,6 +351,37 @@ class TodayViewModel @Inject constructor(
             }
         }
         val updatedItem = uiState.value.selectedItem.copy(isRepeat = !uiState.value.selectedItem.isRepeat)
+
+        updateState(
+            uiState.value.copy(
+                todayList = newList,
+                selectedItem = updatedItem
+            )
+        )
+    }
+
+    fun updateTodoTime(id: Long, time: String) {
+        updateTodoTimeInUI(id, time)
+
+        viewModelScope.launch {
+            updateTodoTimeUseCase(request = UpdateTodoTimeUseCase.Companion.UpdateTodoTimeModel(
+                todoId = id,
+                requestModel = TodoTimeModel(todoTime = time)
+            )).collect {
+                resultResponse(it, { viewModelScope.launch { updateSnapshotList(uiState.value.todayList) } }, { onFailedUpdateTodayList() })
+            }
+        }
+    }
+
+    private fun updateTodoTimeInUI(id: Long, time: String) {
+        val newList = uiState.value.todayList.map {
+            if (it.todoId == id) {
+                it.copy(time = time)
+            } else {
+                it
+            }
+        }
+        val updatedItem = uiState.value.selectedItem.copy(time = time)
 
         updateState(
             uiState.value.copy(

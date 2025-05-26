@@ -481,7 +481,8 @@ fun MainScreen() {
                             deleteTodoFlow = viewModel.deleteTodoFlow,
                             activateItemFlow = viewModel.activateItemFlow,
                             updateCategoryFlow = viewModel.updateCategoryFlow,
-                            updateTodoRepeatFlow = viewModel.updateTodoRepeatFlow
+                            updateTodoRepeatFlow = viewModel.updateTodoRepeatFlow,
+                            updateTodoTimeFlow = viewModel.updateTodoTimeFlow
                         )
                         categoryNavGraph(
                             navController = navController,

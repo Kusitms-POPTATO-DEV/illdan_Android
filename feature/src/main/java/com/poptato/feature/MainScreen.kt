@@ -32,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -47,6 +48,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
@@ -97,6 +102,7 @@ import kotlinx.coroutines.launch
 fun MainScreen() {
     val viewModel: MainViewModel = hiltViewModel()
     val guideViewModel: GuideViewModel = hiltViewModel()
+    val lifecycleOwner = LocalLifecycleOwner.current
     val showSecondGuide by guideViewModel.showSecondGuide.collectAsState()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val navController = rememberNavController()
@@ -154,6 +160,29 @@ fun MainScreen() {
 
     if (uiState.bottomNavType != BottomNavType.DEFAULT) {
         BackHandler(onBack = backPressHandler)
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_START -> {
+                    // 백그라운드 -> 포그라운드 전환 시 어제 한 일 API 호출
+                    viewModel.getYesterdayList()
+                }
+                else -> {}
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    LaunchedEffect(uiState.isExistYesterday) {
+        if (uiState.isExistYesterday) {
+            navController.navigate(NavRoutes.YesterdayListScreen.route)
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -383,6 +412,7 @@ fun MainScreen() {
                             type = uiState.bottomNavType,
                             onClick = { route: String ->
                                 if (navController.currentDestination?.route != route) {
+                                    viewModel.getYesterdayList()
                                     if (route == NavRoutes.BacklogScreen.route) {
                                         navController.navigate(NavRoutes.BacklogScreen.createRoute(0)) {
                                             popUpTo(navController.currentDestination?.route!!) {

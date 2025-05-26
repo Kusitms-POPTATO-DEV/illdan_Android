@@ -19,4 +19,5 @@ data class MainPageState(
     val categoryIconList: CategoryIconTotalListModel = CategoryIconTotalListModel(),
     val dialogContent: DialogContentModel = DialogContentModel(),
     val selectedMonth: CalendarMonthModel = CalendarMonthModel(),
+    val isExistYesterday: Boolean = false
 ): PageState

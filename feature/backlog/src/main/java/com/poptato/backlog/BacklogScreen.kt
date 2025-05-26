@@ -135,7 +135,6 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun BacklogScreen(
-    goToYesterdayList: () -> Unit = {},
     goToCategorySelect: (CategoryScreenContentModel) -> Unit = {},
     showBottomSheet: (TodoItemModel, List<CategoryItemModel>) -> Unit = { _, _ -> },
     updateDeadlineFlow: SharedFlow<String?>,
@@ -153,7 +152,6 @@ fun BacklogScreen(
     val guideViewModel: GuideViewModel = hiltViewModel()
     val isNewUser by guideViewModel.isNewUser.collectAsState()
     val showFirstGuide by guideViewModel.showFirstGuide.collectAsState()
-    val showSecondGuide by guideViewModel.showSecondGuide.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     val uiState: BacklogPageState by viewModel.uiState.collectAsStateWithLifecycle()
     var activeItemId by remember { mutableStateOf<Long?>(null) }
@@ -172,13 +170,6 @@ fun BacklogScreen(
     LaunchedEffect(Unit) {
         if (isNewUser) {
             guideViewModel.updateFirstGuide(true)
-        }
-    }
-
-    LaunchedEffect(uiState.isExistYesterdayTodo) {
-        if (uiState.isExistYesterdayTodo) {
-            goToYesterdayList()
-            viewModel.completeYesterdayTodoDisplay()
         }
     }
 
@@ -248,7 +239,6 @@ fun BacklogScreen(
         BacklogContent(
             uiState = uiState,
             showFirstGuide = showFirstGuide,
-            showSecondGuide = showSecondGuide,
             createBacklog = { newItem -> viewModel.createBacklog(newItem) },
             onItemSwiped = { itemToRemove ->
                 viewModel.swipeBacklogItem(itemToRemove)
@@ -334,7 +324,6 @@ fun BacklogScreen(
 fun BacklogContent(
     uiState: BacklogPageState = BacklogPageState(),
     showFirstGuide: Boolean = false,
-    showSecondGuide: Boolean = false,
     createBacklog: (String) -> Unit = {},
     onSelectCategory: (Int) -> Unit = {},
     onClickCategoryAdd: () -> Unit = {},

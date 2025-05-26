@@ -4,7 +4,6 @@ import androidx.lifecycle.viewModelScope
 import com.poptato.domain.model.enums.TodoType
 import com.poptato.core.util.DateTimeFormatter
 import com.poptato.core.util.move
-import com.poptato.domain.model.request.ListRequestModel
 import com.poptato.domain.model.request.backlog.CreateBacklogRequestModel
 import com.poptato.domain.model.request.backlog.GetBacklogListRequestModel
 import com.poptato.domain.model.request.category.CategoryDragDropRequestModel
@@ -38,7 +37,6 @@ import com.poptato.domain.usecase.todo.UpdateDeadlineUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoRepeatUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoCategoryUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoTimeUseCase
-import com.poptato.domain.usecase.yesterday.GetYesterdayListUseCase
 import com.poptato.ui.base.BaseViewModel
 import com.poptato.ui.util.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -56,7 +54,6 @@ class BacklogViewModel @Inject constructor(
     private val deleteCategoryUseCase: DeleteCategoryUseCase,
     private val createBacklogUseCase: CreateBacklogUseCase,
     private val getBacklogListUseCase: GetBacklogListUseCase,
-    private val getYesterdayListUseCase: GetYesterdayListUseCase,
     private val deleteTodoUseCase: DeleteTodoUseCase,
     private val modifyTodoUseCase: ModifyTodoUseCase,
     private val dragDropUseCase: DragDropUseCase,
@@ -77,7 +74,6 @@ class BacklogViewModel @Inject constructor(
     private var tempTodoId: Long? = null
 
     init {
-        getYesterdayList(0, 1)
         getDeadlineDateMode()
         getBacklogList(-1, 0, 100)
     }
@@ -168,19 +164,6 @@ class BacklogViewModel @Inject constructor(
                 isFinishedInitialization = true
             )
         )
-    }
-
-    private fun getYesterdayList(page: Int, size: Int) {
-        viewModelScope.launch {
-            getYesterdayListUseCase(request = ListRequestModel(page = page, size = size)).collect {
-                resultResponse(it, { data ->
-                    updateState(uiState.value.copy(isExistYesterdayTodo = data.yesterdays.isNotEmpty()))
-                    Timber.d("[어제 한 일] 서버통신 성공(Backlog) -> $data")
-                }, { error ->
-                    Timber.d("[어제 한 일] 서버통신 실패(Backlog) -> $error")
-                })
-            }
-        }
     }
 
     fun createBacklog(content: String) {
@@ -541,10 +524,5 @@ class BacklogViewModel @Inject constructor(
                 updateState(uiState.value.copy(isDeadlineDateMode = it))
             }
         }
-    }
-
-    // YesterdayTodo
-    fun completeYesterdayTodoDisplay() {
-        updateState(uiState.value.copy(isExistYesterdayTodo = false))
     }
 }

@@ -121,7 +121,6 @@ fun NavGraphBuilder.backlogNavGraph(
             val index = it.arguments?.getInt("index") ?: 0
 
             BacklogScreen(
-                goToYesterdayList = { navController.navigate(NavRoutes.YesterdayListScreen.route) },
                 goToCategorySelect = {
                     categoryScreenContent(it)
                     navController.navigate(NavRoutes.CategoryScreen.route) },

@@ -5,7 +5,6 @@ import com.poptato.domain.model.enums.TodoType
 import com.poptato.core.util.DateTimeFormatter
 import com.poptato.core.util.move
 import com.poptato.domain.model.enums.TodoStatus
-import com.poptato.domain.model.request.ListRequestModel
 import com.poptato.domain.model.request.category.GetCategoryListRequestModel
 import com.poptato.domain.model.request.today.GetTodayListRequestModel
 import com.poptato.domain.model.request.todo.DeadlineContentModel
@@ -34,7 +33,6 @@ import com.poptato.domain.usecase.todo.UpdateTodoCategoryUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoCompletionUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoRepeatUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoTimeUseCase
-import com.poptato.domain.usecase.yesterday.GetYesterdayListUseCase
 import com.poptato.ui.base.BaseViewModel
 import com.poptato.ui.util.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -58,13 +56,11 @@ class TodayViewModel @Inject constructor(
     private val deleteTodoUseCase: DeleteTodoUseCase,
     private val updateTodoRepeatUseCase: UpdateTodoRepeatUseCase,
     private var updateTodoTimeUseCase: UpdateTodoTimeUseCase,
-    private val getDeadlineDateModeUseCase: GetDeadlineDateModeUseCase,
-    private var getYesterdayListUseCase: GetYesterdayListUseCase
+    private val getDeadlineDateModeUseCase: GetDeadlineDateModeUseCase
 ) : BaseViewModel<TodayPageState>(TodayPageState()) {
     private var snapshotList: List<TodoItemModel> = emptyList()
 
     init {
-        getYesterdayList(0, 1)
         getDeadlineDateMode()
         getTodayList(0, 50)
         getCategoryList()
@@ -440,23 +436,5 @@ class TodayViewModel @Inject constructor(
                 updateState(uiState.value.copy(isDeadlineDateMode = it))
             }
         }
-    }
-
-    // YesterdayTodo
-    private fun getYesterdayList(page: Int, size: Int) {
-        viewModelScope.launch {
-            getYesterdayListUseCase(request = ListRequestModel(page = page, size = size)).collect {
-                resultResponse(it, { data ->
-                    updateState(uiState.value.copy(isExistYesterdayTodo = data.yesterdays.isNotEmpty()))
-                    Timber.d("[어제 한 일] 서버통신 성공(Backlog) -> $data")
-                }, { error ->
-                    Timber.d("[어제 한 일] 서버통신 실패(Backlog) -> $error")
-                })
-            }
-        }
-    }
-
-    fun completeYesterdayTodoDisplay() {
-        updateState(uiState.value.copy(isExistYesterdayTodo = false))
     }
 }

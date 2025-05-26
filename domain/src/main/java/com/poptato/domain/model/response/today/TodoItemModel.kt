@@ -2,6 +2,7 @@ package com.poptato.domain.model.response.today
 
 import com.poptato.domain.model.enums.TodoStatus
 
+@Suppress("DefaultLocale")
 data class TodoItemModel(
     val todoId: Long = -1,
     val content: String = "",
@@ -40,4 +41,17 @@ data class TodoItemModel(
 
     val minute: Int
         get() = parsedTime?.third ?: 0
+
+    fun formatTime(value: Triple<String, Int, Int>?): String {
+        return if (value == null) "" else {
+            var hour = value.second
+            val minute = value.third
+
+            if (value.first == "오후") {
+                hour += 12
+            }
+
+            String.format("%02d:%02d", hour, minute)
+        }
+    }
 }

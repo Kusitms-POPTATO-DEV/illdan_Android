@@ -47,7 +47,7 @@ const val ONBOARDING4 = "오늘 할 일을 해낸 당신!\n어제보다 한 걸�
 // Todo
 const val REPEAT_TODO = "반복 할 일"
 const val DOT = "·"
-const val TODO_TIME = "%s %2d:%2d"
+const val TODO_TIME = "%s %02d:%02d"
 
 // Backlog
 const val BacklogTitle = "오늘 할 일은 무엇인가요?\n일단 추가해 보세요!"
@@ -71,8 +71,6 @@ const val YesterdayAllCheckBtn = "완료"
 const val YesterdayAllCheckContent = "좋아요! 오늘 하루도\n힘차게 시작해볼까요?"
 
 // Setting
-const val MyPageExampleName = "구름"
-const val MyPageExampleMail = "example@gmail.com"
 const val SettingTitle = "설정"
 const val ProfileTitle = "계정"
 const val EditProfile = "프로필 편집"

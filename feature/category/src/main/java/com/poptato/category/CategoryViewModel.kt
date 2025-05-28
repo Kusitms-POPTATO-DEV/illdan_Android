@@ -76,7 +76,8 @@ class CategoryViewModel @Inject constructor(
                 selectedIcon = CategoryIconItemModel(item.categoryItem.iconId, item.categoryItem.categoryImgUrl),
                 categoryIconImgUrl = item.categoryItem.categoryImgUrl,
                 modifyCategoryId = item.categoryItem.categoryId,
-                categoryIndex = item.categoryIndex
+                categoryIndex = item.categoryIndex,
+                currentSelectedIndex = item.currentSelectedIndex
             )
         )
     }

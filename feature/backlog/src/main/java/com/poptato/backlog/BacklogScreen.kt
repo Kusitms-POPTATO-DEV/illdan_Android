@@ -38,9 +38,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Divider
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -160,11 +161,13 @@ fun BacklogScreen(
     val permissionState = rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
 
     LaunchedEffect(Unit) {
-        viewModel.getCategoryList(initialCategoryIndex)
-
         if (!permissionState.status.isGranted) {
             permissionState.launchPermissionRequest()
         }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.getCategoryList(initialCategoryIndex)
     }
 
     LaunchedEffect(Unit) {
@@ -255,7 +258,8 @@ fun BacklogScreen(
                 goToCategorySelect(
                     CategoryScreenContentModel(
                         screenType = CategoryScreenType.Add,
-                        categoryIndex = uiState.categoryList.size
+                        categoryIndex = uiState.categoryList.size,
+                        currentSelectedIndex = uiState.selectedCategoryIndex
                     )
                 )
             },
@@ -280,7 +284,8 @@ fun BacklogScreen(
                     CategoryScreenContentModel(
                         screenType = CategoryScreenType.Modify,
                         categoryItem = uiState.categoryList[uiState.selectedCategoryIndex],
-                        categoryIndex = uiState.selectedCategoryIndex
+                        categoryIndex = uiState.selectedCategoryIndex,
+                        currentSelectedIndex = uiState.selectedCategoryIndex
                     )
                 )
             },
@@ -392,7 +397,7 @@ fun BacklogContent(
                         onClickItemDropdownItem = onClickCategoryModifyDropdown
                     )
 
-                    Divider(color = Gray90)
+                    HorizontalDivider(color = Gray90)
 
                     CategoryDropDownItem(
                         itemIcon = R.drawable.ic_trash,

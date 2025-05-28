@@ -12,5 +12,6 @@ data class CategoryPageState(
     val categoryIconList: CategoryIconTotalListModel = CategoryIconTotalListModel(),
     val selectedIcon: CategoryIconItemModel? = null,
     val modifyCategoryId: Long = -1,
-    val categoryIndex: Int = -1
+    val categoryIndex: Int = -1,
+    val currentSelectedIndex: Int = -1  // 백로그 -> 카테고리 화면으로 넘어오는 시점에서 선택된 인덱스
 ): PageState

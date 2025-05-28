@@ -52,6 +52,7 @@ import com.poptato.design_system.Primary40
 import com.poptato.design_system.Settings
 import com.poptato.design_system.TIME
 import com.poptato.design_system.TODO_TIME
+import com.poptato.design_system.WORD_DATE
 import com.poptato.design_system.modify
 import com.poptato.domain.model.response.category.CategoryItemModel
 import com.poptato.domain.model.response.today.TodoItemModel
@@ -235,7 +236,7 @@ fun TodoBottomSheetContent(
         )
         BottomSheetBtn(
             resourceId = R.drawable.ic_calendar,
-            buttonText = DEADLINE_OPTION,
+            buttonText = WORD_DATE,
             textColor = Gray30,
             modifier = Modifier.clickable {
                 onClickShowDatePicker()

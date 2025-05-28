@@ -385,6 +385,7 @@ fun BacklogContent(
                     .padding(end = 31.dp, top = 42.dp)
             ) {
                 DropdownMenu(
+                    modifier = Modifier.height(82.dp),
                     shape = RoundedCornerShape(12.dp),
                     containerColor = Gray95,
                     expanded = isDropDownMenuExpanded,
@@ -503,6 +504,7 @@ fun CategoryDropDownItem(
     onClickItemDropdownItem: () -> Unit = {}
 ) {
     DropdownMenuItem(
+        modifier = Modifier.height(33.dp).width(97.dp),
         contentPadding = PaddingValues(0.dp),
         leadingIcon = {
             Icon(
@@ -519,7 +521,8 @@ fun CategoryDropDownItem(
                 text = itemText,
                 color = textColor,
                 style = PoptatoTypo.smMedium,
-                modifier = Modifier
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(end = 4.dp)
             )
         },
         onClick = { onClickItemDropdownItem() }

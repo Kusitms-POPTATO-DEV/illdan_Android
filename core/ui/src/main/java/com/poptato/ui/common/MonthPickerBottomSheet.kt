@@ -26,28 +26,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.poptato.core.enums.DateType
-import com.poptato.core.util.TimeFormatter
 import com.poptato.design_system.Cancel
 import com.poptato.design_system.Confirm
 import com.poptato.design_system.Gray00
-import com.poptato.design_system.Gray100
 import com.poptato.design_system.Gray30
 import com.poptato.design_system.Gray40
 import com.poptato.design_system.Gray95
 import com.poptato.design_system.Month
 import com.poptato.design_system.PoptatoTypo
-import com.poptato.design_system.Primary60
 import com.poptato.design_system.YEAR_MONTH
 import com.poptato.design_system.Year
 import com.poptato.domain.model.response.history.CalendarMonthModel
-import com.poptato.ui.R
 import com.poptato.ui.util.fadingEdge
-import timber.log.Timber
 import java.time.LocalDate
 
 @Composable

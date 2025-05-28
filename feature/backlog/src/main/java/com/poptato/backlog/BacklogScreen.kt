@@ -34,7 +34,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -48,7 +47,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -90,7 +88,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.poptato.component.todo.TodoItem
-import com.poptato.core.enums.TodoType
+import com.poptato.domain.model.enums.TodoType
 import com.poptato.design_system.ALL
 import com.poptato.design_system.BacklogHint
 import com.poptato.design_system.Cancel
@@ -137,7 +135,6 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun BacklogScreen(
-    goToYesterdayList: () -> Unit = {},
     goToCategorySelect: (CategoryScreenContentModel) -> Unit = {},
     showBottomSheet: (TodoItemModel, List<CategoryItemModel>) -> Unit = { _, _ -> },
     updateDeadlineFlow: SharedFlow<String?>,
@@ -146,6 +143,7 @@ fun BacklogScreen(
     updateBookmarkFlow: SharedFlow<Long>,
     updateCategoryFlow: SharedFlow<Long?>,
     updateTodoRepeatFlow: SharedFlow<Long>,
+    updateTodoTimeFlow: SharedFlow<Pair<Long, String>>,
     showSnackBar: (String) -> Unit,
     showDialog: (DialogContentModel) -> Unit = {},
     initialCategoryIndex: Int = 0
@@ -154,7 +152,6 @@ fun BacklogScreen(
     val guideViewModel: GuideViewModel = hiltViewModel()
     val isNewUser by guideViewModel.isNewUser.collectAsState()
     val showFirstGuide by guideViewModel.showFirstGuide.collectAsState()
-    val showSecondGuide by guideViewModel.showSecondGuide.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     val uiState: BacklogPageState by viewModel.uiState.collectAsStateWithLifecycle()
     var activeItemId by remember { mutableStateOf<Long?>(null) }
@@ -173,13 +170,6 @@ fun BacklogScreen(
     LaunchedEffect(Unit) {
         if (isNewUser) {
             guideViewModel.updateFirstGuide(true)
-        }
-    }
-
-    LaunchedEffect(uiState.isExistYesterdayTodo) {
-        if (uiState.isExistYesterdayTodo) {
-            goToYesterdayList()
-            viewModel.completeYesterdayTodoDisplay()
         }
     }
 
@@ -233,6 +223,12 @@ fun BacklogScreen(
         }
     }
 
+    LaunchedEffect(updateTodoTimeFlow) {
+        updateTodoTimeFlow.collect {
+            viewModel.updateTodoTime(it.first, it.second)
+        }
+    }
+
     LaunchedEffect(uiState.isFinishedInitialization) {
         if (uiState.isFinishedInitialization) {
             LoadingManager.endLoading()
@@ -243,7 +239,6 @@ fun BacklogScreen(
         BacklogContent(
             uiState = uiState,
             showFirstGuide = showFirstGuide,
-            showSecondGuide = showSecondGuide,
             createBacklog = { newItem -> viewModel.createBacklog(newItem) },
             onItemSwiped = { itemToRemove ->
                 viewModel.swipeBacklogItem(itemToRemove)
@@ -329,7 +324,6 @@ fun BacklogScreen(
 fun BacklogContent(
     uiState: BacklogPageState = BacklogPageState(),
     showFirstGuide: Boolean = false,
-    showSecondGuide: Boolean = false,
     createBacklog: (String) -> Unit = {},
     onSelectCategory: (Int) -> Unit = {},
     onClickCategoryAdd: () -> Unit = {},

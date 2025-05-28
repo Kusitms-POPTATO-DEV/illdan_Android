@@ -1,11 +1,10 @@
 package com.poptato.today
 
 import androidx.lifecycle.viewModelScope
-import com.poptato.core.enums.TodoType
-import com.poptato.core.util.TimeFormatter
+import com.poptato.domain.model.enums.TodoType
+import com.poptato.core.util.DateTimeFormatter
 import com.poptato.core.util.move
 import com.poptato.domain.model.enums.TodoStatus
-import com.poptato.domain.model.request.ListRequestModel
 import com.poptato.domain.model.request.category.GetCategoryListRequestModel
 import com.poptato.domain.model.request.today.GetTodayListRequestModel
 import com.poptato.domain.model.request.todo.DeadlineContentModel
@@ -13,6 +12,7 @@ import com.poptato.domain.model.request.todo.DragDropRequestModel
 import com.poptato.domain.model.request.todo.ModifyTodoRequestModel
 import com.poptato.domain.model.request.todo.TodoCategoryIdModel
 import com.poptato.domain.model.request.todo.TodoIdModel
+import com.poptato.domain.model.request.todo.TodoTimeModel
 import com.poptato.domain.model.request.todo.UpdateDeadlineRequestModel
 import com.poptato.domain.model.request.todo.UpdateTodoCategoryModel
 import com.poptato.domain.model.response.category.CategoryListModel
@@ -32,13 +32,11 @@ import com.poptato.domain.usecase.todo.UpdateDeadlineUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoCategoryUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoCompletionUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoRepeatUseCase
-import com.poptato.domain.usecase.yesterday.GetYesterdayListUseCase
+import com.poptato.domain.usecase.todo.UpdateTodoTimeUseCase
 import com.poptato.ui.base.BaseViewModel
 import com.poptato.ui.util.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -57,13 +55,12 @@ class TodayViewModel @Inject constructor(
     private val updateTodoCategoryUseCase: UpdateTodoCategoryUseCase,
     private val deleteTodoUseCase: DeleteTodoUseCase,
     private val updateTodoRepeatUseCase: UpdateTodoRepeatUseCase,
-    private val getDeadlineDateModeUseCase: GetDeadlineDateModeUseCase,
-    private var getYesterdayListUseCase: GetYesterdayListUseCase
+    private var updateTodoTimeUseCase: UpdateTodoTimeUseCase,
+    private val getDeadlineDateModeUseCase: GetDeadlineDateModeUseCase
 ) : BaseViewModel<TodayPageState>(TodayPageState()) {
     private var snapshotList: List<TodoItemModel> = emptyList()
 
     init {
-        getYesterdayList(0, 1)
         getDeadlineDateMode()
         getTodayList(0, 50)
         getCategoryList()
@@ -267,7 +264,7 @@ class TodayViewModel @Inject constructor(
     }
 
     private fun updateDeadlineInUI(deadline: String?, id: Long) {
-        val dDay = TimeFormatter.calculateDDay(deadline)
+        val dDay = DateTimeFormatter.calculateDDay(deadline)
         val newList = uiState.value.todayList.map {
             if (it.todoId == id) {
                 it.copy(deadline = deadline ?: "", dDay = dDay)
@@ -359,6 +356,37 @@ class TodayViewModel @Inject constructor(
         )
     }
 
+    fun updateTodoTime(id: Long, time: String) {
+        updateTodoTimeInUI(id, time)
+
+        viewModelScope.launch {
+            updateTodoTimeUseCase(request = UpdateTodoTimeUseCase.Companion.UpdateTodoTimeModel(
+                todoId = id,
+                requestModel = TodoTimeModel(todoTime = time)
+            )).collect {
+                resultResponse(it, { viewModelScope.launch { updateSnapshotList(uiState.value.todayList) } }, { onFailedUpdateTodayList() })
+            }
+        }
+    }
+
+    private fun updateTodoTimeInUI(id: Long, time: String) {
+        val newList = uiState.value.todayList.map {
+            if (it.todoId == id) {
+                it.copy(time = time)
+            } else {
+                it
+            }
+        }
+        val updatedItem = uiState.value.selectedItem.copy(time = time)
+
+        updateState(
+            uiState.value.copy(
+                todayList = newList,
+                selectedItem = updatedItem
+            )
+        )
+    }
+
     fun getSelectedItemDetailContent(item: TodoItemModel, callback: (TodoItemModel) -> Unit) {
         viewModelScope.launch {
             getTodoDetailUseCase(item.todoId).collect {
@@ -408,23 +436,5 @@ class TodayViewModel @Inject constructor(
                 updateState(uiState.value.copy(isDeadlineDateMode = it))
             }
         }
-    }
-
-    // YesterdayTodo
-    private fun getYesterdayList(page: Int, size: Int) {
-        viewModelScope.launch {
-            getYesterdayListUseCase(request = ListRequestModel(page = page, size = size)).collect {
-                resultResponse(it, { data ->
-                    updateState(uiState.value.copy(isExistYesterdayTodo = data.yesterdays.isNotEmpty()))
-                    Timber.d("[어제 한 일] 서버통신 성공(Backlog) -> $data")
-                }, { error ->
-                    Timber.d("[어제 한 일] 서버통신 실패(Backlog) -> $error")
-                })
-            }
-        }
-    }
-
-    fun completeYesterdayTodoDisplay() {
-        updateState(uiState.value.copy(isExistYesterdayTodo = false))
     }
 }

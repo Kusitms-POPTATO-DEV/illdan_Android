@@ -79,7 +79,6 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun HistoryScreen(
-    showBottomSheet: (CalendarMonthModel) -> Unit,
     updateMonthFlow: SharedFlow<CalendarMonthModel>
 ) {
     val viewModel: HistoryViewModel = hiltViewModel()
@@ -98,12 +97,7 @@ fun HistoryScreen(
         onDateSelected = { selectedDate -> viewModel.updateSelectedDate(selectedDate)},
         onPreviousMonthClick = {viewModel.onClickCalNav(MonthNav.PREVIOUS)},
         onNextMonthClick = {viewModel.onClickCalNav(MonthNav.NEXT)},
-        getImageResourceForDate = { date, hasEvent -> viewModel.getImageResourceForDate(date, hasEvent) },
-        onClickCalendarHeader = {
-            viewModel.setCalendarMonthModel { updatedCalendarMonth ->
-                showBottomSheet(updatedCalendarMonth)
-            }
-        }
+        getImageResourceForDate = { date, hasEvent -> viewModel.getImageResourceForDate(date, hasEvent) }
     )
 }
 
@@ -115,7 +109,6 @@ fun HistoryContent(
     onPreviousMonthClick: () -> Unit,
     onNextMonthClick: () -> Unit,
     getImageResourceForDate: (LocalDate, Boolean) -> Int,
-    onClickCalendarHeader: () -> Unit
 ) {
     val listState = rememberLazyListState()
 
@@ -133,8 +126,7 @@ fun HistoryContent(
             eventDates = uiState.eventDates,
             onPreviousMonthClick = onPreviousMonthClick,
             onNextMonthClick = onNextMonthClick,
-            getImageResourceForDate = getImageResourceForDate,
-            onClickCalendarHeader = onClickCalendarHeader
+            getImageResourceForDate = getImageResourceForDate
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -181,8 +173,7 @@ fun CalendarContent(
     eventDates: List<Map<String, Int>>,
     onNextMonthClick: () -> Unit,
     onPreviousMonthClick: () -> Unit,
-    getImageResourceForDate: (LocalDate, Boolean) -> Int,
-    onClickCalendarHeader: () -> Unit,
+    getImageResourceForDate: (LocalDate, Boolean) -> Int
 ) {
     val daysInMonth = currentMonthStartDate.lengthOfMonth()
     val firstDayOfWeek = (currentMonthStartDate.withDayOfMonth(1).dayOfWeek.value % 7) // 일요일 = 0

@@ -6,5 +6,6 @@ data class TodoDetailItemModel (
     val content: String = "",
     val deadline: String? = "",
     val categoryName: String? = null,
-    val emojiImageUrl: String? = null
+    val emojiImageUrl: String? = null,
+    val time: String = ""
 )

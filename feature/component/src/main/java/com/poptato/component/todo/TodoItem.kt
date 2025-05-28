@@ -7,7 +7,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -48,25 +47,27 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.poptato.core.enums.TodoType
+import com.poptato.domain.model.enums.TodoType
 import com.poptato.design_system.BOOKMARK
 import com.poptato.design_system.DOT
 import com.poptato.design_system.Gray00
+import com.poptato.design_system.Gray40
 import com.poptato.design_system.Gray50
 import com.poptato.design_system.Gray80
 import com.poptato.design_system.Gray90
 import com.poptato.design_system.Gray95
 import com.poptato.design_system.PoptatoTypo
 import com.poptato.design_system.Primary40
-import com.poptato.design_system.Primary60
 import com.poptato.design_system.R
 import com.poptato.design_system.REPEAT_TODO
+import com.poptato.design_system.TODO_TIME
 import com.poptato.domain.model.enums.TodoStatus
 import com.poptato.domain.model.response.today.TodoItemModel
 import com.poptato.ui.common.PoptatoCheckBox
 import com.poptato.ui.common.formatDeadline
 import com.poptato.ui.util.toPx
 import kotlinx.coroutines.flow.filter
+import kotlinx.serialization.StringFormat
 
 @SuppressLint("ModifierParameter")
 @Composable
@@ -201,9 +202,9 @@ fun TodoItem(
                 )
             }
 
-            if (item.isBookmark || item.categoryName.isNotEmpty()) {
+            if (item.isBookmark || item.time.isNotEmpty() || item.categoryName.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
-                BookmarkCategoryItem(item)
+                BookmarkTimeCategoryItem(item)
             }
         }
 
@@ -256,8 +257,9 @@ private fun RepeatDeadlineRow(
     }
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
-private fun BookmarkCategoryItem(
+private fun BookmarkTimeCategoryItem(
     item: TodoItemModel
 ) {
     Row(
@@ -269,6 +271,16 @@ private fun BookmarkCategoryItem(
                 isBookmark = true
             )
             
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+
+        if (item.time.isNotEmpty()) {
+            TodoInfoChip(
+                title = String.format(TODO_TIME, item.meridiem, item.hour, item.minute),
+                isBookmark = false,
+                isTime = true
+            )
+
             Spacer(modifier = Modifier.width(8.dp))
         }
 
@@ -286,7 +298,8 @@ private fun BookmarkCategoryItem(
 private fun TodoInfoChip(
     image: String = "",
     title: String,
-    isBookmark: Boolean
+    isBookmark: Boolean,
+    isTime: Boolean = false
 ) {
     Row(
         modifier = Modifier
@@ -300,6 +313,13 @@ private fun TodoInfoChip(
                 contentDescription = "",
                 modifier = Modifier.size(12.dp),
                 tint = Primary40
+            )
+        } else if (isTime) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_clock),
+                contentDescription = "",
+                modifier = Modifier.size(12.dp),
+                tint = Color.Unspecified
             )
         } else {
             AsyncImage(

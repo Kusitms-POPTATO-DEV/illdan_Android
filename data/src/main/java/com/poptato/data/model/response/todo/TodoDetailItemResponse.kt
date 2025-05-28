@@ -14,5 +14,7 @@ data class TodoDetailItemResponse (
     @SerializedName("categoryName")
     val categoryName: String? = null,
     @SerializedName("emojiImageUrl")
-    val emojiImageUrl: String? = null
+    val emojiImageUrl: String? = null,
+    @SerializedName("time")
+    val time: String? = null
 )

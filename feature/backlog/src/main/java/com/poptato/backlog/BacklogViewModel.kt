@@ -1,10 +1,9 @@
 package com.poptato.backlog
 
 import androidx.lifecycle.viewModelScope
-import com.poptato.core.enums.TodoType
-import com.poptato.core.util.TimeFormatter
+import com.poptato.domain.model.enums.TodoType
+import com.poptato.core.util.DateTimeFormatter
 import com.poptato.core.util.move
-import com.poptato.domain.model.request.ListRequestModel
 import com.poptato.domain.model.request.backlog.CreateBacklogRequestModel
 import com.poptato.domain.model.request.backlog.GetBacklogListRequestModel
 import com.poptato.domain.model.request.category.CategoryDragDropRequestModel
@@ -14,6 +13,7 @@ import com.poptato.domain.model.request.todo.DragDropRequestModel
 import com.poptato.domain.model.request.todo.ModifyTodoRequestModel
 import com.poptato.domain.model.request.todo.TodoCategoryIdModel
 import com.poptato.domain.model.request.todo.TodoIdModel
+import com.poptato.domain.model.request.todo.TodoTimeModel
 import com.poptato.domain.model.request.todo.UpdateDeadlineRequestModel
 import com.poptato.domain.model.request.todo.UpdateTodoCategoryModel
 import com.poptato.domain.model.response.backlog.BacklogListModel
@@ -36,13 +36,11 @@ import com.poptato.domain.usecase.todo.UpdateBookmarkUseCase
 import com.poptato.domain.usecase.todo.UpdateDeadlineUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoRepeatUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoCategoryUseCase
-import com.poptato.domain.usecase.yesterday.GetYesterdayListUseCase
+import com.poptato.domain.usecase.todo.UpdateTodoTimeUseCase
 import com.poptato.ui.base.BaseViewModel
 import com.poptato.ui.util.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -56,7 +54,6 @@ class BacklogViewModel @Inject constructor(
     private val deleteCategoryUseCase: DeleteCategoryUseCase,
     private val createBacklogUseCase: CreateBacklogUseCase,
     private val getBacklogListUseCase: GetBacklogListUseCase,
-    private val getYesterdayListUseCase: GetYesterdayListUseCase,
     private val deleteTodoUseCase: DeleteTodoUseCase,
     private val modifyTodoUseCase: ModifyTodoUseCase,
     private val dragDropUseCase: DragDropUseCase,
@@ -66,6 +63,7 @@ class BacklogViewModel @Inject constructor(
     private val getTodoDetailUseCase: GetTodoDetailUseCase,
     private val swipeTodoUseCase: SwipeTodoUseCase,
     private val updateTodoRepeatUseCase: UpdateTodoRepeatUseCase,
+    private val updateTodoTimeUseCase: UpdateTodoTimeUseCase,
     private val categoryDragDropUseCase: CategoryDragDropUseCase,
     private val getDeadlineDateModeUseCase: GetDeadlineDateModeUseCase
 ) : BaseViewModel<BacklogPageState>(
@@ -76,7 +74,6 @@ class BacklogViewModel @Inject constructor(
     private var tempTodoId: Long? = null
 
     init {
-        getYesterdayList(0, 1)
         getDeadlineDateMode()
         getBacklogList(-1, 0, 100)
     }
@@ -105,7 +102,7 @@ class BacklogViewModel @Inject constructor(
             eventName = "delete_category",
             params = mapOf(
                 "category_name" to uiState.value.categoryList[uiState.value.selectedCategoryIndex].categoryName,
-                "delete_date" to TimeFormatter.getTodayFullDate()
+                "delete_date" to DateTimeFormatter.getTodayFullDate()
             )
         )
 
@@ -169,19 +166,6 @@ class BacklogViewModel @Inject constructor(
         )
     }
 
-    private fun getYesterdayList(page: Int, size: Int) {
-        viewModelScope.launch {
-            getYesterdayListUseCase(request = ListRequestModel(page = page, size = size)).collect {
-                resultResponse(it, { data ->
-                    updateState(uiState.value.copy(isExistYesterdayTodo = data.yesterdays.isNotEmpty()))
-                    Timber.d("[어제 한 일] 서버통신 성공(Backlog) -> $data")
-                }, { error ->
-                    Timber.d("[어제 한 일] 서버통신 실패(Backlog) -> $error")
-                })
-            }
-        }
-    }
-
     fun createBacklog(content: String) {
         addTemporaryBacklog(content)
 
@@ -205,7 +189,7 @@ class BacklogViewModel @Inject constructor(
     private fun onSuccessCreateBacklog(response: TodoIdModel) {
         AnalyticsManager.logEvent(
             eventName = "make_task",
-            params = mapOf("make_date" to TimeFormatter.getToday(), "task_ID" to response.todoId)
+            params = mapOf("make_date" to DateTimeFormatter.getToday(), "task_ID" to response.todoId)
         )
         val updatedList = uiState.value.backlogList.map { item ->
             if (item.todoId == tempTodoId) {
@@ -228,7 +212,7 @@ class BacklogViewModel @Inject constructor(
     fun swipeBacklogItem(item: TodoItemModel) {
         AnalyticsManager.logEvent(
             eventName = "add_today",
-            params = mapOf("add_date" to TimeFormatter.getTodayFullDate(), "task_ID" to "${item.todoId}")
+            params = mapOf("add_date" to DateTimeFormatter.getTodayFullDate(), "task_ID" to "${item.todoId}")
         )
 
         val newList = uiState.value.backlogList.filter { it.todoId != item.todoId }
@@ -340,7 +324,7 @@ class BacklogViewModel @Inject constructor(
     }
 
     private fun updateDeadlineInUI(deadline: String?, id: Long) {
-        val dDay = TimeFormatter.calculateDDay(deadline)
+        val dDay = DateTimeFormatter.calculateDDay(deadline)
         val newList = uiState.value.backlogList.map {
             if (it.todoId == id) {
                 it.copy(deadline = deadline ?: "", dDay = dDay)
@@ -490,6 +474,37 @@ class BacklogViewModel @Inject constructor(
         )
     }
 
+    fun updateTodoTime(id: Long, time: String) {
+        updateTodoTimeInUI(id, time)
+
+        viewModelScope.launch {
+            updateTodoTimeUseCase(request = UpdateTodoTimeUseCase.Companion.UpdateTodoTimeModel(
+                todoId = id,
+                requestModel = TodoTimeModel(todoTime = time)
+            )).collect {
+                resultResponse(it, { viewModelScope.launch { updateSnapshotList(uiState.value.backlogList) } }, { onFailedUpdateBacklogList() })
+            }
+        }
+    }
+
+    private fun updateTodoTimeInUI(id: Long, time: String) {
+        val newList = uiState.value.backlogList.map {
+            if (it.todoId == id) {
+                it.copy(time = time)
+            } else {
+                it
+            }
+        }
+        val updatedItem = uiState.value.selectedItem.copy(time = time)
+
+        updateState(
+            uiState.value.copy(
+                backlogList = newList,
+                selectedItem = updatedItem
+            )
+        )
+    }
+
     private suspend fun updateSnapshotList(newList: List<TodoItemModel>) {
         mutex.withLock {
             snapshotList = newList
@@ -509,10 +524,5 @@ class BacklogViewModel @Inject constructor(
                 updateState(uiState.value.copy(isDeadlineDateMode = it))
             }
         }
-    }
-
-    // YesterdayTodo
-    fun completeYesterdayTodoDisplay() {
-        updateState(uiState.value.copy(isExistYesterdayTodo = false))
     }
 }

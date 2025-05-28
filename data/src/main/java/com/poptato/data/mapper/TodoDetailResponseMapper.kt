@@ -13,7 +13,8 @@ object TodoDetailResponseMapper : Mapper<TodoDetailItemResponse, TodoDetailItemM
                 content = it.content,
                 deadline = it.deadline,
                 categoryName = it.categoryName,
-                emojiImageUrl = it.emojiImageUrl
+                emojiImageUrl = it.emojiImageUrl,
+                time = it.time ?: ""
             )
         } ?: TodoDetailItemModel()
     }

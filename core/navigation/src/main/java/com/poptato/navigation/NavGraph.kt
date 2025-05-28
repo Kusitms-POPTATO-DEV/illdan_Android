@@ -1,5 +1,7 @@
 package com.poptato.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -91,6 +93,7 @@ fun NavGraphBuilder.loginNavGraph(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 fun NavGraphBuilder.backlogNavGraph(
     navController: NavHostController,
     showBottomSheet: (TodoItemModel, List<CategoryItemModel>) -> Unit,
@@ -103,6 +106,7 @@ fun NavGraphBuilder.backlogNavGraph(
     showDialog: (DialogContentModel) -> Unit,
     categoryScreenContent: (CategoryScreenContentModel) -> Unit,
     updateTodoRepeatFlow: SharedFlow<Long>,
+    updateTodoTimeFlow: SharedFlow<Pair<Long, String>>
 ) {
     navigation(
         startDestination = NavRoutes.BacklogScreen.createRoute(0),
@@ -117,7 +121,6 @@ fun NavGraphBuilder.backlogNavGraph(
             val index = it.arguments?.getInt("index") ?: 0
 
             BacklogScreen(
-                goToYesterdayList = { navController.navigate(NavRoutes.YesterdayListScreen.route) },
                 goToCategorySelect = {
                     categoryScreenContent(it)
                     navController.navigate(NavRoutes.CategoryScreen.route) },
@@ -128,6 +131,7 @@ fun NavGraphBuilder.backlogNavGraph(
                 updateBookmarkFlow = updateBookmarkFlow,
                 updateCategoryFlow = updateCategoryFlow,
                 updateTodoRepeatFlow = updateTodoRepeatFlow,
+                updateTodoTimeFlow = updateTodoTimeFlow,
                 showSnackBar = showSnackBar,
                 showDialog = showDialog,
                 initialCategoryIndex = index
@@ -273,7 +277,8 @@ fun NavGraphBuilder.todayNavGraph(
     activateItemFlow: SharedFlow<Long>,
     updateCategoryFlow: SharedFlow<Long?>,
     updateBookmarkFlow: SharedFlow<Long>,
-    updateTodoRepeatFlow: SharedFlow<Long>
+    updateTodoRepeatFlow: SharedFlow<Long>,
+    updateTodoTimeFlow: SharedFlow<Pair<Long, String>>
 ) {
     navigation(startDestination = NavRoutes.TodayScreen.route, route = NavRoutes.TodayGraph.route) {
         composable(NavRoutes.TodayScreen.route) {
@@ -286,7 +291,8 @@ fun NavGraphBuilder.todayNavGraph(
                 activateItemFlow = activateItemFlow,
                 deleteTodoFlow = deleteTodoFlow,
                 updateCategoryFlow = updateCategoryFlow,
-                updateTodoRepeatFlow = updateTodoRepeatFlow
+                updateTodoRepeatFlow = updateTodoRepeatFlow,
+                updateTodoTimeFlow = updateTodoTimeFlow
             )
         }
     }
@@ -294,7 +300,6 @@ fun NavGraphBuilder.todayNavGraph(
 
 fun NavGraphBuilder.historyNavGraph(
     navController: NavHostController,
-    showBottomSheet: (CalendarMonthModel) -> Unit,
     updateMonthFlow: SharedFlow<CalendarMonthModel>
 ) {
     navigation(
@@ -303,7 +308,6 @@ fun NavGraphBuilder.historyNavGraph(
     ) {
         composable(NavRoutes.HistoryScreen.route) {
             HistoryScreen(
-                showBottomSheet = showBottomSheet,
                 updateMonthFlow = updateMonthFlow
             )
         }

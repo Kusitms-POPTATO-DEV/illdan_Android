@@ -6,7 +6,7 @@ import org.threeten.bp.Year
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.temporal.ChronoUnit
 
-object TimeFormatter {
+object DateTimeFormatter {
 
     fun getToday(): String {
         val currentDate = LocalDate.now()

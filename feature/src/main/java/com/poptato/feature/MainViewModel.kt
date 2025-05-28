@@ -1,7 +1,9 @@
 package com.poptato.feature
 
+import androidx.lifecycle.viewModelScope
 import com.poptato.core.enums.BottomNavType
 import com.poptato.domain.model.enums.BottomSheetType
+import com.poptato.domain.model.request.ListRequestModel
 import com.poptato.domain.model.response.category.CategoryIconItemModel
 import com.poptato.domain.model.response.category.CategoryIconTotalListModel
 import com.poptato.domain.model.response.category.CategoryItemModel
@@ -9,20 +11,26 @@ import com.poptato.domain.model.response.category.CategoryScreenContentModel
 import com.poptato.domain.model.response.dialog.DialogContentModel
 import com.poptato.domain.model.response.history.CalendarMonthModel
 import com.poptato.domain.model.response.today.TodoItemModel
+import com.poptato.domain.model.response.yesterday.YesterdayListModel
+import com.poptato.domain.usecase.yesterday.GetYesterdayListUseCase
 import com.poptato.navigation.NavRoutes
 import com.poptato.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor() : BaseViewModel<MainPageState>(MainPageState()) {
+class MainViewModel @Inject constructor(
+    private val getYesterdayListUseCase: GetYesterdayListUseCase
+) : BaseViewModel<MainPageState>(MainPageState()) {
     val updateDeadlineFlow = MutableSharedFlow<String?>()
     val deleteTodoFlow = MutableSharedFlow<Long>()
     val activateItemFlow = MutableSharedFlow<Long>()
     val updateBookmarkFlow = MutableSharedFlow<Long>()
     val updateCategoryFlow = MutableSharedFlow<Long?>()
     val updateTodoRepeatFlow = MutableSharedFlow<Long>()
+    val updateTodoTimeFlow = MutableSharedFlow<Pair<Long, String>>()
     val animationDuration = 300
     val selectedIconInBottomSheet = MutableSharedFlow<CategoryIconItemModel>()
     val updateMonthFlow = MutableSharedFlow<CalendarMonthModel>()
@@ -117,6 +125,17 @@ class MainViewModel @Inject constructor() : BaseViewModel<MainPageState>(MainPag
         )
     }
 
+    fun onUpdatedTodoTime(value: Triple<String, Int, Int>?) {
+        val time = uiState.value.selectedTodoItem.formatTime(value)
+        val updatedItem = uiState.value.selectedTodoItem.copy(time = time)
+
+        updateState(
+            uiState.value.copy(
+                selectedTodoItem = updatedItem
+            )
+        )
+    }
+
     fun toggleBackPressed(value: Boolean) { updateState(uiState.value.copy(backPressedOnce = value)) }
 
     fun updateBottomSheetType(type: BottomSheetType) { updateState(uiState.value.copy(bottomSheetType = type)) }
@@ -138,21 +157,15 @@ class MainViewModel @Inject constructor() : BaseViewModel<MainPageState>(MainPag
         )
     }
 
-    fun showMonthPicker(currentMonthModel: CalendarMonthModel) {
-        updateState(
-            uiState.value.copy(
-                selectedMonth = currentMonthModel, // 초기 Month 설정
-                bottomSheetType = BottomSheetType.MonthPicker
-            )
-        )
+    fun getYesterdayList() {
+        viewModelScope.launch {
+            getYesterdayListUseCase(ListRequestModel(0, 1)).collect {
+                resultResponse(it, ::onSuccessGetYesterdayList)
+            }
+        }
     }
 
-    fun onMonthSelected(selectedMonthModel: CalendarMonthModel) {
-            updateState(
-                uiState.value.copy(
-                    selectedMonth = selectedMonthModel,
-                    bottomSheetType = BottomSheetType.Main
-                )
-            )
+    private fun onSuccessGetYesterdayList(result: YesterdayListModel) {
+        updateState(uiState.value.copy(isExistYesterday = result.yesterdays.isNotEmpty()))
     }
 }

@@ -31,19 +31,16 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.poptato.core.enums.DateType
-import com.poptato.core.util.TimeFormatter
+import com.poptato.core.util.DateTimeFormatter
 import com.poptato.design_system.Cancel
-import com.poptato.design_system.Complete
 import com.poptato.design_system.Confirm
-import com.poptato.design_system.Day
 import com.poptato.design_system.Gray00
 import com.poptato.design_system.Gray100
 import com.poptato.design_system.Gray40
+import com.poptato.design_system.Gray60
 import com.poptato.design_system.Gray95
-import com.poptato.design_system.Month
 import com.poptato.design_system.PoptatoTypo
 import com.poptato.design_system.Primary60
-import com.poptato.design_system.Year
 import com.poptato.domain.model.enums.BottomSheetType
 import com.poptato.ui.util.fadingEdge
 
@@ -54,11 +51,11 @@ fun DatePickerBottomSheet(
     onDismissRequest: () -> Unit = {},
     bottomSheetType: BottomSheetType = BottomSheetType.FullDate
 ) {
-    val todayDate = TimeFormatter.getTodayYearMonthDay()
+    val todayDate = DateTimeFormatter.getTodayYearMonthDay()
     val initialYear = todayDate[0].toInt()
     val initialMonth = todayDate[1].toInt()
     val initialDay = todayDate[2].toInt()
-    val items = TimeFormatter.getDaysInMonth(initialYear, initialMonth)
+    val items = DateTimeFormatter.getDaysInMonth(initialYear, initialMonth)
 
     DatePickerBottomSheetContent(
         initialYear = initialYear,
@@ -105,40 +102,40 @@ fun DatePickerBottomSheetContent(
                 .padding(horizontal = 24.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                DialPicker(
-                    items = (2024..2100).toList(),
-                    listState = yearState,
-                    dateType = DateType.YEAR,
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                DialPicker(
-                    items = (1..12).toList(),
-                    listState = monthState,
-                    dateType = DateType.MONTH,
-                )
-            }
-
-            if (bottomSheetType == BottomSheetType.FullDate) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                ) {
-                    DialPicker(
-                        items = items,
-                        listState = dayState,
-                        dateType = DateType.DAY,
-                    )
-                }
-            }
+//            Box(
+//                modifier = Modifier
+//                    .weight(1f)
+//            ) {
+//                DialPicker(
+//                    items = (2024..2100).toList(),
+//                    listState = yearState,
+//                    dateType = DateType.YEAR,
+//                )
+//            }
+//
+//            Box(
+//                modifier = Modifier
+//                    .weight(1f)
+//            ) {
+//                DialPicker(
+//                    items = (1..12).toList(),
+//                    listState = monthState,
+//                    dateType = DateType.MONTH,
+//                )
+//            }
+//
+//            if (bottomSheetType == BottomSheetType.FullDate) {
+//                Box(
+//                    modifier = Modifier
+//                        .weight(1f)
+//                ) {
+//                    DialPicker(
+//                        items = items,
+//                        listState = dayState,
+//                        dateType = DateType.DAY,
+//                    )
+//                }
+//            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -173,8 +170,6 @@ fun DatePickerBottomSheetContent(
 
                     if (bottomSheetType == BottomSheetType.FullDate) {
                         onFullDateSelected(formattedDate)
-                    } else if (bottomSheetType == BottomSheetType.SubDate) {
-                        onSubDateSelected(selectedYear, selectedMonth)
                     }
                 },
                 modifier = Modifier
@@ -184,62 +179,6 @@ fun DatePickerBottomSheetContent(
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-    }
-}
-
-@Composable
-fun DialPicker(
-    items: List<Int>,
-    listState: LazyListState,
-    dateType: DateType = DateType.YEAR,
-) {
-    val extendedItems = listOf(0, 0) + items + listOf(0, 0)
-    val visibleItemsCount = 5
-    val itemHeight = 30.dp
-    val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
-    val fadingEdgeGradient = remember {
-        Brush.verticalGradient(
-            0f to Color.Transparent,
-            0.5f to Color.Black,
-            1f to Color.Transparent
-        )
-    }
-
-    LazyColumn(
-        state = listState,
-        modifier = Modifier
-            .height(itemHeight * visibleItemsCount)
-            .fadingEdge(fadingEdgeGradient),
-        flingBehavior = flingBehavior
-    ) {
-        items(extendedItems.size) { index ->
-            val item = extendedItems[index]
-            val firstVisibleItemIndex by remember { derivedStateOf { listState.firstVisibleItemIndex } }
-            val fontStyle = when (index) {
-                firstVisibleItemIndex + 2 -> PoptatoTypo.xLSemiBold
-                firstVisibleItemIndex + 1, firstVisibleItemIndex + 3 -> PoptatoTypo.lgSemiBold
-                firstVisibleItemIndex, firstVisibleItemIndex + 4 -> PoptatoTypo.mdSemiBold
-                else -> PoptatoTypo.smSemiBold
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(itemHeight),
-                contentAlignment = Alignment.Center
-            ) {
-                if (item != 0) {
-                    Text(
-                        text = "$item ${dateType.value}",
-                        style = fontStyle,
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        color = Gray00
-                    )
-                }
-            }
-        }
     }
 }
 

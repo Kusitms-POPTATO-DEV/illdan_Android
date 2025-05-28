@@ -3,6 +3,7 @@ package com.poptato.domain.repository
 import com.poptato.domain.model.request.todo.DragDropRequestModel
 import com.poptato.domain.model.request.todo.ModifyTodoRequestModel
 import com.poptato.domain.model.request.todo.TodoIdModel
+import com.poptato.domain.model.request.todo.TodoTimeModel
 import com.poptato.domain.model.request.todo.UpdateDeadlineRequestModel
 import com.poptato.domain.model.request.todo.UpdateTodoCategoryModel
 import com.poptato.domain.model.response.todo.TodoDetailItemModel
@@ -19,4 +20,5 @@ interface TodoRepository {
     suspend fun updateTodoCategory(request: UpdateTodoCategoryModel): Flow<Result<Unit>>
     suspend fun getTodoDetail(todoId: Long): Flow<Result<TodoDetailItemModel>>
     suspend fun updateTodoRepeat(todoId: Long): Flow<Result<Unit>>
+    suspend fun updateTodoTime(todoId: Long, request: TodoTimeModel): Flow<Result<Unit>>
 }

@@ -153,7 +153,7 @@ fun NavGraphBuilder.categoryNavGraph(
     ) {
         composable(NavRoutes.CategoryScreen.route) {
             CategoryScreen(
-                popScreen = { navController.popBackStack() },
+                popScreen = { index -> navController.navigate(NavRoutes.BacklogScreen.createRoute(index)) },
                 goToBacklog = { index ->
                     navController.navigate(NavRoutes.BacklogScreen.createRoute(index))
                 },

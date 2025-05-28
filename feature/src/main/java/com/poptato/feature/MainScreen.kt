@@ -26,8 +26,10 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -246,6 +248,7 @@ fun MainScreen() {
 
         ModalBottomSheetLayout(
             sheetState = sheetState,
+            sheetGesturesEnabled = false,
             sheetContent = {
                 AnimatedContent(
                     targetState = uiState.bottomSheetType,

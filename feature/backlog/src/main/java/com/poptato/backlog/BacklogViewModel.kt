@@ -1,5 +1,6 @@
 package com.poptato.backlog
 
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
 import com.poptato.domain.model.enums.TodoType
 import com.poptato.core.util.DateTimeFormatter
@@ -263,6 +264,7 @@ class BacklogViewModel @Inject constructor(
         }
     }
 
+    @RequiresApi(35)
     fun onCategoryDragEnd() {
         val categoryIds = uiState.value.categoryList.map { it.categoryId }.toMutableList()
 

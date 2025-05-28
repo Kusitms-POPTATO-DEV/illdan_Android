@@ -38,9 +38,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Divider
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -160,11 +161,13 @@ fun BacklogScreen(
     val permissionState = rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
 
     LaunchedEffect(Unit) {
-        viewModel.getCategoryList(initialCategoryIndex)
-
         if (!permissionState.status.isGranted) {
             permissionState.launchPermissionRequest()
         }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.getCategoryList(initialCategoryIndex)
     }
 
     LaunchedEffect(Unit) {
@@ -255,7 +258,8 @@ fun BacklogScreen(
                 goToCategorySelect(
                     CategoryScreenContentModel(
                         screenType = CategoryScreenType.Add,
-                        categoryIndex = uiState.categoryList.size
+                        categoryIndex = uiState.categoryList.size,
+                        currentSelectedIndex = uiState.selectedCategoryIndex
                     )
                 )
             },
@@ -280,7 +284,8 @@ fun BacklogScreen(
                     CategoryScreenContentModel(
                         screenType = CategoryScreenType.Modify,
                         categoryItem = uiState.categoryList[uiState.selectedCategoryIndex],
-                        categoryIndex = uiState.selectedCategoryIndex
+                        categoryIndex = uiState.selectedCategoryIndex,
+                        currentSelectedIndex = uiState.selectedCategoryIndex
                     )
                 )
             },
@@ -380,6 +385,7 @@ fun BacklogContent(
                     .padding(end = 31.dp, top = 42.dp)
             ) {
                 DropdownMenu(
+                    modifier = Modifier.height(82.dp),
                     shape = RoundedCornerShape(12.dp),
                     containerColor = Gray95,
                     expanded = isDropDownMenuExpanded,
@@ -392,7 +398,7 @@ fun BacklogContent(
                         onClickItemDropdownItem = onClickCategoryModifyDropdown
                     )
 
-                    Divider(color = Gray90)
+                    HorizontalDivider(color = Gray90)
 
                     CategoryDropDownItem(
                         itemIcon = R.drawable.ic_trash,
@@ -498,6 +504,7 @@ fun CategoryDropDownItem(
     onClickItemDropdownItem: () -> Unit = {}
 ) {
     DropdownMenuItem(
+        modifier = Modifier.height(33.dp).width(97.dp),
         contentPadding = PaddingValues(0.dp),
         leadingIcon = {
             Icon(
@@ -514,7 +521,8 @@ fun CategoryDropDownItem(
                 text = itemText,
                 color = textColor,
                 style = PoptatoTypo.smMedium,
-                modifier = Modifier
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(end = 4.dp)
             )
         },
         onClick = { onClickItemDropdownItem() }
@@ -583,7 +591,7 @@ fun BacklogCategoryList(
                                 .takeIf { it != 0f }
                                 ?.let {
                                     dragDropState.overscrollJob = scope.launch {
-                                        val adjustedScroll = it * 0.3f
+                                        val adjustedScroll = it
                                         dragDropState.lazyListState.scrollBy(adjustedScroll)
                                     }
                                 } ?: run { dragDropState.overscrollJob?.cancel() }

@@ -192,7 +192,7 @@ class TodayViewModel @Inject constructor(
         val currentList = uiState.value.todayList.toMutableList()
         val firstCompletedIndex = currentList.indexOfFirst { it.todoStatus == TodoStatus.COMPLETED }
 
-        if (fromIndex >= firstCompletedIndex || toIndex >= firstCompletedIndex) return
+        if (firstCompletedIndex != -1 && (fromIndex >= firstCompletedIndex || toIndex >= firstCompletedIndex)) return
 
         AnalyticsManager.logEvent(
             eventName = "drag_today",

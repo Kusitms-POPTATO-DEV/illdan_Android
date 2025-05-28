@@ -1,6 +1,5 @@
 package com.poptato.ui.common
 
-import android.util.Log
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +24,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.poptato.design_system.CONFIRM_ACTION
 import com.poptato.design_system.Confirm
 import com.poptato.design_system.DELETE
 import com.poptato.design_system.Gray00
@@ -45,6 +43,9 @@ fun TimePickerBottomSheet(
     onDismissRequest: () -> Unit = {},
     onClickCompletionButton: (Pair<Long, Triple<String, Int, Int>?>) -> Unit = {}
 ) {
+    val period = listOf("오전", "오후")
+    val hours = (1..12).toList()
+    val minutes = (0..55 step 5).toList()
     val periodState = rememberLazyListState(
         initialFirstVisibleItemIndex = when (item.meridiem) {
             "오전" -> 0
@@ -54,69 +55,35 @@ fun TimePickerBottomSheet(
     )
     val hourState = rememberLazyListState(initialFirstVisibleItemIndex = item.hour)
     val minuteState = rememberLazyListState(initialFirstVisibleItemIndex = item.minute.div(5))
-    val period = listOf("오전", "오후")
-    val hour = (1..12).toList()
-    val minute = (0..55 step 5).toList()
 
     Column(
         modifier = Modifier
             .padding(top = 24.dp, bottom = 20.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 40.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            DialPicker(items = period, listState = periodState, modifier = Modifier.weight(1f))
-            DialPicker(
-                items = hour.map { it.toString().padStart(2, '0') },
-                listState = hourState,
-                modifier = Modifier.weight(1f)
-            )
-            DialPicker(
-                items = minute.map { it.toString().padStart(2, '0') },
-                listState = minuteState,
-                modifier = Modifier.weight(1f)
-            )
-        }
+        TimePickerSelector(
+            periodState = periodState,
+            hourState = hourState,
+            minuteState = minuteState
+        )
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp)
-        ) {
-            PoptatoButton(
-                buttonText = DELETE,
-                textColor = Gray50,
-                backgroundColor = Gray95,
-                modifier = Modifier.weight(1f),
-                onClickButton = {
-                    onClickCompletionButton(Pair(item.todoId, null))
-                    onDismissRequest()
-                }
-            )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            PoptatoButton(
-                buttonText = Confirm,
-                textColor = Gray90,
-                backgroundColor = Primary40,
-                modifier = Modifier.weight(1f),
-                onClickButton = {
-                    val selectedPeriod = period[periodState.firstVisibleItemIndex]
-                    val selectedHour = hour[hourState.firstVisibleItemIndex]
-                    val selectedMinute = minute[minuteState.firstVisibleItemIndex]
-
-                    onClickCompletionButton(Pair(item.todoId, Triple(selectedPeriod, selectedHour, selectedMinute)))
-                    Timber.e(Triple(selectedPeriod, selectedHour, selectedMinute).toString())
-                    onDismissRequest()
-                }
-            )
-        }
+        TimePickerBottomSheetActionButtons(
+            onDelete = {
+                onClickCompletionButton(Pair(item.todoId, null))
+                onDismissRequest()
+            },
+            onConfirm = {
+                val selected = Triple(
+                    period[periodState.firstVisibleItemIndex],
+                    hours[hourState.firstVisibleItemIndex],
+                    minutes[minuteState.firstVisibleItemIndex]
+                )
+                onClickCompletionButton(Pair(item.todoId, selected))
+                Timber.e(selected.toString())
+                onDismissRequest()
+            }
+        )
     }
 }
 
@@ -173,5 +140,58 @@ fun DialPicker(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun TimePickerSelector(
+    periodState: LazyListState,
+    hourState: LazyListState,
+    minuteState: LazyListState,
+    modifier: Modifier = Modifier
+) {
+    val period = listOf("오전", "오후")
+    val hour = (1..12).toList().map { it.toString().padStart(2, '0') }
+    val minute = (0..55 step 5).toList().map { it.toString().padStart(2, '0') }
+
+    Row(
+        modifier = modifier.padding(horizontal = 40.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        DialPicker(items = period, listState = periodState, modifier = Modifier.weight(1f))
+        DialPicker(items = hour, listState = hourState, modifier = Modifier.weight(1f))
+        DialPicker(items = minute, listState = minuteState, modifier = Modifier.weight(1f))
+    }
+}
+
+
+@Composable
+private fun TimePickerBottomSheetActionButtons(
+    onDelete: () -> Unit,
+    onConfirm: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+    ) {
+        PoptatoButton(
+            buttonText = DELETE,
+            textColor = Gray50,
+            backgroundColor = Gray95,
+            modifier = Modifier.weight(1f),
+            onClickButton = onDelete
+        )
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        PoptatoButton(
+            buttonText = Confirm,
+            textColor = Gray90,
+            backgroundColor = Primary40,
+            modifier = Modifier.weight(1f),
+            onClickButton = onConfirm
+        )
     }
 }

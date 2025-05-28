@@ -20,12 +20,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,11 +70,10 @@ import com.poptato.domain.model.response.category.CategoryScreenContentModel
 import com.poptato.domain.model.response.dialog.DialogContentModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
-import timber.log.Timber
 
 @Composable
 fun CategoryScreen(
-    popScreen: () -> Unit = {},
+    popScreen: (Int) -> Unit = {},
     goToBacklog: (Int) -> Unit = {},
     showIconBottomSheet: (CategoryIconTotalListModel) -> Unit = {},
     selectedIconInBottomSheet: SharedFlow<CategoryIconItemModel>,
@@ -127,7 +125,7 @@ fun CategoryScreen(
         uiState = uiState,
         interactionSource = interactionSource,
         focusManager = focusManager,
-        onClickBackBtn = { popScreen() },
+        onClickBackBtn = { popScreen(uiState.currentSelectedIndex) },
         onClickFinishBtn = {
             focusManager.clearFocus()
             if (viewModel.validateCategoryInput()) {

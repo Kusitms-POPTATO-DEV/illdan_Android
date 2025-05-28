@@ -211,6 +211,15 @@ fun TodoBottomSheetContent(
         Spacer(modifier = Modifier.height(20.dp))
 
         BottomSheetBtn(
+            resourceId = R.drawable.ic_calendar,
+            buttonText = WORD_DATE,
+            textColor = Gray30,
+            modifier = Modifier.clickable {
+                onClickShowDatePicker()
+            },
+            deadline = item.deadline
+        )
+        BottomSheetBtn(
             resourceId = R.drawable.ic_clock,
             buttonText = TIME,
             textColor = Gray30,
@@ -233,15 +242,6 @@ fun TodoBottomSheetContent(
             isRepeatBtn = true,
             isRepeat = item.isRepeat,
             onClickBtnRepeat = { onClickBtnRepeat(item.todoId) }
-        )
-        BottomSheetBtn(
-            resourceId = R.drawable.ic_calendar,
-            buttonText = WORD_DATE,
-            textColor = Gray30,
-            modifier = Modifier.clickable {
-                onClickShowDatePicker()
-            },
-            deadline = item.deadline
         )
         BottomSheetBtn(
             resourceId = R.drawable.ic_add_category,

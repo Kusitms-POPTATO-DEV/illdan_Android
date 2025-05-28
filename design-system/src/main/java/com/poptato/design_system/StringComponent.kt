@@ -31,6 +31,7 @@ const val FRI = "금"
 const val SAT = "토"
 const val SUN = "일"
 const val TIME = "시간"
+const val WORD_DATE = "날짜"
 
 // KaKaoLogin
 const val BtnKaKaoLoginText = "카카오 로그인"

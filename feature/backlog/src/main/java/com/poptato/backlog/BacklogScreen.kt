@@ -588,7 +588,7 @@ fun BacklogCategoryList(
                                 .takeIf { it != 0f }
                                 ?.let {
                                     dragDropState.overscrollJob = scope.launch {
-                                        val adjustedScroll = it * 0.3f
+                                        val adjustedScroll = it
                                         dragDropState.lazyListState.scrollBy(adjustedScroll)
                                     }
                                 } ?: run { dragDropState.overscrollJob?.cancel() }

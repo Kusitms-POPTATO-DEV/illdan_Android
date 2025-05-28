@@ -141,12 +141,12 @@ class DragDropListState(
 
     fun checkForOverScrollHorizontal(): Float {
         return initiallyDraggedElement?.let {
-            val startOffsetX = it.offset + draggedDistance
-            val endOffsetX = it.offsetEnd + draggedDistance
+            val startOffsetX = it.offset + horizontalDraggedDistance
+            val endOffsetX = it.offsetEnd + horizontalDraggedDistance
 
             return@let when {
-                draggedDistance > 0 -> (endOffsetX - lazyListState.layoutInfo.viewportEndOffset).takeIf { diff -> diff > 0 }
-                draggedDistance < 0 -> (startOffsetX - lazyListState.layoutInfo.viewportStartOffset).takeIf { diff -> diff < 0 }
+                horizontalDraggedDistance > 0 -> (endOffsetX - lazyListState.layoutInfo.viewportEndOffset).takeIf { diff -> diff > 0 }
+                horizontalDraggedDistance < 0 -> (startOffsetX - lazyListState.layoutInfo.viewportStartOffset).takeIf { diff -> diff < 0 }
                 else -> null
             }
         } ?: 0f

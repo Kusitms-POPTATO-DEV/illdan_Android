@@ -20,7 +20,7 @@ class DragDropListState(
     private val onMove: (Int, Int) -> Unit,
     val scope: CoroutineScope
 ) {
-    var draggedDistance by mutableFloatStateOf(0f)
+    var verticalDraggedDistance by mutableFloatStateOf(0f)
     var horizontalDraggedDistance by mutableFloatStateOf(0f)
     private var initiallyDraggedElement by mutableStateOf<LazyListItemInfo?>(null)
     private val initialOffsets: Pair<Int, Int>?
@@ -30,7 +30,7 @@ class DragDropListState(
         get() = currentIndexOfDraggedItem?.let {
             lazyListState.getVisibleItemInfoFor(absolute = it)
         }?.let { item ->
-            (initiallyDraggedElement?.offset ?: 0f).toFloat() + draggedDistance - item.offset
+            (initiallyDraggedElement?.offset ?: 0f).toFloat() + verticalDraggedDistance - item.offset
         }
     val horizontalElementDisplacement
         get() = currentIndexOfDraggedItem?.let {
@@ -67,7 +67,7 @@ class DragDropListState(
     }
 
     fun onDragInterrupted() {
-        draggedDistance = 0f
+        verticalDraggedDistance = 0f
         horizontalDraggedDistance = 0f
         currentIndexOfDraggedItem = null
         initiallyDraggedElement = null
@@ -75,11 +75,11 @@ class DragDropListState(
     }
 
     fun onDrag(offset: Offset) {
-        draggedDistance += offset.y
+        verticalDraggedDistance += offset.y
 
         initialOffsets?.let { (topOffset, bottomOffset) ->
-            val startOffset = topOffset + draggedDistance
-            val endOffset = bottomOffset + draggedDistance
+            val startOffset = topOffset + verticalDraggedDistance
+            val endOffset = bottomOffset + verticalDraggedDistance
 
             currentElement?.let { hovered ->
                 lazyListState.layoutInfo.visibleItemsInfo.filterNot { item ->
@@ -128,13 +128,16 @@ class DragDropListState(
 
     fun checkForOverScroll(): Float {
         return initiallyDraggedElement?.let {
-            val startOffset = it.offset + draggedDistance
-            val endOffset = it.offsetEnd + draggedDistance
+            val startOffset = it.offset + verticalDraggedDistance
+            val endOffset = it.offsetEnd + verticalDraggedDistance
+            val viewportHeight = lazyListState
+                .layoutInfo
+                .viewportEndOffset
 
-            return@let when {
-                draggedDistance > 0 -> (endOffset - lazyListState.layoutInfo.viewportEndOffset).takeIf { diff -> diff > 0 }
-                draggedDistance < 0 -> (startOffset - lazyListState.layoutInfo.viewportStartOffset).takeIf { diff -> diff < 0 }
-                else -> null
+            when {
+                endOffset > viewportHeight -> (endOffset - viewportHeight)
+                startOffset < 0f -> startOffset
+                else -> 0f
             }
         } ?: 0f
     }

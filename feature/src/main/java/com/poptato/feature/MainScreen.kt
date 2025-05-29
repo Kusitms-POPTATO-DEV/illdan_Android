@@ -432,6 +432,8 @@ fun MainScreen() {
                                             launchSingleTop = true
                                         }
                                     }
+
+                                    viewModel.recordGAEvent(route)
                                 }
                             },
                             modifier = Modifier.navigationBarsPadding(),

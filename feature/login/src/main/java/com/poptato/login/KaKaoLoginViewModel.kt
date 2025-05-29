@@ -45,7 +45,7 @@ class KaKaoLoginViewModel @Inject constructor(
 
     private fun onSuccessKaKaoLogin(model: AuthModel) {
         AnalyticsManager.logEvent(
-            eventName = "log_in",
+            eventName = "login_kakao",
             params = mapOf("method" to "kakao")
         )
         viewModelScope.launch {

@@ -147,7 +147,7 @@ class BacklogViewModel @Inject constructor(
         }
 
         AnalyticsManager.logEvent(
-            eventName = "get_backlog_list",
+            eventName = "get_backlog",
             params = mapOf("button_name" to "할 일 내비게이션바 버튼", "user_action" to "백로그 전체 조회")
         )
     }

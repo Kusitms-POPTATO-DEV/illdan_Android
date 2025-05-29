@@ -15,6 +15,7 @@ import com.poptato.domain.model.response.yesterday.YesterdayListModel
 import com.poptato.domain.usecase.yesterday.GetYesterdayListUseCase
 import com.poptato.navigation.NavRoutes
 import com.poptato.ui.base.BaseViewModel
+import com.poptato.ui.util.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -134,6 +135,8 @@ class MainViewModel @Inject constructor(
                 selectedTodoItem = updatedItem
             )
         )
+
+        AnalyticsManager.logEvent(eventName = "set_time")
     }
 
     fun toggleBackPressed(value: Boolean) { updateState(uiState.value.copy(backPressedOnce = value)) }
@@ -167,5 +170,11 @@ class MainViewModel @Inject constructor(
 
     private fun onSuccessGetYesterdayList(result: YesterdayListModel) {
         updateState(uiState.value.copy(isExistYesterday = result.yesterdays.isNotEmpty()))
+    }
+
+    // GA 이벤트 기록 메서드
+    fun recordGAEvent(route: String) {
+        if (route == NavRoutes.TodayScreen.route) { AnalyticsManager.logEvent(eventName = "get_today") }
+        else if (route == NavRoutes.HistoryScreen.route) { AnalyticsManager.logEvent(eventName = "get_calendar") }
     }
 }

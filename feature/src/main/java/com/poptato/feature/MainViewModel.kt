@@ -173,7 +173,7 @@ class MainViewModel @Inject constructor(
     }
 
     // GA 이벤트 기록 메서드
-    fun recordGAEvent(route: String) {
+    fun logAnalyticsEventForRoute(route: String) {
         if (route == NavRoutes.TodayScreen.route) { AnalyticsManager.logEvent(eventName = "get_today") }
         else if (route == NavRoutes.HistoryScreen.route) { AnalyticsManager.logEvent(eventName = "get_calendar") }
     }

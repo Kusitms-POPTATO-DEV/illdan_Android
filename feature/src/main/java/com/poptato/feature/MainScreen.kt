@@ -29,7 +29,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -45,14 +44,12 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
@@ -68,7 +65,6 @@ import com.poptato.domain.model.response.category.CategoryIconTotalListModel
 import com.poptato.domain.model.response.category.CategoryItemModel
 import com.poptato.domain.model.response.category.CategoryScreenContentModel
 import com.poptato.domain.model.response.dialog.DialogContentModel
-import com.poptato.domain.model.response.history.CalendarMonthModel
 import com.poptato.domain.model.response.today.TodoItemModel
 import com.poptato.feature.component.BottomNavBar
 import com.poptato.navigation.NavRoutes
@@ -84,8 +80,6 @@ import com.poptato.ui.common.CalendarBottomSheet
 import com.poptato.ui.common.CategoryBottomSheet
 import com.poptato.ui.common.CategoryIconBottomSheet
 import com.poptato.ui.common.CommonSnackBar
-import com.poptato.ui.common.DatePickerBottomSheet
-import com.poptato.ui.common.MonthPickerBottomSheet
 import com.poptato.ui.common.OneBtnTypeDialog
 import com.poptato.ui.common.TimePickerBottomSheet
 import com.poptato.ui.common.TodoBottomSheet
@@ -433,7 +427,7 @@ fun MainScreen() {
                                         }
                                     }
 
-                                    viewModel.recordGAEvent(route)
+                                    viewModel.logAnalyticsEventForRoute(route)
                                 }
                             },
                             modifier = Modifier.navigationBarsPadding(),

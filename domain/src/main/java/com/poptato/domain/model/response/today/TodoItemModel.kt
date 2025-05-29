@@ -47,7 +47,8 @@ data class TodoItemModel(
             var hour = value.second
             val minute = value.third
 
-            if (value.first == "오후") {
+            if (value.first == "오전" && hour == 12) { hour = 0 }
+            else if (value.first == "오후" && hour != 12) {
                 hour += 12
             }
 

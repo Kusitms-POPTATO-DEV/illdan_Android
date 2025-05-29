@@ -47,6 +47,7 @@ import com.poptato.design_system.PoptatoTypo
 import com.poptato.design_system.R
 import com.poptato.design_system.REPEAT_TASK_OPTION
 import com.poptato.design_system.DELETE_ACTION
+import com.poptato.design_system.Gray40
 import com.poptato.design_system.Gray95
 import com.poptato.design_system.Primary40
 import com.poptato.design_system.Settings
@@ -286,11 +287,11 @@ fun BottomSheetBtn(
                 onClickBtnRepeat()
             }
         )
-        if (buttonText == DEADLINE_OPTION && deadline.isNotEmpty()) {
-            Text(text = deadline, style = PoptatoTypo.mdMedium, color = Gray00)
+        if (buttonText == WORD_DATE && deadline.isNotEmpty()) {
+            Text(text = deadline, style = PoptatoTypo.mdRegular, color = Gray40)
         } else if (buttonText == TIME && time.isNotEmpty()) {
-            Text(text = time, style = PoptatoTypo.mdMedium, color = Gray00)
-        } else if (buttonText == DEADLINE_OPTION || buttonText == TIME) {
+            Text(text = time, style = PoptatoTypo.mdRegular, color = Gray40)
+        } else if (buttonText == WORD_DATE || buttonText == TIME) {
             Text(text = Settings, style = PoptatoTypo.mdRegular, color = Gray60)
         }
 

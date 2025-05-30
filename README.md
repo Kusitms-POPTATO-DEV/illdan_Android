@@ -1,3 +1,11 @@
+## 일단 - 일일 계획을 단순하게
+| Type | Link |
+| --- | --- |
+| 플레이 스토어 | https://play.google.com/store/apps/details?id=com.poptato.app |
+| 앱 스토어 | https://apps.apple.com/kr/app/%EC%9D%BC%EB%8B%A8/id6740790261 |
+| 인스타그램 | https://www.instagram.com/illdan_poptato?igsh=MTR1bmQ2aXU0d2txbA== |
+| Linktree | https://linktr.ee/illdan |
+
 ## Tech Stack
 - Jetpack Compose
 - Clean Architecture
@@ -53,9 +61,11 @@
 │
 └── feature
     ├── backlog
+    ├── category
     ├── history
     ├── login
     ├── mypage
+    ├── onboarding
     ├── setting
     ├── splash
     ├── today

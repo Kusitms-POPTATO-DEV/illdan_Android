@@ -268,8 +268,8 @@ class BacklogViewModel @Inject constructor(
     fun onCategoryDragEnd() {
         val categoryIds = uiState.value.categoryList.map { it.categoryId }.toMutableList()
 
-        categoryIds.removeFirst()
-        categoryIds.removeFirst()
+        categoryIds.removeAt(0)
+        categoryIds.removeAt(0)
 
         viewModelScope.launch {
             categoryDragDropUseCase(CategoryDragDropRequestModel(categoryIds)).collect {

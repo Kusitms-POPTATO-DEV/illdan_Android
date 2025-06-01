@@ -39,9 +39,11 @@ import com.poptato.domain.usecase.todo.UpdateTodoRepeatUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoCategoryUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoTimeUseCase
 import com.poptato.ui.base.BaseViewModel
+import com.poptato.ui.event.BacklogExternalEvent
 import com.poptato.ui.util.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -448,7 +450,7 @@ class BacklogViewModel @Inject constructor(
         )
     }
 
-    fun updateTodoRepeat(id: Long) {
+    private fun toggleRepeat(id: Long) {
         updateTodoRepeatInUI(id)
 
         viewModelScope.launch {
@@ -524,6 +526,28 @@ class BacklogViewModel @Inject constructor(
         viewModelScope.launch {
             getDeadlineDateModeUseCase(Unit).collect {
                 updateState(uiState.value.copy(isDeadlineDateMode = it))
+            }
+        }
+    }
+
+    // 할 일 수정 텍스트 필드 관련 메서드
+    fun updateActiveItemId(id: Long?) {
+        updateState(uiState.value.copy(activeItemId = id))
+    }
+
+    // 외부 Flow 이벤트를 처리하는 메서드
+    fun observeExternalEvents(events: SharedFlow<BacklogExternalEvent>) {
+        viewModelScope.launch {
+            events.collect { event ->
+                when(event) {
+                    is BacklogExternalEvent.ActiveItem -> { updateActiveItemId(event.id) }
+                    is BacklogExternalEvent.DeleteTodo -> { deleteBacklog(event.id) }
+                    is BacklogExternalEvent.ToggleRepeat -> { toggleRepeat(event.id) }
+                    is BacklogExternalEvent.UpdateBookmark -> { updateBookmark(event.id) }
+                    is BacklogExternalEvent.UpdateCategory -> { updateCategory(uiState.value.selectedItem.todoId, event.id) }
+                    is BacklogExternalEvent.UpdateDeadline -> { setDeadline(event.deadline, uiState.value.selectedItem.todoId) }
+                    is BacklogExternalEvent.UpdateTime -> { updateTodoTime(event.info.first, event.info.second) }
+                }
             }
         }
     }

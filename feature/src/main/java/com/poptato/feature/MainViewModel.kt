@@ -15,6 +15,7 @@ import com.poptato.domain.model.response.yesterday.YesterdayListModel
 import com.poptato.domain.usecase.yesterday.GetYesterdayListUseCase
 import com.poptato.navigation.NavRoutes
 import com.poptato.ui.base.BaseViewModel
+import com.poptato.ui.event.BacklogExternalEvent
 import com.poptato.ui.util.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -25,6 +26,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val getYesterdayListUseCase: GetYesterdayListUseCase
 ) : BaseViewModel<MainPageState>(MainPageState()) {
+    val backlogEventFlow = MutableSharedFlow<BacklogExternalEvent>()
     val updateDeadlineFlow = MutableSharedFlow<String?>()
     val deleteTodoFlow = MutableSharedFlow<Long>()
     val activateItemFlow = MutableSharedFlow<Long>()
@@ -34,7 +36,6 @@ class MainViewModel @Inject constructor(
     val updateTodoTimeFlow = MutableSharedFlow<Pair<Long, String>>()
     val animationDuration = 300
     val selectedIconInBottomSheet = MutableSharedFlow<CategoryIconItemModel>()
-    val updateMonthFlow = MutableSharedFlow<CalendarMonthModel>()
     val categoryScreenContent = MutableSharedFlow<CategoryScreenContentModel>(replay = 1)
     val userDeleteName = MutableSharedFlow<String>(replay = 1)
 

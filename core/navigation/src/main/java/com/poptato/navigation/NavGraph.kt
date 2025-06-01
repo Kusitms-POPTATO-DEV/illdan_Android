@@ -28,6 +28,7 @@ import com.poptato.setting.servicedelete.ServiceDeleteScreen
 import com.poptato.setting.userdata.UserDataScreen
 import com.poptato.splash.SplashScreen
 import com.poptato.today.TodayScreen
+import com.poptato.ui.event.BacklogExternalEvent
 import com.poptato.yesterdaylist.YesterdayListScreen
 import com.poptato.yesterdaylist.allcheck.AllCheckScreen
 import com.potato.history.HistoryScreen
@@ -97,16 +98,10 @@ fun NavGraphBuilder.loginNavGraph(
 fun NavGraphBuilder.backlogNavGraph(
     navController: NavHostController,
     showBottomSheet: (TodoItemModel, List<CategoryItemModel>) -> Unit,
-    updateDeadlineFlow: SharedFlow<String?>,
-    deleteTodoFlow: SharedFlow<Long>,
-    activateItemFlow: SharedFlow<Long>,
-    updateBookmarkFlow: SharedFlow<Long>,
-    updateCategoryFlow: SharedFlow<Long?>,
+    backlogExternalEvent: SharedFlow<BacklogExternalEvent>,
     showSnackBar: (String) -> Unit,
     showDialog: (DialogContentModel) -> Unit,
-    categoryScreenContent: (CategoryScreenContentModel) -> Unit,
-    updateTodoRepeatFlow: SharedFlow<Long>,
-    updateTodoTimeFlow: SharedFlow<Pair<Long, String>>
+    categoryScreenContent: (CategoryScreenContentModel) -> Unit
 ) {
     navigation(
         startDestination = NavRoutes.BacklogScreen.createRoute(0),
@@ -125,13 +120,7 @@ fun NavGraphBuilder.backlogNavGraph(
                     categoryScreenContent(it)
                     navController.navigate(NavRoutes.CategoryScreen.route) },
                 showBottomSheet = showBottomSheet,
-                updateDeadlineFlow = updateDeadlineFlow,
-                deleteTodoFlow = deleteTodoFlow,
-                activateItemFlow = activateItemFlow,
-                updateBookmarkFlow = updateBookmarkFlow,
-                updateCategoryFlow = updateCategoryFlow,
-                updateTodoRepeatFlow = updateTodoRepeatFlow,
-                updateTodoTimeFlow = updateTodoTimeFlow,
+                backlogExternalEvent = backlogExternalEvent,
                 showSnackBar = showSnackBar,
                 showDialog = showDialog,
                 initialCategoryIndex = index

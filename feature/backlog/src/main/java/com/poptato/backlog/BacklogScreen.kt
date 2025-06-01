@@ -125,6 +125,7 @@ import com.poptato.ui.common.BookmarkItem
 import com.poptato.ui.common.RepeatItem
 import com.poptato.ui.common.TopBar
 import com.poptato.ui.common.formatDeadline
+import com.poptato.ui.event.BacklogExternalEvent
 import com.poptato.ui.util.AnalyticsManager
 import com.poptato.ui.util.LoadingManager
 import com.poptato.ui.util.rememberDragDropListState
@@ -138,13 +139,7 @@ import kotlinx.coroutines.launch
 fun BacklogScreen(
     goToCategorySelect: (CategoryScreenContentModel) -> Unit = {},
     showBottomSheet: (TodoItemModel, List<CategoryItemModel>) -> Unit = { _, _ -> },
-    updateDeadlineFlow: SharedFlow<String?>,
-    deleteTodoFlow: SharedFlow<Long>,
-    activateItemFlow: SharedFlow<Long>,
-    updateBookmarkFlow: SharedFlow<Long>,
-    updateCategoryFlow: SharedFlow<Long?>,
-    updateTodoRepeatFlow: SharedFlow<Long>,
-    updateTodoTimeFlow: SharedFlow<Pair<Long, String>>,
+    backlogExternalEvent: SharedFlow<BacklogExternalEvent>,
     showSnackBar: (String) -> Unit,
     showDialog: (DialogContentModel) -> Unit = {},
     initialCategoryIndex: Int = 0
@@ -155,10 +150,13 @@ fun BacklogScreen(
     val showFirstGuide by guideViewModel.showFirstGuide.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     val uiState: BacklogPageState by viewModel.uiState.collectAsStateWithLifecycle()
-    var activeItemId by remember { mutableStateOf<Long?>(null) }
     var isDropDownMenuExpanded by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
     val permissionState = rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
+
+    LaunchedEffect(backlogExternalEvent) {
+        viewModel.observeExternalEvents(backlogExternalEvent)
+    }
 
     LaunchedEffect(Unit) {
         if (!permissionState.status.isGranted) {
@@ -176,18 +174,6 @@ fun BacklogScreen(
         }
     }
 
-    LaunchedEffect(activateItemFlow) {
-        activateItemFlow.collect { id ->
-            activeItemId = id
-        }
-    }
-
-    LaunchedEffect(deleteTodoFlow) {
-        deleteTodoFlow.collect {
-            viewModel.deleteBacklog(it)
-        }
-    }
-
     LaunchedEffect(Unit) {
         viewModel.eventFlow.collect { event ->
             when (event) {
@@ -199,36 +185,6 @@ fun BacklogScreen(
                     showSnackBar(SNACK_BAR_COMPLETE_DELETE_TODO)
                 }
             }
-        }
-    }
-
-    LaunchedEffect(updateDeadlineFlow) {
-        updateDeadlineFlow.collect {
-            viewModel.setDeadline(it, uiState.selectedItem.todoId)
-        }
-    }
-
-    LaunchedEffect(updateBookmarkFlow) {
-        updateBookmarkFlow.collect {
-            viewModel.updateBookmark(it)
-        }
-    }
-
-    LaunchedEffect(updateCategoryFlow) {
-        updateCategoryFlow.collect {
-            viewModel.updateCategory(uiState.selectedItem.todoId, it)
-        }
-    }
-
-    LaunchedEffect(updateTodoRepeatFlow) {
-        updateTodoRepeatFlow.collect {
-            viewModel.updateTodoRepeat(it)
-        }
-    }
-
-    LaunchedEffect(updateTodoTimeFlow) {
-        updateTodoTimeFlow.collect {
-            viewModel.updateTodoTime(it.first, it.second)
         }
     }
 
@@ -295,8 +251,8 @@ fun BacklogScreen(
                 }
             },
             interactionSource = interactionSource,
-            activeItemId = activeItemId,
-            onClearActiveItem = { activeItemId = null },
+            activeItemId = uiState.activeItemId,
+            onClearActiveItem = { viewModel.updateActiveItemId(null) },
             onTodoItemModified = { id: Long, content: String ->
                 viewModel.modifyTodo(
                     item = ModifyTodoRequestModel(
@@ -504,7 +460,9 @@ fun CategoryDropDownItem(
     onClickItemDropdownItem: () -> Unit = {}
 ) {
     DropdownMenuItem(
-        modifier = Modifier.height(33.dp).width(97.dp),
+        modifier = Modifier
+            .height(33.dp)
+            .width(97.dp),
         contentPadding = PaddingValues(0.dp),
         leadingIcon = {
             Icon(

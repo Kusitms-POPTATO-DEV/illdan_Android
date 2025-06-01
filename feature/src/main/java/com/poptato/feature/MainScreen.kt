@@ -521,8 +521,7 @@ fun MainScreen() {
                             categoryScreenFromBacklog = viewModel.categoryScreenContent
                         )
                         historyNavGraph(
-                            navController = navController,
-                            updateMonthFlow = viewModel.updateMonthFlow
+                            navController = navController
                         )
                     }
 

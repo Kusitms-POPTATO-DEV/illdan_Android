@@ -78,18 +78,9 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun HistoryScreen(
-    updateMonthFlow: SharedFlow<CalendarMonthModel>
-) {
+fun HistoryScreen() {
     val viewModel: HistoryViewModel = hiltViewModel()
     val uiState: HistoryPageState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    LaunchedEffect(updateMonthFlow) {
-        updateMonthFlow.collect { selectedMonth ->
-            viewModel.updateCurrentMonth(LocalDate.of(selectedMonth.year, selectedMonth.month, 1))
-            viewModel.getCalendarList()
-        }
-    }
 
     HistoryContent(
         uiState = uiState,

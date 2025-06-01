@@ -34,7 +34,6 @@ class MainViewModel @Inject constructor(
     val updateTodoTimeFlow = MutableSharedFlow<Pair<Long, String>>()
     val animationDuration = 300
     val selectedIconInBottomSheet = MutableSharedFlow<CategoryIconItemModel>()
-    val updateMonthFlow = MutableSharedFlow<CalendarMonthModel>()
     val categoryScreenContent = MutableSharedFlow<CategoryScreenContentModel>(replay = 1)
     val userDeleteName = MutableSharedFlow<String>(replay = 1)
 

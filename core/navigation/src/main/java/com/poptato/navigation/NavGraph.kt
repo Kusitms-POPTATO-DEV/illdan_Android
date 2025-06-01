@@ -299,17 +299,14 @@ fun NavGraphBuilder.todayNavGraph(
 }
 
 fun NavGraphBuilder.historyNavGraph(
-    navController: NavHostController,
-    updateMonthFlow: SharedFlow<CalendarMonthModel>
+    navController: NavHostController
 ) {
     navigation(
         startDestination = NavRoutes.HistoryScreen.route,
         route = NavRoutes.HistoryGraph.route
     ) {
         composable(NavRoutes.HistoryScreen.route) {
-            HistoryScreen(
-                updateMonthFlow = updateMonthFlow
-            )
+            HistoryScreen()
         }
     }
 }

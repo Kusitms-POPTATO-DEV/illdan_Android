@@ -84,6 +84,7 @@ import com.poptato.ui.common.OneBtnTypeDialog
 import com.poptato.ui.common.TimePickerBottomSheet
 import com.poptato.ui.common.TodoBottomSheet
 import com.poptato.ui.common.TwoBtnTypeDialog
+import com.poptato.ui.event.BacklogExternalEvent
 import com.poptato.ui.util.AnalyticsManager
 import com.poptato.ui.util.CommonEventManager
 import com.poptato.ui.util.DismissKeyboardOnClick
@@ -278,12 +279,13 @@ fun MainScreen() {
                                 },
                                 onClickBtnDelete = {
                                     scope.launch {
-                                        viewModel.deleteTodoFlow.emit(it)
+                                        viewModel.backlogEventFlow.emit(BacklogExternalEvent.DeleteTodo(it))
                                         sheetState.hide()
                                     }
                                 },
                                 onClickBtnModify = {
                                     scope.launch {
+                                        viewModel.backlogEventFlow.emit(BacklogExternalEvent.ActiveItem(it))
                                         viewModel.activateItemFlow.emit(it)
                                         sheetState.hide()
                                     }
@@ -295,6 +297,7 @@ fun MainScreen() {
                                         params = mapOf("task_ID" to "${uiState.selectedTodoItem.todoId}")
                                     )
                                     scope.launch {
+                                        viewModel.backlogEventFlow.emit(BacklogExternalEvent.UpdateBookmark(it))
                                         viewModel.updateBookmarkFlow.emit(it)
                                     }
                                 },
@@ -303,7 +306,10 @@ fun MainScreen() {
                                 },
                                 onClickBtnRepeat = {
                                     viewModel.onUpdatedTodoRepeat(!uiState.selectedTodoItem.isRepeat)
-                                    scope.launch { viewModel.updateTodoRepeatFlow.emit(it) }
+                                    scope.launch {
+                                        viewModel.backlogEventFlow.emit(BacklogExternalEvent.ToggleRepeat(it))
+                                        viewModel.updateTodoRepeatFlow.emit(it)
+                                    }
                                 },
                                 onClickBtnTime = {
                                     viewModel.updateBottomSheetType(BottomSheetType.TimePicker)
@@ -319,7 +325,10 @@ fun MainScreen() {
                                         eventName = "set_dday",
                                         params = mapOf("set_date" to DateTimeFormatter.getTodayFullDate(), "dday" to "$date", "task_ID" to "${uiState.selectedTodoItem.todoId}")
                                     )
-                                    scope.launch { viewModel.updateDeadlineFlow.emit(date) }
+                                    scope.launch {
+                                        viewModel.backlogEventFlow.emit(BacklogExternalEvent.UpdateDeadline(date))
+                                        viewModel.updateDeadlineFlow.emit(date)
+                                    }
                                 },
                                 deadline = uiState.selectedTodoItem.deadline
                             )
@@ -350,7 +359,10 @@ fun MainScreen() {
                                     AnalyticsManager.logEvent(
                                         eventName = "set_category"
                                     )
-                                    scope.launch { viewModel.updateCategoryFlow.emit(it) }
+                                    scope.launch {
+                                        viewModel.backlogEventFlow.emit(BacklogExternalEvent.UpdateCategory(it))
+                                        viewModel.updateCategoryFlow.emit(it)
+                                    }
                                 }
                             )
                         }
@@ -362,6 +374,9 @@ fun MainScreen() {
                                 onClickCompletionButton = { info ->
                                     viewModel.onUpdatedTodoTime(info.second)
                                     scope.launch {
+                                        viewModel.backlogEventFlow.emit(BacklogExternalEvent.UpdateTime(
+                                            Pair(info.first, uiState.selectedTodoItem.formatTime(info.second))
+                                        ))
                                         viewModel.updateTodoTimeFlow.emit(
                                             Pair(info.first, uiState.selectedTodoItem.formatTime(info.second))
                                         )
@@ -490,16 +505,10 @@ fun MainScreen() {
                         backlogNavGraph(
                             navController = navController,
                             showBottomSheet = showBottomSheet,
-                            updateDeadlineFlow = viewModel.updateDeadlineFlow,
-                            deleteTodoFlow = viewModel.deleteTodoFlow,
-                            activateItemFlow = viewModel.activateItemFlow,
-                            updateBookmarkFlow = viewModel.updateBookmarkFlow,
-                            updateCategoryFlow = viewModel.updateCategoryFlow,
+                            backlogExternalEvent = viewModel.backlogEventFlow,
                             showSnackBar = showSnackBar,
                             showDialog = showDialog,
-                            categoryScreenContent = categoryScreenContent,
-                            updateTodoRepeatFlow = viewModel.updateTodoRepeatFlow,
-                            updateTodoTimeFlow = viewModel.updateTodoTimeFlow
+                            categoryScreenContent = categoryScreenContent
                         )
                         todayNavGraph(
                             navController = navController,

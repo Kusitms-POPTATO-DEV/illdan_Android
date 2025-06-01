@@ -9,6 +9,7 @@ android {
 
 dependencies {
     implementation(projects.core)
+    implementation(projects.core.ui)
     implementation(projects.domain)
     implementation(projects.feature.splash)
     implementation(projects.feature.login)

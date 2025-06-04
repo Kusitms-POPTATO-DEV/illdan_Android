@@ -30,5 +30,9 @@ jobs:
         echo "KAKAO_HOST_SCHEME=${{ secrets.KAKAO_HOST_SCHEME }}" >> local.properties
         echo "FAQ_URL=${{ secrets.FAQ_URL }}" >> local.properties
         echo "NOTICE_URL=${{ secrets.NOTICE_URL }}" >> local.properties
+    - name: Decode google-services.json
+      run: |
+        mkdir -p app
+        echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 -d > app/google-services.json
     - name: Build with Gradle
       run: ./gradlew build

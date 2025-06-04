@@ -1,6 +1,7 @@
 package com.poptato.backlog
 
 import androidx.annotation.RequiresApi
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.viewModelScope
 import com.poptato.domain.model.enums.TodoType
 import com.poptato.core.util.DateTimeFormatter
@@ -47,6 +48,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.jetbrains.annotations.TestOnly
 import timber.log.Timber
 import javax.inject.Inject
 import kotlin.random.Random
@@ -74,7 +76,9 @@ class BacklogViewModel @Inject constructor(
 ) {
     private val mutex = Mutex()
     private var snapshotList: List<TodoItemModel> = emptyList()
-    private var tempTodoId: Long? = null
+    @TestOnly
+    @VisibleForTesting
+    internal var tempTodoId: Long? = null
 
     init {
         getDeadlineDateMode()
@@ -157,11 +161,9 @@ class BacklogViewModel @Inject constructor(
     private fun onSuccessGetBacklogList(response: BacklogListModel) {
         viewModelScope.launch { updateSnapshotList(response.backlogs) }
 
-        val backlogs: List<TodoItemModel> = response.backlogs.map { it.apply { categoryId = uiState.value.selectedCategoryId } }
-
         updateStateSync(
             uiState.value.copy(
-                backlogList = backlogs,
+                backlogList = response.backlogs,
                 totalPageCount = response.totalPageCount,
                 totalItemCount = response.totalCount,
                 isFinishedInitialization = true
@@ -169,21 +171,51 @@ class BacklogViewModel @Inject constructor(
         )
     }
 
+    // -------- 스냅샷을 업데이트하기 위한 메서드 --------
+    private fun getBacklogListForSnapshot() {
+        viewModelScope.launch {
+            getBacklogListUseCase(request = GetBacklogListRequestModel(categoryId = -1, page = 0, size = 100)).collect {
+                resultResponse(it, ::onSuccessUpdateSnapshot)
+            }
+        }
+    }
+
+    private fun onSuccessUpdateSnapshot(response: BacklogListModel) {
+        viewModelScope.launch {
+            updateSnapshotList(response.backlogs)
+        }
+    }
+
     fun createBacklog(content: String) {
+        if (content.isBlank()) return
+
         addTemporaryBacklog(content)
 
-        viewModelScope.launch(Dispatchers.IO) {
-            createBacklogUseCase.invoke(request = CreateBacklogRequestModel(uiState.value.selectedCategoryId, content)).collect {
+        viewModelScope.launch {
+            createBacklogUseCase(
+                request = CreateBacklogRequestModel(uiState.value.selectedCategoryId, content)
+            ).collect {
                 resultResponse(it, ::onSuccessCreateBacklog, { onFailedUpdateBacklogList() })
             }
         }
     }
 
-    private fun addTemporaryBacklog(content: String) {
+    @TestOnly
+    @VisibleForTesting
+    internal fun addTemporaryBacklog(content: String) {
         val newList = uiState.value.backlogList.toMutableList()
         val temporaryId = Random.nextLong()
+        val currentCategory = uiState.value.categoryList[uiState.value.selectedCategoryIndex]
+        val newItem = TodoItemModel(
+            todoId = temporaryId,
+            content = content,
+            isBookmark = uiState.value.selectedCategoryIndex == 1,
+            categoryName = currentCategory.categoryName,
+            categoryId = currentCategory.categoryId,
+            imageUrl = currentCategory.categoryImgUrl
+        )
 
-        newList.add(0, TodoItemModel(content = content, todoId = temporaryId))
+        newList.add(0, newItem)
         updateNewItemFlag(true)
         updateList(newList)
         tempTodoId = temporaryId
@@ -192,16 +224,19 @@ class BacklogViewModel @Inject constructor(
     private fun onSuccessCreateBacklog(response: TodoIdModel) {
         AnalyticsManager.logEvent(
             eventName = "make_task",
-            params = mapOf("make_date" to DateTimeFormatter.getToday(), "task_ID" to response.todoId)
+            params = mapOf(
+                "make_date" to DateTimeFormatter.getToday(),
+                "task_ID" to response.todoId
+            )
         )
         val updatedList = uiState.value.backlogList.map { item ->
             if (item.todoId == tempTodoId) {
                 item.copy(todoId = response.todoId)
             } else item
         }
-        updateList(updatedList)
 
-        getBacklogList(categoryId = uiState.value.selectedCategoryId, page = 0, size = 100)
+        updateList(updatedList)
+        getBacklogListForSnapshot()
     }
 
     private fun onFailedUpdateBacklogList() {
@@ -280,7 +315,9 @@ class BacklogViewModel @Inject constructor(
         }
     }
 
-    private fun updateList(updatedList: List<TodoItemModel>) {
+    @TestOnly
+    @VisibleForTesting
+    internal fun updateList(updatedList: List<TodoItemModel>) {
         val newList = updatedList.toList()
         updateState(
             uiState.value.copy(
@@ -509,7 +546,9 @@ class BacklogViewModel @Inject constructor(
         )
     }
 
-    private suspend fun updateSnapshotList(newList: List<TodoItemModel>) {
+    @TestOnly
+    @VisibleForTesting
+    internal suspend fun updateSnapshotList(newList: List<TodoItemModel>) {
         mutex.withLock {
             snapshotList = newList
         }

@@ -1,4 +1,4 @@
-package com.poptato.backlog
+package com.poptato.test_utils
 
 import org.junit.Test
 

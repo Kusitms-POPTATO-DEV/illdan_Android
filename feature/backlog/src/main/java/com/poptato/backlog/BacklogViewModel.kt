@@ -13,6 +13,7 @@ import com.poptato.domain.model.request.category.GetCategoryListRequestModel
 import com.poptato.domain.model.request.todo.DeadlineContentModel
 import com.poptato.domain.model.request.todo.DragDropRequestModel
 import com.poptato.domain.model.request.todo.ModifyTodoRequestModel
+import com.poptato.domain.model.request.todo.RoutineRequestModel
 import com.poptato.domain.model.request.todo.TodoCategoryIdModel
 import com.poptato.domain.model.request.todo.TodoIdModel
 import com.poptato.domain.model.request.todo.TodoTimeModel
@@ -36,6 +37,7 @@ import com.poptato.domain.usecase.todo.ModifyTodoUseCase
 import com.poptato.domain.usecase.todo.SwipeTodoUseCase
 import com.poptato.domain.usecase.todo.UpdateBookmarkUseCase
 import com.poptato.domain.usecase.todo.UpdateDeadlineUseCase
+import com.poptato.domain.usecase.todo.UpdateRoutineUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoRepeatUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoCategoryUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoTimeUseCase
@@ -70,7 +72,8 @@ class BacklogViewModel @Inject constructor(
     private val updateTodoRepeatUseCase: UpdateTodoRepeatUseCase,
     private val updateTodoTimeUseCase: UpdateTodoTimeUseCase,
     private val categoryDragDropUseCase: CategoryDragDropUseCase,
-    private val getDeadlineDateModeUseCase: GetDeadlineDateModeUseCase
+    private val getDeadlineDateModeUseCase: GetDeadlineDateModeUseCase,
+    private val updateRoutineUseCase: UpdateRoutineUseCase
 ) : BaseViewModel<BacklogPageState>(
     BacklogPageState()
 ) {
@@ -536,6 +539,37 @@ class BacklogViewModel @Inject constructor(
             }
         }
         val updatedItem = uiState.value.selectedItem.copy(time = time)
+
+        updateState(
+            uiState.value.copy(
+                backlogList = newList,
+                selectedItem = updatedItem
+            )
+        )
+    }
+
+    fun updateRoutine(id: Long, activeIndex: List<Int>?) {
+        val request = RoutineRequestModel()
+        request.convertIndexToDays(activeIndex)
+
+        updateRoutineInUI(id, request.routineDays)
+
+        viewModelScope.launch {
+            updateRoutineUseCase(request = UpdateRoutineUseCase.Companion.UpdateTodoRoutineModel(id, request)).collect {
+                resultResponse(it, { viewModelScope.launch { updateSnapshotList(uiState.value.backlogList) } }, { onFailedUpdateBacklogList() })
+            }
+        }
+    }
+
+    private fun updateRoutineInUI(id: Long, routineDays: List<String>?) {
+        val newList = uiState.value.backlogList.map {
+            if (it.todoId == id) {
+                it.copy(routineDays = routineDays ?: emptyList())
+            } else {
+                it
+            }
+        }
+        val updatedItem = uiState.value.selectedItem.copy(routineDays = routineDays ?: emptyList())
 
         updateState(
             uiState.value.copy(

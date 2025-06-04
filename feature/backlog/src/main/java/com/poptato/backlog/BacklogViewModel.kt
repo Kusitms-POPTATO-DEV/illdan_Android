@@ -301,7 +301,6 @@ class BacklogViewModel @Inject constructor(
         }
     }
 
-    @RequiresApi(35)
     fun onCategoryDragEnd() {
         val categoryIds = uiState.value.categoryList.map { it.categoryId }.toMutableList()
 

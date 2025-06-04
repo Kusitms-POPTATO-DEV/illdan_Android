@@ -46,5 +46,8 @@ internal fun Project.configureAndroidCommonPlugin() {
         "implementation"(libs.findLibrary("clarity").get())
         "implementation"(platform(libs.findLibrary("firebase-bom").get()))
         "implementation"(libs.findLibrary("firebase-analytics").get())
+        "testImplementation"(libs.findLibrary("junit").get())
+        "testImplementation"(libs.findLibrary("coroutines-test").get())
+        "testImplementation"(libs.findLibrary("mock").get())
     }
 }

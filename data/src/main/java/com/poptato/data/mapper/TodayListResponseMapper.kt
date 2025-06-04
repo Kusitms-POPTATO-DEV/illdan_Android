@@ -22,7 +22,8 @@ object TodayListResponseMapper: Mapper<TodayListResponse, TodayListModel> {
                         dDay = item.dDay,
                         categoryName = item.categoryName ?: "",
                         imageUrl = item.imageUrl ?: "",
-                        time = item.time ?: ""
+                        time = item.time ?: "",
+                        routineDays = item.routineDays ?: emptyList()
                     )
                 },
                 totalPageCount = it.totalPageCount

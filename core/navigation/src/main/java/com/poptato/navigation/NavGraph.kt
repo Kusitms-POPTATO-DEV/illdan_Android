@@ -15,7 +15,6 @@ import com.poptato.domain.model.response.category.CategoryIconTotalListModel
 import com.poptato.domain.model.response.category.CategoryItemModel
 import com.poptato.domain.model.response.category.CategoryScreenContentModel
 import com.poptato.domain.model.response.dialog.DialogContentModel
-import com.poptato.domain.model.response.history.CalendarMonthModel
 import com.poptato.domain.model.response.today.TodoItemModel
 import com.poptato.login.KaKaoLoginScreen
 import com.poptato.mypage.MyPageScreen
@@ -28,7 +27,7 @@ import com.poptato.setting.servicedelete.ServiceDeleteScreen
 import com.poptato.setting.userdata.UserDataScreen
 import com.poptato.splash.SplashScreen
 import com.poptato.today.TodayScreen
-import com.poptato.ui.event.BacklogExternalEvent
+import com.poptato.ui.event.TodoExternalEvent
 import com.poptato.yesterdaylist.YesterdayListScreen
 import com.poptato.yesterdaylist.allcheck.AllCheckScreen
 import com.potato.history.HistoryScreen
@@ -98,7 +97,7 @@ fun NavGraphBuilder.loginNavGraph(
 fun NavGraphBuilder.backlogNavGraph(
     navController: NavHostController,
     showBottomSheet: (TodoItemModel, List<CategoryItemModel>) -> Unit,
-    backlogExternalEvent: SharedFlow<BacklogExternalEvent>,
+    todoExternalEvent: SharedFlow<TodoExternalEvent>,
     showSnackBar: (String) -> Unit,
     showDialog: (DialogContentModel) -> Unit,
     categoryScreenContent: (CategoryScreenContentModel) -> Unit
@@ -120,7 +119,7 @@ fun NavGraphBuilder.backlogNavGraph(
                     categoryScreenContent(it)
                     navController.navigate(NavRoutes.CategoryScreen.route) },
                 showBottomSheet = showBottomSheet,
-                backlogExternalEvent = backlogExternalEvent,
+                todoExternalEvent = todoExternalEvent,
                 showSnackBar = showSnackBar,
                 showDialog = showDialog,
                 initialCategoryIndex = index
@@ -261,13 +260,7 @@ fun NavGraphBuilder.todayNavGraph(
     navController: NavHostController,
     showSnackBar: (String) -> Unit,
     showBottomSheet: (TodoItemModel, List<CategoryItemModel>) -> Unit,
-    deleteTodoFlow: SharedFlow<Long>,
-    updateDeadlineFlow: SharedFlow<String?>,
-    activateItemFlow: SharedFlow<Long>,
-    updateCategoryFlow: SharedFlow<Long?>,
-    updateBookmarkFlow: SharedFlow<Long>,
-    updateTodoRepeatFlow: SharedFlow<Long>,
-    updateTodoTimeFlow: SharedFlow<Pair<Long, String>>
+    todoExternalEvent: SharedFlow<TodoExternalEvent>
 ) {
     navigation(startDestination = NavRoutes.TodayScreen.route, route = NavRoutes.TodayGraph.route) {
         composable(NavRoutes.TodayScreen.route) {
@@ -275,13 +268,7 @@ fun NavGraphBuilder.todayNavGraph(
                 goToBacklog = { navController.navigate(NavRoutes.BacklogScreen.createRoute(0)) },
                 showSnackBar = showSnackBar,
                 showBottomSheet = showBottomSheet,
-                updateDeadlineFlow = updateDeadlineFlow,
-                updateBookmarkFlow = updateBookmarkFlow,
-                activateItemFlow = activateItemFlow,
-                deleteTodoFlow = deleteTodoFlow,
-                updateCategoryFlow = updateCategoryFlow,
-                updateTodoRepeatFlow = updateTodoRepeatFlow,
-                updateTodoTimeFlow = updateTodoTimeFlow
+                todoExternalEvent = todoExternalEvent
             )
         }
     }

@@ -1,6 +1,5 @@
 package com.poptato.backlog
 
-import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.viewModelScope
 import com.poptato.domain.model.enums.TodoType
@@ -30,6 +29,7 @@ import com.poptato.domain.usecase.backlog.GetBacklogListUseCase
 import com.poptato.domain.usecase.category.CategoryDragDropUseCase
 import com.poptato.domain.usecase.category.DeleteCategoryUseCase
 import com.poptato.domain.usecase.category.GetCategoryListUseCase
+import com.poptato.domain.usecase.todo.DeleteTodoRepeatUseCase
 import com.poptato.domain.usecase.todo.DeleteTodoUseCase
 import com.poptato.domain.usecase.todo.DragDropUseCase
 import com.poptato.domain.usecase.todo.GetTodoDetailUseCase
@@ -38,14 +38,13 @@ import com.poptato.domain.usecase.todo.SwipeTodoUseCase
 import com.poptato.domain.usecase.todo.UpdateBookmarkUseCase
 import com.poptato.domain.usecase.todo.UpdateDeadlineUseCase
 import com.poptato.domain.usecase.todo.UpdateRoutineUseCase
-import com.poptato.domain.usecase.todo.UpdateTodoRepeatUseCase
+import com.poptato.domain.usecase.todo.SetTodoRepeatUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoCategoryUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoTimeUseCase
 import com.poptato.ui.base.BaseViewModel
-import com.poptato.ui.event.BacklogExternalEvent
+import com.poptato.ui.event.TodoExternalEvent
 import com.poptato.ui.util.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -69,11 +68,12 @@ class BacklogViewModel @Inject constructor(
     private val updateTodoCategoryUseCase: UpdateTodoCategoryUseCase,
     private val getTodoDetailUseCase: GetTodoDetailUseCase,
     private val swipeTodoUseCase: SwipeTodoUseCase,
-    private val updateTodoRepeatUseCase: UpdateTodoRepeatUseCase,
+    private val setTodoRepeatUseCase: SetTodoRepeatUseCase,
     private val updateTodoTimeUseCase: UpdateTodoTimeUseCase,
     private val categoryDragDropUseCase: CategoryDragDropUseCase,
     private val getDeadlineDateModeUseCase: GetDeadlineDateModeUseCase,
-    private val updateRoutineUseCase: UpdateRoutineUseCase
+    private val updateRoutineUseCase: UpdateRoutineUseCase,
+    private val deleteTodoRepeatUseCase: DeleteTodoRepeatUseCase
 ) : BaseViewModel<BacklogPageState>(
     BacklogPageState()
 ) {
@@ -209,14 +209,22 @@ class BacklogViewModel @Inject constructor(
         val newList = uiState.value.backlogList.toMutableList()
         val temporaryId = Random.nextLong()
         val currentCategory = uiState.value.categoryList[uiState.value.selectedCategoryIndex]
-        val newItem = TodoItemModel(
-            todoId = temporaryId,
-            content = content,
-            isBookmark = uiState.value.selectedCategoryIndex == 1,
-            categoryName = currentCategory.categoryName,
-            categoryId = currentCategory.categoryId,
-            imageUrl = currentCategory.categoryImgUrl
-        )
+        val newItem =
+            if (uiState.value.selectedCategoryIndex == 0 || uiState.value.selectedCategoryIndex == 1)
+                TodoItemModel(
+                    todoId = temporaryId,
+                    content = content,
+                    isBookmark = uiState.value.selectedCategoryIndex == 1
+                )
+            else
+                TodoItemModel(
+                    todoId = temporaryId,
+                    content = content,
+                    isBookmark = uiState.value.selectedCategoryIndex == 1,
+                    categoryName = currentCategory.categoryName,
+                    categoryId = currentCategory.categoryId,
+                    imageUrl = currentCategory.categoryImgUrl
+                )
 
         newList.add(0, newItem)
         updateNewItemFlag(true)
@@ -489,25 +497,36 @@ class BacklogViewModel @Inject constructor(
         )
     }
 
-    private fun toggleRepeat(id: Long) {
-        updateTodoRepeatInUI(id)
+    private fun updateTodoRepeat(id: Long, value: Boolean) {
+        updateTodoRepeatInUI(id, value)
 
-        viewModelScope.launch {
-            updateTodoRepeatUseCase(id).collect {
-                resultResponse(it, { viewModelScope.launch { updateSnapshotList(uiState.value.backlogList) } }, { onFailedUpdateBacklogList() })
+        when (value) {
+            true -> {
+                viewModelScope.launch {
+                    setTodoRepeatUseCase(id).collect {
+                        resultResponse(it, { viewModelScope.launch { updateSnapshotList(uiState.value.backlogList) } }, { onFailedUpdateBacklogList() })
+                    }
+                }
+            }
+            false -> {
+                viewModelScope.launch {
+                    deleteTodoRepeatUseCase(id).collect {
+                        resultResponse(it, { viewModelScope.launch { updateSnapshotList(uiState.value.backlogList) } }, { onFailedUpdateBacklogList() })
+                    }
+                }
             }
         }
     }
 
-    private fun updateTodoRepeatInUI(id: Long) {
+    private fun updateTodoRepeatInUI(id: Long, value: Boolean) {
         val newList = uiState.value.backlogList.map {
             if (it.todoId == id) {
-                it.copy(isRepeat = !it.isRepeat)
+                it.copy(isRepeat = value)
             } else {
                 it
             }
         }
-        val updatedItem = uiState.value.selectedItem.copy(isRepeat = !uiState.value.selectedItem.isRepeat)
+        val updatedItem = uiState.value.selectedItem.copy(isRepeat = value)
 
         updateState(
             uiState.value.copy(
@@ -608,17 +627,17 @@ class BacklogViewModel @Inject constructor(
     }
 
     // 외부 Flow 이벤트를 처리하는 메서드
-    fun observeExternalEvents(events: SharedFlow<BacklogExternalEvent>) {
+    fun observeExternalEvents(events: SharedFlow<TodoExternalEvent>) {
         viewModelScope.launch {
             events.collect { event ->
                 when(event) {
-                    is BacklogExternalEvent.ActiveItem -> { updateActiveItemId(event.id) }
-                    is BacklogExternalEvent.DeleteTodo -> { deleteBacklog(event.id) }
-                    is BacklogExternalEvent.ToggleRepeat -> { toggleRepeat(event.id) }
-                    is BacklogExternalEvent.UpdateBookmark -> { updateBookmark(event.id) }
-                    is BacklogExternalEvent.UpdateCategory -> { updateCategory(uiState.value.selectedItem.todoId, event.id) }
-                    is BacklogExternalEvent.UpdateDeadline -> { setDeadline(event.deadline, uiState.value.selectedItem.todoId) }
-                    is BacklogExternalEvent.UpdateTime -> { updateTodoTime(event.info.first, event.info.second) }
+                    is TodoExternalEvent.ActiveItem -> { updateActiveItemId(event.id) }
+                    is TodoExternalEvent.DeleteTodo -> { deleteBacklog(event.id) }
+                    is TodoExternalEvent.UpdateRepeat -> { updateTodoRepeat(event.id, event.value) }
+                    is TodoExternalEvent.UpdateBookmark -> { updateBookmark(event.id) }
+                    is TodoExternalEvent.UpdateCategory -> { updateCategory(uiState.value.selectedItem.todoId, event.id) }
+                    is TodoExternalEvent.UpdateDeadline -> { setDeadline(event.deadline, uiState.value.selectedItem.todoId) }
+                    is TodoExternalEvent.UpdateTime -> { updateTodoTime(event.info.first, event.info.second) }
                 }
             }
         }

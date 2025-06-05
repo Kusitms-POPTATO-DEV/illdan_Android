@@ -72,8 +72,12 @@ class TodoRepositoryImpl @Inject constructor(
         }, TodoDetailResponseMapper)
     }
 
-    override suspend fun updateTodoRepeat(todoId: Long): Flow<Result<Unit>> {
-        return apiLaunch(apiCall = { todoService.updateTodoRepeat(todoId) }, UnitResponseMapper)
+    override suspend fun setTodoRepeat(todoId: Long): Flow<Result<Unit>> {
+        return apiLaunch(apiCall = { todoService.setTodoRepeat(todoId) }, UnitResponseMapper)
+    }
+
+    override suspend fun deleteTodoRepeat(todoId: Long): Flow<Result<Unit>> {
+        return apiLaunch(apiCall = { todoService.deleteTodoRepeat(todoId) }, UnitResponseMapper)
     }
 
     override suspend fun updateTodoTime(todoId: Long, request: TodoTimeModel): Flow<Result<Unit>> {

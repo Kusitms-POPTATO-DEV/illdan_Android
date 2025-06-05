@@ -284,7 +284,7 @@ private fun BookmarkTimeCategoryItem(
             Spacer(modifier = Modifier.width(8.dp))
         }
 
-        if (item.categoryName.isNotEmpty() && (item.categoryId != -1L && item.categoryId != 0L)) {
+        if (item.categoryName.isNotEmpty()) {
             TodoInfoChip(
                 image = item.imageUrl,
                 title = item.categoryName,

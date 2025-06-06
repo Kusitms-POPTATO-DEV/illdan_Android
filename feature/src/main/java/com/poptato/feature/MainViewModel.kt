@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.poptato.core.enums.BottomNavType
 import com.poptato.domain.model.enums.BottomSheetType
 import com.poptato.domain.model.request.ListRequestModel
+import com.poptato.domain.model.request.todo.RoutineRequestModel
 import com.poptato.domain.model.response.category.CategoryIconItemModel
 import com.poptato.domain.model.response.category.CategoryIconTotalListModel
 import com.poptato.domain.model.response.category.CategoryItemModel
@@ -111,6 +112,18 @@ class MainViewModel @Inject constructor(
 
     fun onUpdatedTodoRepeat(value: Boolean) {
         val updatedItem = uiState.value.selectedTodoItem.copy(isRepeat = value)
+
+        updateState(
+            uiState.value.copy(
+                selectedTodoItem = updatedItem
+            )
+        )
+    }
+
+    fun onUpdatedTodoRoutine(days: Set<Int>?) {
+        val request = RoutineRequestModel()
+        request.convertIndexToDays(days?.toList())
+        val updatedItem = uiState.value.selectedTodoItem.copy(routineDays = request.routineDays ?: emptyList())
 
         updateState(
             uiState.value.copy(

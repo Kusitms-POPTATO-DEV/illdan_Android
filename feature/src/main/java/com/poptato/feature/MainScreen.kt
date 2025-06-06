@@ -81,10 +81,11 @@ import com.poptato.ui.common.CategoryBottomSheet
 import com.poptato.ui.common.CategoryIconBottomSheet
 import com.poptato.ui.common.CommonSnackBar
 import com.poptato.ui.common.OneBtnTypeDialog
+import com.poptato.ui.common.RoutineBottomSheet
 import com.poptato.ui.common.TimePickerBottomSheet
 import com.poptato.ui.common.TodoBottomSheet
 import com.poptato.ui.common.TwoBtnTypeDialog
-import com.poptato.ui.event.BacklogExternalEvent
+import com.poptato.ui.event.TodoExternalEvent
 import com.poptato.ui.util.AnalyticsManager
 import com.poptato.ui.util.CommonEventManager
 import com.poptato.ui.util.DismissKeyboardOnClick
@@ -123,7 +124,7 @@ fun MainScreen() {
             scope.launch { sheetState.show() }
         }
     val backPressHandler: () -> Unit = {
-        scope.launch { viewModel.activateItemFlow.emit(-1L) }
+        scope.launch { viewModel.todoEventFlow.emit(TodoExternalEvent.ActiveItem(-1L)) }
         if (sheetState.isVisible) {
             scope.launch { sheetState.hide() }
         } else if (uiState.backPressedOnce) {
@@ -220,7 +221,7 @@ fun MainScreen() {
 
     DismissKeyboardOnClick(
         callback = {
-            scope.launch { viewModel.activateItemFlow.emit(-1L)  }
+            scope.launch { viewModel.todoEventFlow.emit(TodoExternalEvent.ActiveItem(-1L))  }
         }
     ) {
         if (isShowDialog.value) {
@@ -279,14 +280,13 @@ fun MainScreen() {
                                 },
                                 onClickBtnDelete = {
                                     scope.launch {
-                                        viewModel.backlogEventFlow.emit(BacklogExternalEvent.DeleteTodo(it))
+                                        viewModel.todoEventFlow.emit(TodoExternalEvent.DeleteTodo(it))
                                         sheetState.hide()
                                     }
                                 },
                                 onClickBtnModify = {
                                     scope.launch {
-                                        viewModel.backlogEventFlow.emit(BacklogExternalEvent.ActiveItem(it))
-                                        viewModel.activateItemFlow.emit(it)
+                                        viewModel.todoEventFlow.emit(TodoExternalEvent.ActiveItem(it))
                                         sheetState.hide()
                                     }
                                 },
@@ -297,23 +297,16 @@ fun MainScreen() {
                                         params = mapOf("task_ID" to "${uiState.selectedTodoItem.todoId}")
                                     )
                                     scope.launch {
-                                        viewModel.backlogEventFlow.emit(BacklogExternalEvent.UpdateBookmark(it))
-                                        viewModel.updateBookmarkFlow.emit(it)
+                                        viewModel.todoEventFlow.emit(TodoExternalEvent.UpdateBookmark(it))
                                     }
                                 },
                                 onClickCategoryBottomSheet = {
                                     viewModel.updateBottomSheetType(BottomSheetType.CategoryList)
                                 },
-                                onClickBtnRepeat = {
-                                    viewModel.onUpdatedTodoRepeat(!uiState.selectedTodoItem.isRepeat)
-                                    scope.launch {
-                                        viewModel.backlogEventFlow.emit(BacklogExternalEvent.ToggleRepeat(it))
-                                        viewModel.updateTodoRepeatFlow.emit(it)
-                                    }
-                                },
                                 onClickBtnTime = {
                                     viewModel.updateBottomSheetType(BottomSheetType.TimePicker)
-                                }
+                                },
+                                onClickBtnRoutine = { viewModel.updateBottomSheetType(BottomSheetType.Routine) }
                             )
                         }
                         BottomSheetType.FullDate -> {
@@ -326,8 +319,7 @@ fun MainScreen() {
                                         params = mapOf("set_date" to DateTimeFormatter.getTodayFullDate(), "dday" to "$date", "task_ID" to "${uiState.selectedTodoItem.todoId}")
                                     )
                                     scope.launch {
-                                        viewModel.backlogEventFlow.emit(BacklogExternalEvent.UpdateDeadline(date))
-                                        viewModel.updateDeadlineFlow.emit(date)
+                                        viewModel.todoEventFlow.emit(TodoExternalEvent.UpdateDeadline(date))
                                     }
                                 },
                                 deadline = uiState.selectedTodoItem.deadline
@@ -360,8 +352,7 @@ fun MainScreen() {
                                         eventName = "set_category"
                                     )
                                     scope.launch {
-                                        viewModel.backlogEventFlow.emit(BacklogExternalEvent.UpdateCategory(it))
-                                        viewModel.updateCategoryFlow.emit(it)
+                                        viewModel.todoEventFlow.emit(TodoExternalEvent.UpdateCategory(it))
                                     }
                                 }
                             )
@@ -374,12 +365,27 @@ fun MainScreen() {
                                 onClickCompletionButton = { info ->
                                     viewModel.onUpdatedTodoTime(info.second)
                                     scope.launch {
-                                        viewModel.backlogEventFlow.emit(BacklogExternalEvent.UpdateTime(
+                                        viewModel.todoEventFlow.emit(TodoExternalEvent.UpdateTime(
                                             Pair(info.first, uiState.selectedTodoItem.formatTime(info.second))
                                         ))
-                                        viewModel.updateTodoTimeFlow.emit(
-                                            Pair(info.first, uiState.selectedTodoItem.formatTime(info.second))
-                                        )
+                                    }
+                                }
+                            )
+                        }
+                        BottomSheetType.Routine -> {
+                            RoutineBottomSheet(
+                                item = uiState.selectedTodoItem,
+                                onDismissRequest = { viewModel.updateBottomSheetType(BottomSheetType.Main) },
+                                updateTodoRepeat = { id, value ->
+                                    viewModel.onUpdatedTodoRepeat(!uiState.selectedTodoItem.isRepeat)
+                                    scope.launch {
+                                        viewModel.todoEventFlow.emit(TodoExternalEvent.UpdateRepeat(id, value))
+                                    }
+                                },
+                                updateTodoRoutine = { id, days ->
+                                    viewModel.onUpdatedTodoRoutine(days)
+                                    scope.launch {
+                                        viewModel.todoEventFlow.emit(TodoExternalEvent.UpdateRoutine(id, days))
                                     }
                                 }
                             )
@@ -505,7 +511,7 @@ fun MainScreen() {
                         backlogNavGraph(
                             navController = navController,
                             showBottomSheet = showBottomSheet,
-                            backlogExternalEvent = viewModel.backlogEventFlow,
+                            todoExternalEvent = viewModel.todoEventFlow,
                             showSnackBar = showSnackBar,
                             showDialog = showDialog,
                             categoryScreenContent = categoryScreenContent
@@ -514,13 +520,7 @@ fun MainScreen() {
                             navController = navController,
                             showSnackBar = showSnackBar,
                             showBottomSheet = showBottomSheet,
-                            updateDeadlineFlow = viewModel.updateDeadlineFlow,
-                            updateBookmarkFlow = viewModel.updateBookmarkFlow,
-                            deleteTodoFlow = viewModel.deleteTodoFlow,
-                            activateItemFlow = viewModel.activateItemFlow,
-                            updateCategoryFlow = viewModel.updateCategoryFlow,
-                            updateTodoRepeatFlow = viewModel.updateTodoRepeatFlow,
-                            updateTodoTimeFlow = viewModel.updateTodoTimeFlow
+                            todoExternalEvent = viewModel.todoEventFlow
                         )
                         categoryNavGraph(
                             navController = navController,

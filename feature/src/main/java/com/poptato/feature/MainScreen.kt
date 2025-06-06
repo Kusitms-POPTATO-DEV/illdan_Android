@@ -377,7 +377,7 @@ fun MainScreen() {
                                 item = uiState.selectedTodoItem,
                                 onDismissRequest = { viewModel.updateBottomSheetType(BottomSheetType.Main) },
                                 updateTodoRepeat = { id, value ->
-                                    viewModel.onUpdatedTodoRepeat(!uiState.selectedTodoItem.isRepeat)
+                                    viewModel.onUpdatedTodoRepeat(value)
                                     scope.launch {
                                         viewModel.todoEventFlow.emit(TodoExternalEvent.UpdateRepeat(id, value))
                                     }

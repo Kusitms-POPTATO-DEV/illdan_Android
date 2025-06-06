@@ -35,4 +35,4 @@ jobs:
         mkdir -p app
         echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 -d > app/google-services.json
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew build --info

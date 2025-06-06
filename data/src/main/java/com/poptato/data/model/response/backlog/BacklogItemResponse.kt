@@ -20,5 +20,7 @@ data class BacklogItemResponse(
     @SerializedName("imageUrl")
     val imageUrl: String? = null,
     @SerializedName("time")
-    val time: String? = null
+    val time: String? = null,
+    @SerializedName("routineDays")
+    val routineDays: List<String>? = null
 )

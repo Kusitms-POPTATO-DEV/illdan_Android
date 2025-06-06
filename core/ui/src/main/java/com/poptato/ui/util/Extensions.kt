@@ -42,3 +42,16 @@ fun Float.toDp(): Dp {
     val density = LocalDensity.current
     return with(density) { this@toDp.toDp() }
 }
+
+fun List<String>.toDayIndexSet(): Set<Int> {
+    val dayToIndexMap = mapOf(
+        "월" to 0,
+        "화" to 1,
+        "수" to 2,
+        "목" to 3,
+        "금" to 4,
+        "토" to 5,
+        "일" to 6
+    )
+    return this.mapNotNull { dayToIndexMap[it] }.toSet()
+}

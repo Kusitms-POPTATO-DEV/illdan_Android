@@ -32,6 +32,7 @@ const val SAT = "토"
 const val SUN = "일"
 const val TIME = "시간"
 const val WORD_DATE = "날짜"
+const val FULL_DAY = "매일"
 
 // KaKaoLogin
 const val BtnKaKaoLoginText = "카카오 로그인"
@@ -121,6 +122,10 @@ const val HistoryListEmpty = "완료한 일이 없어요"
 const val REPEAT_TASK_OPTION = "반복 할 일"
 const val DEADLINE_OPTION = "마감기한"
 const val YEAR_MONTH = "%s년 %s월"
+const val GENERAL_REPEAT = "일반 반복"
+
+// RoutineBottomSheet
+const val GENERAL_REPEAT_GUIDE = "불규칙하게 반복되는 할 일에 설정하세요.\n" + "완료해도 할 일이 사라지지 않아요."
 
 // Error
 const val ERROR_GENERIC_MESSAGE = "에러가 발생하였습니다"

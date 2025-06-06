@@ -96,6 +96,7 @@ import com.poptato.ui.common.BookmarkItem
 import com.poptato.ui.common.PoptatoCheckBox
 import com.poptato.ui.common.RepeatItem
 import com.poptato.ui.common.formatDeadline
+import com.poptato.ui.event.TodoExternalEvent
 import com.poptato.ui.util.AnalyticsManager
 import com.poptato.ui.util.LoadingManager
 import com.poptato.ui.util.rememberDragDropListState
@@ -110,61 +111,16 @@ fun TodayScreen(
     goToBacklog: () -> Unit = {},
     showSnackBar: (String) -> Unit,
     showBottomSheet: (TodoItemModel, List<CategoryItemModel>) -> Unit = { _, _ -> },
-    updateDeadlineFlow: SharedFlow<String?>,
-    deleteTodoFlow: SharedFlow<Long>,
-    activateItemFlow: SharedFlow<Long>,
-    updateTodoRepeatFlow: SharedFlow<Long>,
-    updateBookmarkFlow: SharedFlow<Long>,
-    updateCategoryFlow: SharedFlow<Long?>,
-    updateTodoTimeFlow: SharedFlow<Pair<Long, String>>
+    todoExternalEvent: SharedFlow<TodoExternalEvent>
 ) {
     val viewModel: TodayViewModel = hiltViewModel()
     val scope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val date = DateTimeFormatter.getTodayMonthDay()
-    var activeItemId by remember { mutableStateOf<Long?>(null) }
     val haptic = LocalHapticFeedback.current
 
-    LaunchedEffect(activateItemFlow) {
-        activateItemFlow.collect { id ->
-            activeItemId = id
-        }
-    }
-
-    LaunchedEffect(deleteTodoFlow) {
-        deleteTodoFlow.collect {
-            viewModel.deleteBacklog(it)
-        }
-    }
-
-    LaunchedEffect(updateDeadlineFlow) {
-        updateDeadlineFlow.collect {
-            viewModel.setDeadline(it, uiState.selectedItem.todoId)
-        }
-    }
-
-    LaunchedEffect(updateBookmarkFlow) {
-        updateBookmarkFlow.collect {
-            viewModel.updateBookmark(it)
-        }
-    }
-
-    LaunchedEffect(updateCategoryFlow) {
-        updateCategoryFlow.collect {
-            viewModel.updateCategory(uiState.selectedItem.todoId, it)
-        }
-    }
-
-    LaunchedEffect(updateTodoRepeatFlow) {
-        updateTodoRepeatFlow.collect {
-            viewModel.updateTodoRepeat(it)
-        }
-    }
-
-    LaunchedEffect(updateTodoTimeFlow) {
-        updateTodoTimeFlow.collect {
-            viewModel.updateTodoTime(it.first, it.second)
-        }
+    LaunchedEffect(todoExternalEvent) {
+        viewModel.observeExternalEvents(todoExternalEvent)
     }
 
     LaunchedEffect(Unit) {
@@ -214,8 +170,8 @@ fun TodayScreen(
                     )
                 }
             },
-            activeItemId = activeItemId,
-            onClearActiveItem = { activeItemId = null },
+            activeItemId = uiState.activeItemId,
+            onClearActiveItem = { viewModel.updateActiveItemId(null) },
             onTodoItemModified = { id: Long, content: String ->
                 viewModel.modifyTodo(
                     item = ModifyTodoRequestModel(

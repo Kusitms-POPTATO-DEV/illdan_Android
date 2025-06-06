@@ -47,9 +47,12 @@ import com.poptato.design_system.PoptatoTypo
 import com.poptato.design_system.R
 import com.poptato.design_system.REPEAT_TASK_OPTION
 import com.poptato.design_system.DELETE_ACTION
+import com.poptato.design_system.FULL_DAY
+import com.poptato.design_system.GENERAL_REPEAT
 import com.poptato.design_system.Gray40
 import com.poptato.design_system.Gray95
 import com.poptato.design_system.Primary40
+import com.poptato.design_system.REPEAT
 import com.poptato.design_system.Settings
 import com.poptato.design_system.TIME
 import com.poptato.design_system.TODO_TIME
@@ -68,8 +71,8 @@ fun TodoBottomSheet(
     onClickBtnModify: (Long) -> Unit = {},
     onClickBtnBookmark: (Long) -> Unit = {},
     onClickCategoryBottomSheet: () -> Unit = {},
-    onClickBtnRepeat: (Long) -> Unit = {},
-    onClickBtnTime: (Long) -> Unit = {}
+    onClickBtnTime: (Long) -> Unit = {},
+    onClickBtnRoutine: () -> Unit = {}
 ) {
     var deadline by remember { mutableStateOf(item.deadline) }
     var isBookmark by remember { mutableStateOf(item.isBookmark) }
@@ -92,8 +95,8 @@ fun TodoBottomSheet(
             isBookmark = !isBookmark
         },
         onClickCategoryBottomSheet = onClickCategoryBottomSheet,
-        onClickBtnRepeat = onClickBtnRepeat,
-        onClickBtnTime = onClickBtnTime
+        onClickBtnTime = onClickBtnTime,
+        onClickBtnRoutine = onClickBtnRoutine
     )
 }
 
@@ -107,8 +110,8 @@ fun TodoBottomSheetContent(
     onClickBtnModify: (Long) -> Unit = {},
     onClickBtnBookmark: (Long) -> Unit = {},
     onClickCategoryBottomSheet: () -> Unit = {},
-    onClickBtnRepeat: (Long) -> Unit = {},
-    onClickBtnTime: (Long) -> Unit = {}
+    onClickBtnTime: (Long) -> Unit = {},
+    onClickBtnRoutine: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -231,18 +234,12 @@ fun TodoBottomSheetContent(
         )
         BottomSheetBtn(
             resourceId = R.drawable.ic_refresh,
-            buttonText = REPEAT_TASK_OPTION,
+            buttonText = REPEAT,
+            routineText = if (item.isRepeat) GENERAL_REPEAT else if (item.routineDays.size == 7) FULL_DAY else item.routineDays.joinToString(""),
             textColor = Gray30,
             modifier = Modifier.clickable {
-                onClickBtnRepeat(item.todoId)
-                AnalyticsManager.logEvent(
-                    eventName = "set_repeat",
-                    params = mapOf("task_ID" to "${item.todoId}")
-                )
-            },
-            isRepeatBtn = true,
-            isRepeat = item.isRepeat,
-            onClickBtnRepeat = { onClickBtnRepeat(item.todoId) }
+                onClickBtnRoutine()
+            }
         )
         BottomSheetBtn(
             resourceId = R.drawable.ic_add_category,
@@ -265,11 +262,9 @@ fun BottomSheetBtn(
     textColor: Color,
     deadline: String = "",
     time: String = "",
+    routineText: String = "",
     category: CategoryItemModel? = CategoryItemModel(),
-    modifier: Modifier = Modifier,
-    isRepeatBtn: Boolean = false,
-    isRepeat: Boolean = false,
-    onClickBtnRepeat: () -> Unit = {}
+    modifier: Modifier = Modifier
 ) {
 
     Row(
@@ -281,17 +276,13 @@ fun BottomSheetBtn(
         Spacer(modifier = Modifier.width(8.dp))
         Text(text = buttonText, style = PoptatoTypo.mdMedium, color = textColor)
         Spacer(modifier = Modifier.weight(1f))
-        if (isRepeatBtn) PoptatoSwitchButton(
-            check = isRepeat,
-            onClick = {
-                onClickBtnRepeat()
-            }
-        )
         if (buttonText == WORD_DATE && deadline.isNotEmpty()) {
             Text(text = deadline, style = PoptatoTypo.mdRegular, color = Gray40)
         } else if (buttonText == TIME && time.isNotEmpty()) {
             Text(text = time, style = PoptatoTypo.mdRegular, color = Gray40)
-        } else if (buttonText == WORD_DATE || buttonText == TIME) {
+        } else if (buttonText == REPEAT && routineText.isNotEmpty()) {
+            Text(text = routineText, style = PoptatoTypo.mdRegular, color = Gray40)
+        } else if (buttonText == WORD_DATE || buttonText == TIME || buttonText == REPEAT) {
             Text(text = Settings, style = PoptatoTypo.mdRegular, color = Gray60)
         }
 

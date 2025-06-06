@@ -9,6 +9,8 @@ import com.poptato.domain.usecase.backlog.GetBacklogListUseCase
 import com.poptato.domain.usecase.category.CategoryDragDropUseCase
 import com.poptato.domain.usecase.category.DeleteCategoryUseCase
 import com.poptato.domain.usecase.category.GetCategoryListUseCase
+import com.poptato.domain.usecase.todo.DeleteTodoRepeatUseCase
+import com.poptato.domain.usecase.todo.DeleteTodoRoutineUseCase
 import com.poptato.domain.usecase.todo.DeleteTodoUseCase
 import com.poptato.domain.usecase.todo.DragDropUseCase
 import com.poptato.domain.usecase.todo.GetTodoDetailUseCase
@@ -17,7 +19,8 @@ import com.poptato.domain.usecase.todo.SwipeTodoUseCase
 import com.poptato.domain.usecase.todo.UpdateBookmarkUseCase
 import com.poptato.domain.usecase.todo.UpdateDeadlineUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoCategoryUseCase
-import com.poptato.domain.usecase.todo.UpdateTodoRepeatUseCase
+import com.poptato.domain.usecase.todo.SetTodoRepeatUseCase
+import com.poptato.domain.usecase.todo.SetTodoRoutineUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoTimeUseCase
 import com.poptato.ui.util.AnalyticsManager
 import io.mockk.Runs
@@ -168,10 +171,13 @@ class BacklogViewModel_CreateBacklogTest {
             updateTodoCategoryUseCase = mockk<UpdateTodoCategoryUseCase>(relaxed = true),
             getTodoDetailUseCase = mockk<GetTodoDetailUseCase>(relaxed = true),
             swipeTodoUseCase = mockk<SwipeTodoUseCase>(relaxed = true),
-            updateTodoRepeatUseCase = mockk<UpdateTodoRepeatUseCase>(relaxed = true),
+            setTodoRepeatUseCase = mockk<SetTodoRepeatUseCase>(relaxed = true),
             updateTodoTimeUseCase = mockk<UpdateTodoTimeUseCase>(relaxed = true),
             categoryDragDropUseCase = mockk<CategoryDragDropUseCase>(relaxed = true),
-            getDeadlineDateModeUseCase = mockk<GetDeadlineDateModeUseCase>(relaxed = true)
+            getDeadlineDateModeUseCase = mockk<GetDeadlineDateModeUseCase>(relaxed = true),
+            deleteTodoRoutineUseCase = mockk<DeleteTodoRoutineUseCase>(relaxed = true),
+            deleteTodoRepeatUseCase = mockk<DeleteTodoRepeatUseCase>(relaxed = true),
+            setTodoRoutineUseCase = mockk<SetTodoRoutineUseCase>(relaxed = true)
         )
     }
 

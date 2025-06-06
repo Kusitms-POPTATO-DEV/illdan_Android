@@ -4,18 +4,18 @@ import androidx.lifecycle.viewModelScope
 import com.poptato.core.enums.BottomNavType
 import com.poptato.domain.model.enums.BottomSheetType
 import com.poptato.domain.model.request.ListRequestModel
+import com.poptato.domain.model.request.todo.RoutineRequestModel
 import com.poptato.domain.model.response.category.CategoryIconItemModel
 import com.poptato.domain.model.response.category.CategoryIconTotalListModel
 import com.poptato.domain.model.response.category.CategoryItemModel
 import com.poptato.domain.model.response.category.CategoryScreenContentModel
 import com.poptato.domain.model.response.dialog.DialogContentModel
-import com.poptato.domain.model.response.history.CalendarMonthModel
 import com.poptato.domain.model.response.today.TodoItemModel
 import com.poptato.domain.model.response.yesterday.YesterdayListModel
 import com.poptato.domain.usecase.yesterday.GetYesterdayListUseCase
 import com.poptato.navigation.NavRoutes
 import com.poptato.ui.base.BaseViewModel
-import com.poptato.ui.event.BacklogExternalEvent
+import com.poptato.ui.event.TodoExternalEvent
 import com.poptato.ui.util.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -26,14 +26,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val getYesterdayListUseCase: GetYesterdayListUseCase
 ) : BaseViewModel<MainPageState>(MainPageState()) {
-    val backlogEventFlow = MutableSharedFlow<BacklogExternalEvent>()
-    val updateDeadlineFlow = MutableSharedFlow<String?>()
-    val deleteTodoFlow = MutableSharedFlow<Long>()
-    val activateItemFlow = MutableSharedFlow<Long>()
-    val updateBookmarkFlow = MutableSharedFlow<Long>()
-    val updateCategoryFlow = MutableSharedFlow<Long?>()
-    val updateTodoRepeatFlow = MutableSharedFlow<Long>()
-    val updateTodoTimeFlow = MutableSharedFlow<Pair<Long, String>>()
+    val todoEventFlow = MutableSharedFlow<TodoExternalEvent>()
     val animationDuration = 300
     val selectedIconInBottomSheet = MutableSharedFlow<CategoryIconItemModel>()
     val categoryScreenContent = MutableSharedFlow<CategoryScreenContentModel>(replay = 1)
@@ -118,7 +111,25 @@ class MainViewModel @Inject constructor(
     }
 
     fun onUpdatedTodoRepeat(value: Boolean) {
-        val updatedItem = uiState.value.selectedTodoItem.copy(isRepeat = value)
+        val updatedItem = uiState.value.selectedTodoItem.copy(
+            isRepeat = value,
+            routineDays = if (value) emptyList() else uiState.value.selectedTodoItem.routineDays
+        )
+
+        updateState(
+            uiState.value.copy(
+                selectedTodoItem = updatedItem
+            )
+        )
+    }
+
+    fun onUpdatedTodoRoutine(days: Set<Int>?) {
+        val request = RoutineRequestModel()
+        request.convertIndexToDays(days?.toList())
+        val updatedItem = uiState.value.selectedTodoItem.copy(
+            routineDays = request.routineDays ?: emptyList(),
+            isRepeat = if (request.routineDays?.isNotEmpty() == true) false else uiState.value.selectedTodoItem.isRepeat
+        )
 
         updateState(
             uiState.value.copy(

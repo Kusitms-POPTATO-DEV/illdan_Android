@@ -15,6 +15,7 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PATCH
+import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 
@@ -67,8 +68,13 @@ interface TodoService {
         @Path("todoId") todoId: Long
     ): Response<ApiResponse<TodoDetailItemResponse>>
 
-    @PATCH(Endpoints.Todo.REPEAT)
-    suspend fun updateTodoRepeat(
+    @POST(Endpoints.Todo.REPEAT)
+    suspend fun setTodoRepeat(
+        @Path("todoId") todoId: Long
+    ): Response<ApiResponse<Unit>>
+
+    @DELETE(Endpoints.Todo.REPEAT)
+    suspend fun deleteTodoRepeat(
         @Path("todoId") todoId: Long
     ): Response<ApiResponse<Unit>>
 
@@ -79,8 +85,13 @@ interface TodoService {
     ): Response<ApiResponse<Unit>>
 
     @PUT(Endpoints.Todo.ROUTINE)
-    suspend fun updateRoutine(
+    suspend fun updateTodoRoutine(
         @Path("todoId") todoId: Long,
         @Body request: RoutineRequestModel
+    ): Response<ApiResponse<Unit>>
+
+    @DELETE(Endpoints.Todo.ROUTINE)
+    suspend fun deleteTodoRoutine(
+        @Path("todoId") todoId: Long
     ): Response<ApiResponse<Unit>>
 }

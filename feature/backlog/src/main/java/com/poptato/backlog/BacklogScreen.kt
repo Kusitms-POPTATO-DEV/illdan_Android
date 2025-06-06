@@ -38,7 +38,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -125,7 +124,7 @@ import com.poptato.ui.common.BookmarkItem
 import com.poptato.ui.common.RepeatItem
 import com.poptato.ui.common.TopBar
 import com.poptato.ui.common.formatDeadline
-import com.poptato.ui.event.BacklogExternalEvent
+import com.poptato.ui.event.TodoExternalEvent
 import com.poptato.ui.util.AnalyticsManager
 import com.poptato.ui.util.LoadingManager
 import com.poptato.ui.util.rememberDragDropListState
@@ -139,7 +138,7 @@ import kotlinx.coroutines.launch
 fun BacklogScreen(
     goToCategorySelect: (CategoryScreenContentModel) -> Unit = {},
     showBottomSheet: (TodoItemModel, List<CategoryItemModel>) -> Unit = { _, _ -> },
-    backlogExternalEvent: SharedFlow<BacklogExternalEvent>,
+    todoExternalEvent: SharedFlow<TodoExternalEvent>,
     showSnackBar: (String) -> Unit,
     showDialog: (DialogContentModel) -> Unit = {},
     initialCategoryIndex: Int = 0
@@ -154,8 +153,8 @@ fun BacklogScreen(
     val haptic = LocalHapticFeedback.current
     val permissionState = rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
 
-    LaunchedEffect(backlogExternalEvent) {
-        viewModel.observeExternalEvents(backlogExternalEvent)
+    LaunchedEffect(todoExternalEvent) {
+        viewModel.observeExternalEvents(todoExternalEvent)
     }
 
     LaunchedEffect(Unit) {

@@ -14,7 +14,8 @@ data class TodoItemModel(
     var categoryName: String = "",
     var imageUrl: String = "",
     var categoryId: Long = -1,
-    var time: String = ""
+    var time: String = "",
+    var routineDays: List<String> = emptyList()
 ) {
     private val parsedTime: Triple<String, Int, Int>? = try {
         val parts = time.split(":")

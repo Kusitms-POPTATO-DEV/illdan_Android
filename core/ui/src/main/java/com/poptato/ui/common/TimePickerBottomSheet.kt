@@ -68,7 +68,7 @@ fun TimePickerBottomSheet(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        TimePickerBottomSheetActionButtons(
+        BottomSheetActionButtons(
             onDelete = {
                 onClickCompletionButton(Pair(item.todoId, null))
                 onDismissRequest()
@@ -166,7 +166,7 @@ fun TimePickerSelector(
 
 
 @Composable
-private fun TimePickerBottomSheetActionButtons(
+fun BottomSheetActionButtons(
     onDelete: () -> Unit,
     onConfirm: () -> Unit,
     modifier: Modifier = Modifier

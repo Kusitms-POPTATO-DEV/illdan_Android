@@ -8,4 +8,5 @@ sealed class TodoExternalEvent {
     data class UpdateCategory(val id: Long?): TodoExternalEvent()
     data class UpdateRepeat(val id: Long, val value: Boolean): TodoExternalEvent()
     data class UpdateTime(val info: Pair<Long, String>): TodoExternalEvent()
+    data class UpdateRoutine(val id: Long, val days: Set<Int>?): TodoExternalEvent()
 }

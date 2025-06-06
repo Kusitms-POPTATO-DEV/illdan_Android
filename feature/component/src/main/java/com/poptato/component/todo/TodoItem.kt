@@ -50,6 +50,8 @@ import coil.compose.AsyncImage
 import com.poptato.domain.model.enums.TodoType
 import com.poptato.design_system.BOOKMARK
 import com.poptato.design_system.DOT
+import com.poptato.design_system.FULL_DAY
+import com.poptato.design_system.GENERAL_REPEAT
 import com.poptato.design_system.Gray00
 import com.poptato.design_system.Gray40
 import com.poptato.design_system.Gray50
@@ -194,7 +196,7 @@ fun TodoItem(
                 )
             }
 
-            if (item.isRepeat || item.dDay != null) {
+            if (item.isRepeat || item.routineDays.isNotEmpty() || item.dDay != null) {
                 Spacer(modifier = Modifier.height(8.dp))
                 RepeatDeadlineRow(
                     item = item,
@@ -229,7 +231,7 @@ private fun RepeatDeadlineRow(
     ) {
         if (item.isRepeat) {
             Text(
-                text = REPEAT_TODO,
+                text = GENERAL_REPEAT,
                 color = Gray50,
                 style = PoptatoTypo.xsRegular
             )
@@ -244,6 +246,26 @@ private fun RepeatDeadlineRow(
                 )
 
                 Spacer(modifier = Modifier.width(4.dp))
+            }
+        } else {
+            if (item.routineDays.isNotEmpty()) {
+                Text(
+                    text = if (item.routineDays.size == 7) FULL_DAY else item.routineDays.joinToString(""),
+                    color = Gray50,
+                    style = PoptatoTypo.xsRegular
+                )
+
+                if (item.dDay != null) {
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Text(
+                        text = DOT,
+                        color = Gray50,
+                        style = PoptatoTypo.xsRegular
+                    )
+
+                    Spacer(modifier = Modifier.width(4.dp))
+                }
             }
         }
 

@@ -85,8 +85,13 @@ interface TodoService {
     ): Response<ApiResponse<Unit>>
 
     @PUT(Endpoints.Todo.ROUTINE)
-    suspend fun updateRoutine(
+    suspend fun updateTodoRoutine(
         @Path("todoId") todoId: Long,
         @Body request: RoutineRequestModel
+    ): Response<ApiResponse<Unit>>
+
+    @DELETE(Endpoints.Todo.ROUTINE)
+    suspend fun deleteTodoRoutine(
+        @Path("todoId") todoId: Long
     ): Response<ApiResponse<Unit>>
 }

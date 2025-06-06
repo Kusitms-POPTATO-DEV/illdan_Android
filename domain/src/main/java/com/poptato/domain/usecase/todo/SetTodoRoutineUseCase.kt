@@ -6,12 +6,12 @@ import com.poptato.domain.repository.TodoRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class UpdateRoutineUseCase @Inject constructor(
+class SetTodoRoutineUseCase @Inject constructor(
     private val todoRepository: TodoRepository
-) : UseCase<UpdateRoutineUseCase.Companion.UpdateTodoRoutineModel, Result<Unit>>() {
+) : UseCase<SetTodoRoutineUseCase.Companion.UpdateTodoRoutineModel, Result<Unit>>() {
     
     override suspend fun invoke(request: UpdateTodoRoutineModel): Flow<Result<Unit>> {
-        return todoRepository.updateTodoRoutine(request.todoId, request.requestModel)
+        return todoRepository.setTodoRoutine(request.todoId, request.requestModel)
     }
 
     companion object {

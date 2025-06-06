@@ -23,5 +23,6 @@ interface TodoRepository {
     suspend fun setTodoRepeat(todoId: Long): Flow<Result<Unit>>
     suspend fun deleteTodoRepeat(todoId: Long): Flow<Result<Unit>>
     suspend fun updateTodoTime(todoId: Long, request: TodoTimeModel): Flow<Result<Unit>>
-    suspend fun updateTodoRoutine(todoId: Long, request: RoutineRequestModel): Flow<Result<Unit>>
+    suspend fun setTodoRoutine(todoId: Long, request: RoutineRequestModel): Flow<Result<Unit>>
+    suspend fun deleteTodoRoutine(todoId: Long): Flow<Result<Unit>>
 }

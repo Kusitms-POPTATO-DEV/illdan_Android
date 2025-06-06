@@ -111,7 +111,10 @@ class MainViewModel @Inject constructor(
     }
 
     fun onUpdatedTodoRepeat(value: Boolean) {
-        val updatedItem = uiState.value.selectedTodoItem.copy(isRepeat = value)
+        val updatedItem = uiState.value.selectedTodoItem.copy(
+            isRepeat = value,
+            routineDays = if (value) emptyList() else uiState.value.selectedTodoItem.routineDays
+        )
 
         updateState(
             uiState.value.copy(
@@ -123,7 +126,10 @@ class MainViewModel @Inject constructor(
     fun onUpdatedTodoRoutine(days: Set<Int>?) {
         val request = RoutineRequestModel()
         request.convertIndexToDays(days?.toList())
-        val updatedItem = uiState.value.selectedTodoItem.copy(routineDays = request.routineDays ?: emptyList())
+        val updatedItem = uiState.value.selectedTodoItem.copy(
+            routineDays = request.routineDays ?: emptyList(),
+            isRepeat = if (request.routineDays?.isNotEmpty() == true) false else uiState.value.selectedTodoItem.isRepeat
+        )
 
         updateState(
             uiState.value.copy(

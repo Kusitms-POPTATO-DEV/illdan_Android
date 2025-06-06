@@ -10,6 +10,7 @@ import com.poptato.domain.model.request.today.GetTodayListRequestModel
 import com.poptato.domain.model.request.todo.DeadlineContentModel
 import com.poptato.domain.model.request.todo.DragDropRequestModel
 import com.poptato.domain.model.request.todo.ModifyTodoRequestModel
+import com.poptato.domain.model.request.todo.RoutineRequestModel
 import com.poptato.domain.model.request.todo.TodoCategoryIdModel
 import com.poptato.domain.model.request.todo.TodoIdModel
 import com.poptato.domain.model.request.todo.TodoTimeModel
@@ -23,6 +24,7 @@ import com.poptato.domain.usecase.auth.GetDeadlineDateModeUseCase
 import com.poptato.domain.usecase.category.GetCategoryListUseCase
 import com.poptato.domain.usecase.today.GetTodayListUseCase
 import com.poptato.domain.usecase.todo.DeleteTodoRepeatUseCase
+import com.poptato.domain.usecase.todo.DeleteTodoRoutineUseCase
 import com.poptato.domain.usecase.todo.DeleteTodoUseCase
 import com.poptato.domain.usecase.todo.DragDropUseCase
 import com.poptato.domain.usecase.todo.GetTodoDetailUseCase
@@ -33,6 +35,7 @@ import com.poptato.domain.usecase.todo.UpdateDeadlineUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoCategoryUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoCompletionUseCase
 import com.poptato.domain.usecase.todo.SetTodoRepeatUseCase
+import com.poptato.domain.usecase.todo.SetTodoRoutineUseCase
 import com.poptato.domain.usecase.todo.UpdateTodoTimeUseCase
 import com.poptato.ui.base.BaseViewModel
 import com.poptato.ui.event.TodoExternalEvent
@@ -58,9 +61,11 @@ class TodayViewModel @Inject constructor(
     private val updateTodoCategoryUseCase: UpdateTodoCategoryUseCase,
     private val deleteTodoUseCase: DeleteTodoUseCase,
     private val setTodoRepeatUseCase: SetTodoRepeatUseCase,
-    private var updateTodoTimeUseCase: UpdateTodoTimeUseCase,
+    private val updateTodoTimeUseCase: UpdateTodoTimeUseCase,
     private val getDeadlineDateModeUseCase: GetDeadlineDateModeUseCase,
-    private val deleteTodoRepeatUseCase: DeleteTodoRepeatUseCase
+    private val deleteTodoRepeatUseCase: DeleteTodoRepeatUseCase,
+    private val setTodoRoutineUseCase: SetTodoRoutineUseCase,
+    private val deleteTodoRoutineUseCase: DeleteTodoRoutineUseCase
 ) : BaseViewModel<TodayPageState>(TodayPageState()) {
     private var snapshotList: List<TodoItemModel> = emptyList()
 
@@ -356,7 +361,10 @@ class TodayViewModel @Inject constructor(
     private fun updateTodoRepeatInUI(id: Long, value: Boolean) {
         val newList = uiState.value.todayList.map {
             if (it.todoId == id) {
-                it.copy(isRepeat = value)
+                it.copy(
+                    isRepeat = value,
+                    routineDays = if (value) emptyList() else it.routineDays
+                )
             } else {
                 it
             }
@@ -444,6 +452,50 @@ class TodayViewModel @Inject constructor(
         }
     }
 
+    private fun setTodoRoutine(id: Long, days: Set<Int>) {
+        val request = RoutineRequestModel()
+        request.convertIndexToDays(days.toList())
+
+        updateRoutineInUI(id, request.routineDays)
+
+        viewModelScope.launch {
+            setTodoRoutineUseCase(request = SetTodoRoutineUseCase.Companion.UpdateTodoRoutineModel(id, request)).collect {
+                resultResponse(it, { viewModelScope.launch { updateSnapshotList(uiState.value.todayList) } }, { onFailedUpdateTodayList() })
+            }
+        }
+    }
+
+    private fun deleteTodoRoutine(id: Long) {
+        updateRoutineInUI(id, null)
+
+        viewModelScope.launch {
+            deleteTodoRoutineUseCase(id).collect {
+                resultResponse(it, { viewModelScope.launch { updateSnapshotList(uiState.value.todayList) } }, { onFailedUpdateTodayList() })
+            }
+        }
+    }
+
+    private fun updateRoutineInUI(id: Long, routineDays: List<String>?) {
+        val newList = uiState.value.todayList.map {
+            if (it.todoId == id) {
+                it.copy(
+                    routineDays = routineDays ?: emptyList(),
+                    isRepeat = if (routineDays?.isNotEmpty() == true) false else it.isRepeat
+                )
+            } else {
+                it
+            }
+        }
+        val updatedItem = uiState.value.selectedItem.copy(routineDays = routineDays ?: emptyList())
+
+        updateState(
+            uiState.value.copy(
+                todayList = newList,
+                selectedItem = updatedItem
+            )
+        )
+    }
+
     // DeadlineDateMode
     private fun getDeadlineDateMode() {
         viewModelScope.launch {
@@ -470,6 +522,12 @@ class TodayViewModel @Inject constructor(
                     is TodoExternalEvent.UpdateCategory -> { updateCategory(uiState.value.selectedItem.todoId, event.id) }
                     is TodoExternalEvent.UpdateDeadline -> { setDeadline(event.deadline, uiState.value.selectedItem.todoId) }
                     is TodoExternalEvent.UpdateTime -> { updateTodoTime(event.info.first, event.info.second) }
+                    is TodoExternalEvent.UpdateRoutine -> {
+                        when (val days = event.days) {
+                            null -> deleteTodoRoutine(event.id)
+                            else -> setTodoRoutine(event.id, days)
+                        }
+                    }
                 }
             }
         }

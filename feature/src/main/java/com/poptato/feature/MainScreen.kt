@@ -13,8 +13,6 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -52,6 +50,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.poptato.core.enums.BottomNavType
@@ -61,6 +60,7 @@ import com.poptato.design_system.Gray100
 import com.poptato.design_system.R
 import com.poptato.domain.model.enums.BottomSheetType
 import com.poptato.domain.model.enums.DialogType
+import com.poptato.domain.model.response.category.CategoryIconItemModel
 import com.poptato.domain.model.response.category.CategoryIconTotalListModel
 import com.poptato.domain.model.response.category.CategoryItemModel
 import com.poptato.domain.model.response.category.CategoryScreenContentModel
@@ -91,6 +91,7 @@ import com.poptato.ui.util.CommonEventManager
 import com.poptato.ui.util.DismissKeyboardOnClick
 import com.poptato.ui.viewModel.GuideViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
@@ -147,7 +148,7 @@ fun MainScreen() {
     }
     val categoryScreenContent: (CategoryScreenContentModel) -> Unit = {
         scope.launch {
-            viewModel.categoryScreenContent.emit(it)
+            viewModel.categoryScreenContentFromBacklog.emit(it)
         }
     }
     val deleteUserName: (String) -> Unit = {
@@ -400,30 +401,6 @@ fun MainScreen() {
                 bottomBar = {
                     AnimatedVisibility(
                         visible = uiState.bottomNavType != BottomNavType.DEFAULT,
-                        enter = fadeIn(
-                            animationSpec = tween(
-                                durationMillis = viewModel.animationDuration,
-                                easing = FastOutSlowInEasing
-                            )
-                        ) + scaleIn(
-                            initialScale = 0.9f,
-                            animationSpec = tween(
-                                durationMillis = viewModel.animationDuration,
-                                easing = FastOutSlowInEasing
-                            )
-                        ),
-                        exit = fadeOut(
-                            animationSpec = tween(
-                                durationMillis = viewModel.animationDuration,
-                                easing = LinearOutSlowInEasing
-                            )
-                        ) + scaleOut(
-                            targetScale = 0.9f,
-                            animationSpec = tween(
-                                durationMillis = viewModel.animationDuration,
-                                easing = LinearOutSlowInEasing
-                            )
-                        ),
                         modifier = Modifier.background(Gray100)
                     ) {
                         BottomNavBar(
@@ -433,17 +410,13 @@ fun MainScreen() {
                                     viewModel.getYesterdayList()
                                     if (route == NavRoutes.BacklogScreen.route) {
                                         navController.navigate(NavRoutes.BacklogScreen.createRoute(0)) {
-                                            popUpTo(navController.currentDestination?.route!!) {
-                                                inclusive = true
-                                            }
+                                            popUpTo(navController.currentDestination?.route!!) { inclusive = true }
                                             launchSingleTop = true
                                         }
                                     } else {
                                         if (route == NavRoutes.TodayScreen.route && showSecondGuide) { guideViewModel.updateSecondGuide(false) }
                                         navController.navigate(route) {
-                                            popUpTo(navController.currentDestination?.route!!) {
-                                                inclusive = true
-                                            }
+                                            popUpTo(navController.currentDestination?.route!!) { inclusive = true }
                                             launchSingleTop = true
                                         }
                                     }
@@ -458,94 +431,106 @@ fun MainScreen() {
                 },
                 snackbarHost = { CommonSnackBar(hostState = snackBarHost) },
             ) { innerPadding ->
-                Box(
-                    modifier = Modifier
-                        .padding(innerPadding)
-                ) {
-                    NavHost(
-                        modifier = Modifier.background(Gray100),
-                        navController = navController,
-                        startDestination = NavRoutes.SplashGraph.route,
-                        exitTransition = {
-                            fadeOut(
-                                animationSpec = tween(
-                                    durationMillis = viewModel.animationDuration,
-                                    easing = LinearOutSlowInEasing
-                                )
-                            )
-                        },
-                        enterTransition = {
-                            fadeIn(
-                                animationSpec = tween(
-                                    durationMillis = viewModel.animationDuration,
-                                    easing = FastOutSlowInEasing
-                                )
-                            )
-                        },
-                        popEnterTransition = {
-                            fadeIn(
-                                animationSpec = tween(
-                                    durationMillis = viewModel.animationDuration,
-                                    easing = FastOutSlowInEasing
-                                )
-                            )
-                        },
-                        popExitTransition = {
-                            fadeOut(
-                                animationSpec = tween(
-                                    durationMillis = viewModel.animationDuration,
-                                    easing = LinearOutSlowInEasing
-                                )
-                            )
-                        }
-                    ) {
-                        splashNavGraph(navController = navController)
-                        loginNavGraph(navController = navController, showSnackBar = showSnackBar)
-                        yesterdayListNavGraph(navController = navController)
-                        myPageNavGraph(
-                            navController = navController,
-                            showDialog = showDialog,
-                            deleteUserName = deleteUserName,
-                            deleteUserNameFromUserData = viewModel.userDeleteName
-                        )
-                        backlogNavGraph(
-                            navController = navController,
-                            showBottomSheet = showBottomSheet,
-                            todoExternalEvent = viewModel.todoEventFlow,
-                            showSnackBar = showSnackBar,
-                            showDialog = showDialog,
-                            categoryScreenContent = categoryScreenContent
-                        )
-                        todayNavGraph(
-                            navController = navController,
-                            showSnackBar = showSnackBar,
-                            showBottomSheet = showBottomSheet,
-                            todoExternalEvent = viewModel.todoEventFlow
-                        )
-                        categoryNavGraph(
-                            navController = navController,
-                            showCategoryIconBottomSheet = showCategoryIconBottomSheet,
-                            selectedIconInBottomSheet = viewModel.selectedIconInBottomSheet,
-                            showDialog = showDialog,
-                            categoryScreenFromBacklog = viewModel.categoryScreenContent
-                        )
-                        historyNavGraph(
-                            navController = navController
-                        )
-                    }
-
-                    if (showSecondGuide) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_guide_bubble_2),
-                            contentDescription = null,
-                            tint = Color.Unspecified,
-                            modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .offset(x = 20.dp)
-                        )
-                    }
-                }
+                NavHostContent(
+                    modifier = Modifier.padding(innerPadding),
+                    navController = navController,
+                    showSecondGuide = showSecondGuide,
+                    userDeleteName = viewModel.userDeleteName,
+                    todoEventFlow = viewModel.todoEventFlow,
+                    selectedIconInBottomSheet = viewModel.selectedIconInBottomSheet,
+                    categoryScreenContentFromBacklog = viewModel.categoryScreenContentFromBacklog,
+                    deleteUserName = deleteUserName,
+                    categoryScreenContent = categoryScreenContent,
+                    showSnackBar = showSnackBar,
+                    showBottomSheet = showBottomSheet,
+                    showDialog = showDialog,
+                    showCategoryIconBottomSheet = showCategoryIconBottomSheet
+                )
             }
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+@Composable
+fun NavHostContent(
+    // modifier
+    modifier: Modifier = Modifier,
+    // navController
+    navController: NavHostController,
+    // State
+    showSecondGuide: Boolean = false,
+    // Flow
+    userDeleteName: SharedFlow<String>,
+    todoEventFlow: SharedFlow<TodoExternalEvent>,
+    selectedIconInBottomSheet: SharedFlow<CategoryIconItemModel>,
+    categoryScreenContentFromBacklog: SharedFlow<CategoryScreenContentModel>,
+    // Callback
+    deleteUserName: (String) -> Unit = {},
+    categoryScreenContent: (CategoryScreenContentModel) -> Unit = {},
+    showSnackBar: (String) -> Unit = {},
+    showBottomSheet: (TodoItemModel, List<CategoryItemModel>) -> Unit = { _, _ -> },
+    showDialog: (DialogContentModel) -> Unit = {},
+    showCategoryIconBottomSheet: (CategoryIconTotalListModel) -> Unit = {},
+) {
+    val animationDuration = 300
+
+    Box(
+        modifier = modifier
+    ) {
+        NavHost(
+            modifier = Modifier.background(Gray100),
+            navController = navController,
+            startDestination = NavRoutes.SplashGraph.route,
+            exitTransition = { fadeOut(animationSpec = tween(durationMillis = animationDuration, easing = LinearOutSlowInEasing)) },
+            enterTransition = { fadeIn(animationSpec = tween(durationMillis = animationDuration, easing = FastOutSlowInEasing)) },
+            popEnterTransition = { fadeIn(animationSpec = tween(durationMillis = animationDuration, easing = FastOutSlowInEasing)) },
+            popExitTransition = { fadeOut(animationSpec = tween(durationMillis = animationDuration, easing = LinearOutSlowInEasing)) }
+        ) {
+            splashNavGraph(navController = navController)
+            loginNavGraph(navController = navController, showSnackBar = showSnackBar)
+            yesterdayListNavGraph(navController = navController)
+            myPageNavGraph(
+                navController = navController,
+                showDialog = showDialog,
+                deleteUserName = deleteUserName,
+                deleteUserNameFromUserData = userDeleteName
+            )
+            backlogNavGraph(
+                navController = navController,
+                showBottomSheet = showBottomSheet,
+                todoExternalEvent = todoEventFlow,
+                showSnackBar = showSnackBar,
+                showDialog = showDialog,
+                categoryScreenContent = categoryScreenContent
+            )
+            todayNavGraph(
+                navController = navController,
+                showSnackBar = showSnackBar,
+                showBottomSheet = showBottomSheet,
+                todoExternalEvent = todoEventFlow
+            )
+            categoryNavGraph(
+                navController = navController,
+                showCategoryIconBottomSheet = showCategoryIconBottomSheet,
+                selectedIconInBottomSheet = selectedIconInBottomSheet,
+                showDialog = showDialog,
+                categoryScreenFromBacklog = categoryScreenContentFromBacklog
+            )
+            historyNavGraph(
+                navController = navController
+            )
+        }
+
+        if (showSecondGuide) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_guide_bubble_2),
+                contentDescription = null,
+                tint = Color.Unspecified,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .offset(x = 20.dp)
+            )
         }
     }
 }

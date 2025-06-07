@@ -27,9 +27,8 @@ class MainViewModel @Inject constructor(
     private val getYesterdayListUseCase: GetYesterdayListUseCase
 ) : BaseViewModel<MainPageState>(MainPageState()) {
     val todoEventFlow = MutableSharedFlow<TodoExternalEvent>()
-    val animationDuration = 300
     val selectedIconInBottomSheet = MutableSharedFlow<CategoryIconItemModel>()
-    val categoryScreenContent = MutableSharedFlow<CategoryScreenContentModel>(replay = 1)
+    val categoryScreenContentFromBacklog = MutableSharedFlow<CategoryScreenContentModel>(replay = 1)
     val userDeleteName = MutableSharedFlow<String>(replay = 1)
 
     fun setBottomNavType(route: String?) {

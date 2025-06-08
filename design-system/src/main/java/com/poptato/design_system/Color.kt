@@ -71,3 +71,4 @@ val Splash = Brush.linearGradient(
 // Background
 val BgSnackBar = Color(0xFF121214)
 val BgProgressBar = Color(0xFF000000)
+val BottomSheet = Color(0xFF000000).copy(alpha = 0.5f)

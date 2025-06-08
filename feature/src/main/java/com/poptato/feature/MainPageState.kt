@@ -14,7 +14,7 @@ data class MainPageState(
     val selectedTodoItem: TodoItemModel = TodoItemModel(),
     val selectedTodoCategoryItem: CategoryItemModel? = CategoryItemModel(),
     val categoryList: List<CategoryItemModel> = emptyList(),
-    val bottomSheetType: BottomSheetType = BottomSheetType.Main,
+    val bottomSheetType: BottomSheetType = BottomSheetType.None,
     val backPressedOnce: Boolean = false,
     val categoryIconList: CategoryIconTotalListModel = CategoryIconTotalListModel(),
     val dialogContent: DialogContentModel = DialogContentModel(),

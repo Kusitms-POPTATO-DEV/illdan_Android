@@ -8,25 +8,36 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.animation.with
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-//noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -38,9 +49,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -54,7 +67,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.poptato.core.enums.BottomNavType
-import com.poptato.core.util.DateTimeFormatter
+import com.poptato.design_system.BottomSheet
 import com.poptato.design_system.SNACK_BAR_FINISH_APP_GUIDE
 import com.poptato.design_system.Gray100
 import com.poptato.design_system.R
@@ -86,7 +99,6 @@ import com.poptato.ui.common.TimePickerBottomSheet
 import com.poptato.ui.common.TodoBottomSheet
 import com.poptato.ui.common.TwoBtnTypeDialog
 import com.poptato.ui.event.TodoExternalEvent
-import com.poptato.ui.util.AnalyticsManager
 import com.poptato.ui.util.CommonEventManager
 import com.poptato.ui.util.DismissKeyboardOnClick
 import com.poptato.ui.viewModel.GuideViewModel
@@ -109,25 +121,19 @@ fun MainScreen() {
     val scope = rememberCoroutineScope()
     val snackBarHost = remember { SnackbarHostState() }
     val interactionSource = remember { MutableInteractionSource() }
-    val sheetState = androidx.compose.material.rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true
-    )
     val isShowDialog = remember { mutableStateOf(false) }
     val showBottomSheet: (TodoItemModel, List<CategoryItemModel>) -> Unit =
         { item: TodoItemModel, categoryList: List<CategoryItemModel> ->
             viewModel.onSelectedTodoItem(item, categoryList)
-            scope.launch { sheetState.show() }
         }
     val showCategoryIconBottomSheet: (CategoryIconTotalListModel) -> Unit =
         { categoryList: CategoryIconTotalListModel ->
             viewModel.onSelectedCategoryIcon(categoryList)
-            scope.launch { sheetState.show() }
         }
     val backPressHandler: () -> Unit = {
         scope.launch { viewModel.todoEventFlow.emit(TodoExternalEvent.ActiveItem(-1L)) }
-        if (sheetState.isVisible) {
-            scope.launch { sheetState.hide() }
+        if (uiState.bottomSheetType != BottomSheetType.None) {
+            viewModel.updateBottomSheetType(BottomSheetType.None)
         } else if (uiState.backPressedOnce) {
             (context as? Activity)?.finish()
         } else {
@@ -200,234 +206,34 @@ fun MainScreen() {
             }
     }
 
-    LaunchedEffect(sheetState) {
-        snapshotFlow { sheetState.isVisible }
-            .distinctUntilChanged()
-            .collect { isVisible ->
-                if (!isVisible) {
-                    viewModel.updateBottomSheetType(BottomSheetType.Main)
-                }
-            }
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.eventFlow.collect { event ->
-            when (event) {
-                is MainEvent.ShowTodoBottomSheet -> {
-                    sheetState.show()
-                }
-            }
-        }
-    }
-
     DismissKeyboardOnClick(
-        callback = {
-            scope.launch { viewModel.todoEventFlow.emit(TodoExternalEvent.ActiveItem(-1L))  }
-        }
+        callback = { scope.launch { viewModel.todoEventFlow.emit(TodoExternalEvent.ActiveItem(-1L)) } }
     ) {
         if (isShowDialog.value) {
             when (uiState.dialogContent.dialogType) {
-                DialogType.OneBtn -> {
-                    OneBtnTypeDialog(
-                        onDismiss = { isShowDialog.value = false },
-                        dialogContent = uiState.dialogContent
-                    )
-                }
-
-                DialogType.TwoBtn -> {
-                    TwoBtnTypeDialog(
-                        onDismiss = { isShowDialog.value = false },
-                        dialogContent = uiState.dialogContent
-                    )
-                }
+                DialogType.OneBtn -> { OneBtnTypeDialog(onDismiss = { isShowDialog.value = false }, dialogContent = uiState.dialogContent) }
+                DialogType.TwoBtn -> { TwoBtnTypeDialog(onDismiss = { isShowDialog.value = false }, dialogContent = uiState.dialogContent) }
             }
         }
 
-        ModalBottomSheetLayout(
-            sheetState = sheetState,
-            sheetGesturesEnabled = false,
-            sheetContent = {
-                AnimatedContent(
-                    targetState = uiState.bottomSheetType,
-                    transitionSpec = {
-                        fadeIn(animationSpec = tween(500)) togetherWith fadeOut(
-                            animationSpec = tween(
-                                500
-                            )
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .then(
-                            if (uiState.bottomSheetType == BottomSheetType.CategoryIcon) {
-                                Modifier.height(610.dp)
-                            } else {
-                                Modifier.wrapContentHeight()
-                            }
-                        )
-                        .background(Gray100)
-                        .navigationBarsPadding(),
-                    label = ""
-                ) { currentSheet ->
-                    when (currentSheet) {
-                        BottomSheetType.Main -> {
-                            TodoBottomSheet(
-                                item = uiState.selectedTodoItem,
-                                categoryItem = uiState.selectedTodoCategoryItem,
-                                onClickShowDatePicker = {
-                                    viewModel.updateBottomSheetType(
-                                        BottomSheetType.FullDate
-                                    )
-                                },
-                                onClickBtnDelete = {
-                                    scope.launch {
-                                        viewModel.todoEventFlow.emit(TodoExternalEvent.DeleteTodo(it))
-                                        sheetState.hide()
-                                    }
-                                },
-                                onClickBtnModify = {
-                                    scope.launch {
-                                        viewModel.todoEventFlow.emit(TodoExternalEvent.ActiveItem(it))
-                                        sheetState.hide()
-                                    }
-                                },
-                                onClickBtnBookmark = {
-                                    viewModel.onUpdatedBookmark(!uiState.selectedTodoItem.isBookmark)
-                                    AnalyticsManager.logEvent(
-                                        eventName = "set_important",
-                                        params = mapOf("task_ID" to "${uiState.selectedTodoItem.todoId}")
-                                    )
-                                    scope.launch {
-                                        viewModel.todoEventFlow.emit(TodoExternalEvent.UpdateBookmark(it))
-                                    }
-                                },
-                                onClickCategoryBottomSheet = {
-                                    viewModel.updateBottomSheetType(BottomSheetType.CategoryList)
-                                },
-                                onClickBtnTime = {
-                                    viewModel.updateBottomSheetType(BottomSheetType.TimePicker)
-                                },
-                                onClickBtnRoutine = { viewModel.updateBottomSheetType(BottomSheetType.Routine) }
-                            )
-                        }
-                        BottomSheetType.FullDate -> {
-                            CalendarBottomSheet(
-                                onDismissRequest = { viewModel.updateBottomSheetType(BottomSheetType.Main) },
-                                onDateSelected = { date ->
-                                    viewModel.onUpdatedDeadline(date)
-                                    AnalyticsManager.logEvent(
-                                        eventName = "set_dday",
-                                        params = mapOf("set_date" to DateTimeFormatter.getTodayFullDate(), "dday" to "$date", "task_ID" to "${uiState.selectedTodoItem.todoId}")
-                                    )
-                                    scope.launch {
-                                        viewModel.todoEventFlow.emit(TodoExternalEvent.UpdateDeadline(date))
-                                    }
-                                },
-                                deadline = uiState.selectedTodoItem.deadline
-                            )
-                        }
-                        // 카테고리 생성 화면 카테고리 리스트 바텀시트
-                        BottomSheetType.CategoryIcon -> {
-                            CategoryIconBottomSheet(
-                                categoryIconList = uiState.categoryIconList,
-                                onSelectCategoryIcon = {
-                                    scope.launch {
-                                        viewModel.selectedIconInBottomSheet.emit(it)
-                                        sheetState.hide()
-                                    }
-                                },
-                                onClickBackButton = backPressHandler
-                            )
-                        }
-                        // 할 일 카테고리 설정 바텀시트
-                        BottomSheetType.CategoryList -> {
-                            CategoryBottomSheet(
-                                categoryId = uiState.selectedTodoCategoryItem?.categoryId ?: -1,
-                                categoryList = uiState.categoryList,
-                                onDismiss = {
-                                    viewModel.updateBottomSheetType(BottomSheetType.Main)
-                                },
-                                onCategorySelected = {
-                                    viewModel.onUpdatedCategory(it)
-                                    AnalyticsManager.logEvent(
-                                        eventName = "set_category"
-                                    )
-                                    scope.launch {
-                                        viewModel.todoEventFlow.emit(TodoExternalEvent.UpdateCategory(it))
-                                    }
-                                }
-                            )
-                        }
-                        // 할 일 시간 설정 바텀시트
-                        BottomSheetType.TimePicker -> {
-                            TimePickerBottomSheet(
-                                item = uiState.selectedTodoItem,
-                                onDismissRequest = { viewModel.updateBottomSheetType(BottomSheetType.Main) },
-                                onClickCompletionButton = { info ->
-                                    viewModel.onUpdatedTodoTime(info.second)
-                                    scope.launch {
-                                        viewModel.todoEventFlow.emit(TodoExternalEvent.UpdateTime(
-                                            Pair(info.first, uiState.selectedTodoItem.formatTime(info.second))
-                                        ))
-                                    }
-                                }
-                            )
-                        }
-                        BottomSheetType.Routine -> {
-                            RoutineBottomSheet(
-                                item = uiState.selectedTodoItem,
-                                onDismissRequest = { viewModel.updateBottomSheetType(BottomSheetType.Main) },
-                                updateTodoRepeat = { id, value ->
-                                    viewModel.onUpdatedTodoRepeat(value)
-                                    scope.launch {
-                                        viewModel.todoEventFlow.emit(TodoExternalEvent.UpdateRepeat(id, value))
-                                    }
-                                },
-                                updateTodoRoutine = { id, days ->
-                                    viewModel.onUpdatedTodoRoutine(days)
-                                    scope.launch {
-                                        viewModel.todoEventFlow.emit(TodoExternalEvent.UpdateRoutine(id, days))
-                                    }
-                                }
-                            )
-                        }
-                    }
-                }
-            },
-            sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-            scrimColor = Color(0, 0, 0, 128)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Gray100)
         ) {
+
+
             Scaffold(
                 bottomBar = {
-                    AnimatedVisibility(
-                        visible = uiState.bottomNavType != BottomNavType.DEFAULT,
-                        modifier = Modifier.background(Gray100)
-                    ) {
-                        BottomNavBar(
-                            type = uiState.bottomNavType,
-                            onClick = { route: String ->
-                                if (navController.currentDestination?.route != route) {
-                                    viewModel.getYesterdayList()
-                                    if (route == NavRoutes.BacklogScreen.route) {
-                                        navController.navigate(NavRoutes.BacklogScreen.createRoute(0)) {
-                                            popUpTo(navController.currentDestination?.route!!) { inclusive = true }
-                                            launchSingleTop = true
-                                        }
-                                    } else {
-                                        if (route == NavRoutes.TodayScreen.route && showSecondGuide) { guideViewModel.updateSecondGuide(false) }
-                                        navController.navigate(route) {
-                                            popUpTo(navController.currentDestination?.route!!) { inclusive = true }
-                                            launchSingleTop = true
-                                        }
-                                    }
-
-                                    viewModel.logAnalyticsEventForRoute(route)
-                                }
-                            },
-                            modifier = Modifier.navigationBarsPadding(),
-                            interactionSource = interactionSource
-                        )
-                    }
+                    BottomBarContent(
+                        uiState = uiState,
+                        showSecondGuide = showSecondGuide,
+                        navController = navController,
+                        interactionSource = interactionSource,
+                        getYesterdayList = { viewModel.getYesterdayList() },
+                        logAnalyticsEventForRoute = { viewModel.logAnalyticsEventForRoute(it) },
+                        updateSecondGuide = { guideViewModel.updateSecondGuide(it) }
+                    )
                 },
                 snackbarHost = { CommonSnackBar(hostState = snackBarHost) },
             ) { innerPadding ->
@@ -447,6 +253,211 @@ fun MainScreen() {
                     showCategoryIconBottomSheet = showCategoryIconBottomSheet
                 )
             }
+
+            if (uiState.bottomSheetType != BottomSheetType.None) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(BottomSheet)
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = null,
+                            onClick = { viewModel.updateBottomSheetType(BottomSheetType.None) }
+                        )
+                )
+            }
+
+            BottomSheetContent(
+                uiState = uiState,
+                onClickShowDatePicker = { viewModel.updateBottomSheetType(BottomSheetType.FullDate) },
+                onClickBtnDelete = { viewModel.onDeleteTodo(it) },
+                onClickBtnModify = { viewModel.onModifyTodo(it) },
+                onClickBtnBookmark = { viewModel.onUpdateTodoBookmark(it, !uiState.selectedTodoItem.isBookmark) },
+                onClickCategoryBottomSheet = { viewModel.updateBottomSheetType(BottomSheetType.CategoryList) },
+                onClickBtnTime = { viewModel.updateBottomSheetType(BottomSheetType.TimePicker) },
+                onClickBtnRoutine = { viewModel.updateBottomSheetType(BottomSheetType.Routine) },
+                onClickUpdateDeadline = { viewModel.onUpdatedTodoDeadline(it) },
+                onClickUpdateTodoTime = { viewModel.onUpdateTodoTime(it.first, it.second) },
+                onClickUpdateTodoRoutine = { id, days -> viewModel.onUpdateTodoRoutine(id, days) },
+                onClickUpdateTodoRepeat = { id, value -> viewModel.onUpdateTodoRepeat(id, value) },
+                onCategoryIconSelected = { viewModel.onCategoryIconSelected(it) },
+                onCategorySelected = { viewModel.onCategorySelected(it) },
+                onDismissRequest = { viewModel.updateBottomSheetType(it) },
+                backPressHandler = backPressHandler
+            )
+        }
+    }
+}
+
+@Composable
+fun BottomSheetContent(
+    uiState: MainPageState,
+    // Callback
+    onClickShowDatePicker: () -> Unit,
+    onClickBtnDelete: (Long) -> Unit,
+    onClickBtnModify: (Long) -> Unit,
+    onClickBtnBookmark: (Long) -> Unit,
+    onClickCategoryBottomSheet: () -> Unit,
+    onClickBtnTime: () -> Unit,
+    onClickBtnRoutine: () -> Unit,
+    onClickUpdateDeadline: (String?) -> Unit,
+    onClickUpdateTodoTime: (Pair<Long, Triple<String, Int, Int>?>) -> Unit,
+    onClickUpdateTodoRoutine: (Long, Set<Int>?) -> Unit,
+    onClickUpdateTodoRepeat: (Long, Boolean) -> Unit,
+    onCategoryIconSelected: (CategoryIconItemModel) -> Unit,
+    onCategorySelected: (Long?) -> Unit,
+    onDismissRequest: (BottomSheetType) -> Unit,
+    backPressHandler: () -> Unit,
+) {
+    val currentType = uiState.bottomSheetType
+    var previousType by remember { mutableStateOf(BottomSheetType.None) }
+    val isSwitchingBetweenSheets = previousType != BottomSheetType.None &&
+            currentType != BottomSheetType.None &&
+            previousType != currentType
+
+    LaunchedEffect(currentType) {
+        previousType = currentType
+    }
+
+    AnimatedVisibility(
+        visible = currentType != BottomSheetType.None,
+        enter = slideInVertically(
+            initialOffsetY = { it },
+            animationSpec = tween(300)
+        ) + fadeIn(),
+        exit = slideOutVertically(
+            targetOffsetY = { it },
+            animationSpec = tween(300)
+        ) + fadeOut()
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .navigationBarsPadding(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            AnimatedContent(
+                targetState = uiState.bottomSheetType,
+                transitionSpec = {
+                    if (isSwitchingBetweenSheets) { (fadeIn(tween(250))).togetherWith(fadeOut(tween(250))) }
+                    else { (fadeIn(tween(300))).togetherWith(fadeOut(tween(300))) }
+                },
+                label = "BottomSheetSwitcher"
+            ) { targetType ->
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 12.dp)
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .background(Gray100, shape = RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(24.dp))
+                        .align(Alignment.BottomCenter)
+                ) {
+                    when (targetType) {
+                        BottomSheetType.Main -> {
+                            TodoBottomSheet(
+                                item = uiState.selectedTodoItem,
+                                categoryItem = uiState.selectedTodoCategoryItem,
+                                onClickShowDatePicker = onClickShowDatePicker,
+                                onClickBtnDelete = onClickBtnDelete,
+                                onClickBtnModify = onClickBtnModify,
+                                onClickBtnBookmark = onClickBtnBookmark,
+                                onClickCategoryBottomSheet = onClickCategoryBottomSheet,
+                                onClickBtnTime = onClickBtnTime,
+                                onClickBtnRoutine = onClickBtnRoutine
+                            )
+                        }
+                        BottomSheetType.FullDate -> {
+                            CalendarBottomSheet(
+                                onDismissRequest = { onDismissRequest(BottomSheetType.Main) },
+                                onDateSelected = onClickUpdateDeadline,
+                                deadline = uiState.selectedTodoItem.deadline
+                            )
+                        }
+                        // 카테고리 생성 화면 카테고리 리스트 바텀시트
+                        BottomSheetType.CategoryIcon -> {
+                            CategoryIconBottomSheet(
+                                categoryIconList = uiState.categoryIconList,
+                                onSelectCategoryIcon = onCategoryIconSelected,
+                                onClickBackButton = backPressHandler
+                            )
+                        }
+                        // 할 일 카테고리 설정 바텀시트
+                        BottomSheetType.CategoryList -> {
+                            CategoryBottomSheet(
+                                categoryId = uiState.selectedTodoCategoryItem?.categoryId ?: -1,
+                                categoryList = uiState.categoryList,
+                                onDismiss = { onDismissRequest(BottomSheetType.Main) },
+                                onCategorySelected = onCategorySelected
+                            )
+                        }
+                        // 할 일 시간 설정 바텀시트
+                        BottomSheetType.TimePicker -> {
+                            TimePickerBottomSheet(
+                                item = uiState.selectedTodoItem,
+                                onDismissRequest = { onDismissRequest(BottomSheetType.Main) },
+                                onClickCompletionButton = onClickUpdateTodoTime
+                            )
+                        }
+                        BottomSheetType.Routine -> {
+                            RoutineBottomSheet(
+                                item = uiState.selectedTodoItem,
+                                onDismissRequest = { onDismissRequest(BottomSheetType.Main) },
+                                updateTodoRepeat = onClickUpdateTodoRepeat,
+                                updateTodoRoutine = onClickUpdateTodoRoutine
+                            )
+                        }
+                        BottomSheetType.None -> { Spacer(modifier = Modifier.height(0.dp)) }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BottomBarContent(
+    // State
+    uiState: MainPageState,
+    showSecondGuide: Boolean,
+    interactionSource: MutableInteractionSource,
+    // NavController
+    navController: NavHostController,
+    // Callback
+    getYesterdayList: () -> Unit,
+    logAnalyticsEventForRoute: (String) -> Unit,
+    updateSecondGuide: (Boolean) -> Unit
+) {
+    Box(modifier = Modifier.background(Gray100)) {
+        AnimatedVisibility(
+            visible = uiState.bottomNavType != BottomNavType.DEFAULT,
+            modifier = Modifier.background(Gray100)
+        ) {
+            BottomNavBar(
+                type = uiState.bottomNavType,
+                onClick = { route: String ->
+                    if (navController.currentDestination?.route != route) {
+                        getYesterdayList()
+                        if (route == NavRoutes.BacklogScreen.route) {
+                            navController.navigate(NavRoutes.BacklogScreen.createRoute(0)) {
+                                popUpTo(navController.currentDestination?.route!!) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        } else {
+                            if (route == NavRoutes.TodayScreen.route && showSecondGuide) { updateSecondGuide(false) }
+                            navController.navigate(route) {
+                                popUpTo(navController.currentDestination?.route!!) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        }
+
+                        logAnalyticsEventForRoute(route)
+                    }
+                },
+                modifier = Modifier.navigationBarsPadding().background(Gray100),
+                interactionSource = interactionSource
+            )
         }
     }
 }

@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -71,7 +72,7 @@ fun TodoBottomSheet(
     onClickBtnModify: (Long) -> Unit = {},
     onClickBtnBookmark: (Long) -> Unit = {},
     onClickCategoryBottomSheet: () -> Unit = {},
-    onClickBtnTime: (Long) -> Unit = {},
+    onClickBtnTime: () -> Unit = {},
     onClickBtnRoutine: () -> Unit = {}
 ) {
     var deadline by remember { mutableStateOf(item.deadline) }
@@ -110,7 +111,7 @@ fun TodoBottomSheetContent(
     onClickBtnModify: (Long) -> Unit = {},
     onClickBtnBookmark: (Long) -> Unit = {},
     onClickCategoryBottomSheet: () -> Unit = {},
-    onClickBtnTime: (Long) -> Unit = {},
+    onClickBtnTime: () -> Unit = {},
     onClickBtnRoutine: () -> Unit = {}
 ) {
     Column(
@@ -229,7 +230,7 @@ fun TodoBottomSheetContent(
             textColor = Gray30,
             time = if (item.time.isNotEmpty()) String.format(TODO_TIME, item.meridiem, item.hour, item.minute) else "",
             modifier = Modifier.clickable {
-                onClickBtnTime(item.todoId)
+                onClickBtnTime()
             }
         )
         BottomSheetBtn(
@@ -270,7 +271,8 @@ fun BottomSheetBtn(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp, horizontal = 24.dp)
+            .padding(vertical = 12.dp, horizontal = 24.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(painter = painterResource(id = resourceId), contentDescription = null, tint = resourceColor, modifier = Modifier.size(20.dp))
         Spacer(modifier = Modifier.width(8.dp))

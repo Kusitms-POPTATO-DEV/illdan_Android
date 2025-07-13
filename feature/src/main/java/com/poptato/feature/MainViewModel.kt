@@ -227,6 +227,8 @@ class MainViewModel @Inject constructor(
                 selectedTodoItem = updatedItem
             )
         )
+
+        AnalyticsManager.logEvent(eventName = "set_routine")
     }
 }
 

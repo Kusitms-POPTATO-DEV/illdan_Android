@@ -33,6 +33,9 @@ const val SUN = "일"
 const val TIME = "시간"
 const val WORD_DATE = "날짜"
 const val FULL_DAY = "매일"
+const val WORD_CONTENT = "내용"
+const val WORD_CONTACT = "연락처"
+const val WORD_SEND = "전송"
 
 // KaKaoLogin
 const val BtnKaKaoLoginText = "카카오 로그인"
@@ -108,6 +111,10 @@ const val SecondNoticeContent = "오늘, 할 일, 기록에 저장된 모든 데
 const val UserDataName = "이름"
 const val UserDataEmail = "카카오 로그인"
 const val DEADLINE_MODE_TEXT = "마감기한 날짜로 보기"
+const val USER_COMMENT_TITLE = "개발자에게 의견 보내기"
+const val USER_COMMENT_PLACEHOLDER = "자유롭게 의견을 보내주세요."
+const val USER_CONTACT_PLACEHOLDER = "ex) simpleday.illdan@gmail.com"
+const val USER_CONTACT_GUIDE = "* 답변이 필요하다면 이메일 or 연락처를 남겨주세요."
 
 // Today
 const val TodayTopBarSub = "오늘도 일단 해보는 거야!"
@@ -140,3 +147,4 @@ const val DEADLINE_PASSED = "D+%s"
 const val SNACK_BAR_TODAY_ALL_CHECKED = "와우! 수고한 나 자신에게 박수!👏"
 const val SNACK_BAR_FINISH_APP_GUIDE = "뒤로가기를 한 번 더 누르면 종료돼요."
 const val SNACK_BAR_COMPLETE_DELETE_TODO = "할 일이 삭제되었어요."
+const val SNACK_BAR_SEND_COMMENT_SUCCESS = "더 나은 서비스로 보답할게요"

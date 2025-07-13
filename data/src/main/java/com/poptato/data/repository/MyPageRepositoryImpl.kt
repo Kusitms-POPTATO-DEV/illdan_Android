@@ -6,6 +6,7 @@ import com.poptato.data.mapper.UnitResponseMapper
 import com.poptato.data.mapper.UserDataResponseMapper
 import com.poptato.data.service.MyPageService
 import com.poptato.domain.model.request.auth.UserDeleteRequestModel
+import com.poptato.domain.model.request.mypage.UserCommentRequest
 import com.poptato.domain.model.response.mypage.PolicyModel
 import com.poptato.domain.model.response.mypage.UserDataModel
 import com.poptato.domain.repository.MyPageRepository
@@ -26,5 +27,9 @@ class MyPageRepositoryImpl @Inject constructor(
 
     override suspend fun getPolicy(): Flow<Result<PolicyModel>> {
         return apiLaunch(apiCall = { myPageService.getPolicy() }, PolicyResponseMapper)
+    }
+
+    override suspend fun sendComment(request: UserCommentRequest): Flow<Result<Unit>> {
+        return apiLaunch(apiCall = { myPageService.sendComment(request) }, UnitResponseMapper)
     }
 }

@@ -5,6 +5,7 @@ import com.poptato.data.base.Endpoints
 import com.poptato.data.model.response.mypage.PolicyResponse
 import com.poptato.data.model.response.mypage.UserDataResponse
 import com.poptato.domain.model.request.auth.UserDeleteRequestModel
+import com.poptato.domain.model.request.mypage.UserCommentRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -23,4 +24,9 @@ interface MyPageService {
 
     @GET(Endpoints.MyPage.POLICY)
     suspend fun getPolicy(): Response<ApiResponse<PolicyResponse>>
+
+    @POST(Endpoints.MyPage.COMMENT)
+    suspend fun sendComment(
+        @Body request: UserCommentRequest
+    ): Response<ApiResponse<Unit>>
 }

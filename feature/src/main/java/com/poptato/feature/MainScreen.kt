@@ -503,6 +503,7 @@ fun NavHostContent(
             myPageNavGraph(
                 navController = navController,
                 showDialog = showDialog,
+                showSnackBar = showSnackBar,
                 deleteUserName = deleteUserName,
                 deleteUserNameFromUserData = userDeleteName
             )

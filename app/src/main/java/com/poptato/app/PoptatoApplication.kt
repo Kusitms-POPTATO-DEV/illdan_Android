@@ -2,6 +2,9 @@ package com.poptato.app
 
 import android.app.Application
 import androidx.lifecycle.ProcessLifecycleOwner
+import coil.Coil
+import coil.ImageLoader
+import coil.decode.SvgDecoder
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.kakao.sdk.common.KakaoSdk
 import com.microsoft.clarity.Clarity
@@ -17,6 +20,14 @@ import timber.log.Timber
 class PoptatoApplication: Application() {
     override fun onCreate() {
         super.onCreate()
+
+        Coil.setImageLoader(
+            ImageLoader.Builder(this)
+                .components {
+                    add(SvgDecoder.Factory())
+                }
+                .build()
+        )
 
         val entryPoint = EntryPointAccessors.fromApplication(
             this,

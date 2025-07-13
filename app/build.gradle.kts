@@ -58,4 +58,8 @@ dependencies {
 
     // Clarity
     implementation(libs.clarity)
+
+    // Coil
+    implementation(libs.coil.compose)
+    implementation(libs.coil.svg)
 }

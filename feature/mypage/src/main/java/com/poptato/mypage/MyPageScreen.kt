@@ -54,6 +54,7 @@ import com.poptato.design_system.Primary60
 import com.poptato.design_system.ProfileDetail
 import com.poptato.design_system.R
 import com.poptato.design_system.SettingTitle
+import com.poptato.design_system.USER_COMMENT_TITLE
 import com.poptato.design_system.Version
 import com.poptato.design_system.VersionSetting
 import com.poptato.mypage.BuildConfig.VERSION_NAME
@@ -65,13 +66,11 @@ import timber.log.Timber
 
 @Composable
 fun MyPageScreen(
+    viewModel: MyPageViewModel,
     goToUserDataPage: () -> Unit = {},
-    goToNoticeViewerPage: () -> Unit = {},
-    goToFAQViewerPage: () -> Unit = {},
-    goToPolicyViewerPage: () -> Unit = {}
+    goToPolicyViewerPage: () -> Unit = {},
+    goToUserCommentPage: () -> Unit = {}
 ) {
-
-    val viewModel: MyPageViewModel = hiltViewModel()
     val uiState: MyPagePageState by viewModel.uiState.collectAsStateWithLifecycle()
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -80,18 +79,9 @@ fun MyPageScreen(
         onClickSwitchButton = { viewModel.setDeadlineDateMode(it) },
         onClickUserDataBtn = { goToUserDataPage() },
         interactionSource = interactionSource,
-        onClickServiceNotice = { viewModel.updateState(true, NOTICE_TYPE) },
-        onClickServiceFAQ = { viewModel.updateState(true, FAQ_TYPE) },
         onClickPolicyBtn = { goToPolicyViewerPage() },
+        onClickUserComment = { goToUserCommentPage() }
     )
-
-    if (uiState.noticeWebViewState) {
-        goToNoticeViewerPage()
-    }
-
-    if (uiState.faqWebViewState) {
-        goToFAQViewerPage()
-    }
 }
 
 @Composable
@@ -99,9 +89,8 @@ fun MyPageContent(
     uiState: MyPagePageState = MyPagePageState(),
     onClickSwitchButton: (Boolean) -> Unit = {},
     onClickUserDataBtn: () -> Unit = {},
-    onClickServiceNotice: () -> Unit = {},
-    onClickServiceFAQ: () -> Unit = {},
     onClickPolicyBtn: () -> Unit = {},
+    onClickUserComment: () -> Unit = {},
     interactionSource: MutableInteractionSource = MutableInteractionSource()
 ) {
     Column(
@@ -126,21 +115,11 @@ fun MyPageContent(
         )
 
         SettingServiceItem(
-            title = Notice,
+            title = USER_COMMENT_TITLE,
             interactionSource = interactionSource,
-            onClickAction = {
-                onClickServiceNotice()
-                AnalyticsManager.logEvent(eventName = "notice")
-            }
+            onClickAction = { onClickUserComment() }
         )
-        SettingServiceItem(
-            title = FAQ,
-            interactionSource = interactionSource,
-            onClickAction = {
-                onClickServiceFAQ()
-                AnalyticsManager.logEvent(eventName = "faq")
-            }
-        )
+
         SettingServiceItem(
             title = Policy,
             interactionSource = interactionSource,
@@ -149,6 +128,7 @@ fun MyPageContent(
                 AnalyticsManager.logEvent(eventName = "terms")
             }
         )
+
         SettingServiceItem(
             title = Version,
             isVersion = true,

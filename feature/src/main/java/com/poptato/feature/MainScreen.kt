@@ -220,9 +220,8 @@ fun MainScreen() {
             modifier = Modifier
                 .fillMaxSize()
                 .background(Gray100)
+                .navigationBarsPadding()
         ) {
-
-
             Scaffold(
                 bottomBar = {
                     BottomBarContent(
@@ -504,6 +503,7 @@ fun NavHostContent(
             myPageNavGraph(
                 navController = navController,
                 showDialog = showDialog,
+                showSnackBar = showSnackBar,
                 deleteUserName = deleteUserName,
                 deleteUserNameFromUserData = userDeleteName
             )

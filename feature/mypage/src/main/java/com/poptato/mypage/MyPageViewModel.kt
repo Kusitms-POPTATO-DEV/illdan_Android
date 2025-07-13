@@ -1,10 +1,12 @@
 package com.poptato.mypage
 
 import androidx.lifecycle.viewModelScope
+import com.poptato.domain.model.request.mypage.UserCommentRequest
 import com.poptato.domain.model.response.mypage.UserDataModel
 import com.poptato.domain.usecase.auth.GetDeadlineDateModeUseCase
 import com.poptato.domain.usecase.auth.SetDeadlineDateModeUseCase
 import com.poptato.domain.usecase.mypage.GetUserDataUseCase
+import com.poptato.domain.usecase.mypage.SendCommentUseCase
 import com.poptato.ui.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
@@ -16,7 +18,8 @@ import javax.inject.Inject
 class MyPageViewModel @Inject constructor(
     private val getUserDataUseCase: GetUserDataUseCase,
     private val getDeadlineDateModeUseCase: GetDeadlineDateModeUseCase,
-    private val setDeadlineDateModeUseCase: SetDeadlineDateModeUseCase
+    private val setDeadlineDateModeUseCase: SetDeadlineDateModeUseCase,
+    private val sendCommentUseCase: SendCommentUseCase
 ) : BaseViewModel<MyPagePageState>(
     MyPagePageState()
 ) {
@@ -67,6 +70,26 @@ class MyPageViewModel @Inject constructor(
         viewModelScope.launch {
             setDeadlineDateModeUseCase(value).collect()
         }
+    }
+
+    /**-------------------------------------------UserComment------------------------------------------------*/
+
+    fun sendComment(comment: String, contact: String) {
+        if (comment.isBlank()) return
+        
+        viewModelScope.launch {
+            sendCommentUseCase(UserCommentRequest(comment, contact)).collect {
+                resultResponse(it, ::onSuccessSendComment, ::onFailedSendComment)
+            }
+        }
+    }
+
+    private fun onSuccessSendComment(result: Unit) {
+        emitEventFlow(MyPageEvent.SendCommentSuccess)
+    }
+
+    private fun onFailedSendComment(error: Throwable) {
+        Timber.e("[마이페이지] 의견 전송 실패 -> $error")
     }
 
     companion object {

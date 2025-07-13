@@ -44,6 +44,7 @@ object Endpoints {
         const val USER_DELETE = "$USER/delete"
         const val USER_DATA = "$USER/mypage"
         const val POLICY = "/policy"
+        const val COMMENT = "$USER/comments"
     }
 
     object Today {

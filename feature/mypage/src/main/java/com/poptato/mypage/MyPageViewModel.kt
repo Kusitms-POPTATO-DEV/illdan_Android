@@ -75,6 +75,8 @@ class MyPageViewModel @Inject constructor(
     /**-------------------------------------------UserComment------------------------------------------------*/
 
     fun sendComment(comment: String, contact: String) {
+        if (comment.isBlank()) return
+        
         viewModelScope.launch {
             sendCommentUseCase(UserCommentRequest(comment, contact)).collect {
                 resultResponse(it, ::onSuccessSendComment, ::onFailedSendComment)

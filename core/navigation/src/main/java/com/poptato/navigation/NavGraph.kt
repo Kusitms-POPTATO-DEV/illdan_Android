@@ -2,6 +2,8 @@ package com.poptato.navigation
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -18,6 +20,8 @@ import com.poptato.domain.model.response.dialog.DialogContentModel
 import com.poptato.domain.model.response.today.TodoItemModel
 import com.poptato.login.KaKaoLoginScreen
 import com.poptato.mypage.MyPageScreen
+import com.poptato.mypage.MyPageViewModel
+import com.poptato.mypage.comment.UserCommentScreen
 import com.poptato.mypage.policy.PolicyViewerScreen
 import com.poptato.mypage.viewer.FAQViewerScreen
 import com.poptato.mypage.viewer.NoticeViewerScreen
@@ -180,6 +184,7 @@ fun NavGraphBuilder.yesterdayListNavGraph(navController: NavHostController) {
 fun NavGraphBuilder.myPageNavGraph(
     navController: NavHostController,
     showDialog: (DialogContentModel) -> Unit,
+    showSnackBar: (String) -> Unit,
     deleteUserName: (String) -> Unit,
     deleteUserNameFromUserData: SharedFlow<String>
     ) {
@@ -187,12 +192,29 @@ fun NavGraphBuilder.myPageNavGraph(
         startDestination = NavRoutes.MyPageScreen.route,
         route = NavRoutes.MyPageGraph.route,
     ) {
-        composable(NavRoutes.MyPageScreen.route) {
+        composable(NavRoutes.MyPageScreen.route) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(NavRoutes.MyPageGraph.route)
+            }
+            val viewModel: MyPageViewModel = hiltViewModel(parentEntry)
+
             MyPageScreen(
-                goToUserDataPage = { navController.navigate(NavRoutes.UserDataScreen.route) },
-                goToNoticeViewerPage = { navController.navigate(NavRoutes.NoticeViewScreen.route) },
-                goToFAQViewerPage = { navController.navigate(NavRoutes.FAQViewScreen.route) },
-                goToPolicyViewerPage = { navController.navigate(NavRoutes.PolicyViewScreen.route) }
+                viewModel = viewModel,
+                goToUserDataPage = {
+                    navController.navigate(NavRoutes.UserDataScreen.route) {
+                        launchSingleTop = true
+                    }
+                },
+                goToPolicyViewerPage = {
+                    navController.navigate(NavRoutes.PolicyViewScreen.route) {
+                        launchSingleTop = true
+                    }
+                },
+                goToUserCommentPage = {
+                    navController.navigate(NavRoutes.UserCommentScreen.route) {
+                        launchSingleTop = true
+                    }
+                }
             )
         }
 
@@ -251,6 +273,19 @@ fun NavGraphBuilder.myPageNavGraph(
             ServiceDeleteFinishScreen(
                 deleteUserName = deleteUserNameFromUserData,
                 goBackToLogIn = { navController.navigate(NavRoutes.KaKaoLoginScreen.route) },
+            )
+        }
+
+        composable(NavRoutes.UserCommentScreen.route) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(NavRoutes.MyPageGraph.route)
+            }
+            val viewModel: MyPageViewModel = hiltViewModel(parentEntry)
+
+            UserCommentScreen(
+                viewModel = viewModel,
+                showSnackBar = showSnackBar,
+                popScreen = { navController.popBackStack() }
             )
         }
     }

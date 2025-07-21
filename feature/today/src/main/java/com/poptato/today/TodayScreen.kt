@@ -7,6 +7,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -101,6 +102,7 @@ import com.poptato.ui.util.AnalyticsManager
 import com.poptato.ui.util.LoadingManager
 import com.poptato.ui.util.rememberDragDropListState
 import com.poptato.ui.util.toPx
+import com.poptato.ui.viewModel.GuideViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.filter
@@ -114,6 +116,8 @@ fun TodayScreen(
     todoExternalEvent: SharedFlow<TodoExternalEvent>
 ) {
     val viewModel: TodayViewModel = hiltViewModel()
+    val guideViewModel: GuideViewModel = hiltViewModel()
+    val showThirdGuide by guideViewModel.showThirdGuide.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val date = DateTimeFormatter.getTodayMonthDay()
@@ -154,8 +158,10 @@ fun TodayScreen(
         TodayContent(
             date = date,
             uiState = uiState,
+            showThirdGuide = showThirdGuide,
             onCheckedChange = { status, id ->
                 viewModel.onCheckedTodo(status = status, id = id)
+                if (showThirdGuide) guideViewModel.updateThirdGuide(false)
             },
             onClickBtnGetTodo = { goToBacklog() },
             onItemSwiped = { itemToRemove -> viewModel.swipeTodayItem(itemToRemove) },
@@ -197,6 +203,7 @@ fun TodayScreen(
 fun TodayContent(
     date: String = "",
     uiState: TodayPageState = TodayPageState(),
+    showThirdGuide: Boolean = false,
     onCheckedChange: (TodoStatus, Long) -> Unit = {_, _ ->},
     onClickBtnGetTodo: () -> Unit = {},
     onItemSwiped: (TodoItemModel) -> Unit = {},
@@ -208,35 +215,50 @@ fun TodayContent(
     onTodoItemModified: (Long, String) -> Unit = {_,_ ->},
     haptic: HapticFeedback = LocalHapticFeedback.current
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Gray100)
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopStart
     ) {
-        TodayTopBar(date = date)
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Box(
+        Column(
             modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .background(Gray100)
         ) {
-            if (uiState.todayList.isEmpty()) EmptyTodoView(
-                onClickBtnGetTodo = onClickBtnGetTodo
-            )
-            else TodayTodoList(
-                list = uiState.todayList,
-                onCheckedChange = onCheckedChange,
-                onItemSwiped = onItemSwiped,
-                onMove = onMove,
-                onDragEnd = onDragEnd,
-                showBottomSheet = showBottomSheet,
-                activeItemId = activeItemId,
-                onClearActiveItem = onClearActiveItem,
-                onTodoItemModified = onTodoItemModified,
-                haptic = haptic,
-                isDeadlineDateMode = uiState.isDeadlineDateMode
+            TodayTopBar(date = date)
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                if (uiState.todayList.isEmpty()) EmptyTodoView(
+                    onClickBtnGetTodo = onClickBtnGetTodo
+                )
+                else TodayTodoList(
+                    list = uiState.todayList,
+                    onCheckedChange = onCheckedChange,
+                    onItemSwiped = onItemSwiped,
+                    onMove = onMove,
+                    onDragEnd = onDragEnd,
+                    showBottomSheet = showBottomSheet,
+                    activeItemId = activeItemId,
+                    onClearActiveItem = onClearActiveItem,
+                    onTodoItemModified = onTodoItemModified,
+                    haptic = haptic,
+                    isDeadlineDateMode = uiState.isDeadlineDateMode
+                )
+            }
+        }
+
+        if (showThirdGuide) {
+            Image(
+                painter = painterResource(R.drawable.ic_guide_bubble_3),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(top = 73.dp)
+                    .padding(start = 16.dp)
             )
         }
     }

@@ -252,7 +252,7 @@ fun TodayContent(
             }
         }
 
-        if (true) {
+        if (showThirdGuide) {
             Image(
                 painter = painterResource(R.drawable.ic_guide_bubble_3),
                 contentDescription = null,

@@ -226,7 +226,7 @@ fun TodayContent(
         ) {
             TodayTopBar(date = date)
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Box(
                 modifier = Modifier
@@ -252,12 +252,12 @@ fun TodayContent(
             }
         }
 
-        if (showThirdGuide) {
+        if (true) {
             Image(
                 painter = painterResource(R.drawable.ic_guide_bubble_3),
                 contentDescription = null,
                 modifier = Modifier
-                    .padding(top = 73.dp)
+                    .padding(top = 80.dp)
                     .padding(start = 16.dp)
             )
         }

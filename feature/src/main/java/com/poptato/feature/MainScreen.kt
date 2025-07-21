@@ -231,7 +231,10 @@ fun MainScreen() {
                         interactionSource = interactionSource,
                         getYesterdayList = { viewModel.getYesterdayList() },
                         logAnalyticsEventForRoute = { viewModel.logAnalyticsEventForRoute(it) },
-                        updateSecondGuide = { guideViewModel.updateSecondGuide(it) }
+                        updateSecondGuide = {
+                            guideViewModel.updateSecondGuide(it)
+                            guideViewModel.updateThirdGuide(true)
+                        }
                     )
                 },
                 snackbarHost = { CommonSnackBar(hostState = snackBarHost) },

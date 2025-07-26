@@ -271,6 +271,7 @@ fun MainScreen() {
 
             BottomSheetContent(
                 uiState = uiState,
+                interactionSource = interactionSource,
                 onClickShowDatePicker = { viewModel.updateBottomSheetType(BottomSheetType.FullDate) },
                 onClickBtnDelete = { viewModel.onDeleteTodo(it) },
                 onClickBtnModify = { viewModel.onModifyTodo(it) },
@@ -294,6 +295,7 @@ fun MainScreen() {
 @Composable
 fun BottomSheetContent(
     uiState: MainPageState,
+    interactionSource: MutableInteractionSource,
     // Callback
     onClickShowDatePicker: () -> Unit,
     onClickBtnDelete: (Long) -> Unit,
@@ -335,7 +337,12 @@ fun BottomSheetContent(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .navigationBarsPadding(),
+                .navigationBarsPadding()
+                .clickable(
+                    indication = null,
+                    interactionSource = interactionSource,
+                    onClick = { } // 내부 클릭 이벤트 소비
+                ),
             contentAlignment = Alignment.BottomCenter
         ) {
             AnimatedContent(

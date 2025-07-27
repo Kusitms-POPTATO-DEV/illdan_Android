@@ -3,6 +3,7 @@ package com.poptato.data.datastore
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -18,6 +19,9 @@ class PoptatoDataStore(context: Context) {
     val refreshToken: Flow<String?> = dataStore.data.map { preferences -> preferences[REFRESH_TOKEN_KEY] }
     val deadlineDateMode: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[DEADLINE_DATE_MODE] ?: false
+    }
+    val todoCompletionCount: Flow<Int> = dataStore.data.map { preferences ->
+        preferences[TODO_COMPLETION_KEY] ?: 0
     }
 
     suspend fun saveAccessToken(token: String) {
@@ -47,9 +51,16 @@ class PoptatoDataStore(context: Context) {
         }
     }
 
+    suspend fun setTodoCompletionCount(count: Int) {
+        dataStore.edit { preferences ->
+            preferences[TODO_COMPLETION_KEY] = count
+        }
+    }
+
     companion object {
         val ACCESS_TOKEN_KEY = stringPreferencesKey("access_token")
         val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token")
         val DEADLINE_DATE_MODE = booleanPreferencesKey("deadline_date_mode")
+        val TODO_COMPLETION_KEY = intPreferencesKey("todo_completion")
     }
 }

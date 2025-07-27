@@ -27,8 +27,10 @@ import com.poptato.domain.usecase.todo.DeleteTodoRepeatUseCase
 import com.poptato.domain.usecase.todo.DeleteTodoRoutineUseCase
 import com.poptato.domain.usecase.todo.DeleteTodoUseCase
 import com.poptato.domain.usecase.todo.DragDropUseCase
+import com.poptato.domain.usecase.todo.GetTodoCompletionCountUseCase
 import com.poptato.domain.usecase.todo.GetTodoDetailUseCase
 import com.poptato.domain.usecase.todo.ModifyTodoUseCase
+import com.poptato.domain.usecase.todo.SetTodoCompletionCountUseCase
 import com.poptato.domain.usecase.todo.SwipeTodoUseCase
 import com.poptato.domain.usecase.todo.UpdateBookmarkUseCase
 import com.poptato.domain.usecase.todo.UpdateDeadlineUseCase
@@ -43,6 +45,7 @@ import com.poptato.ui.util.AnalyticsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -65,7 +68,9 @@ class TodayViewModel @Inject constructor(
     private val getDeadlineDateModeUseCase: GetDeadlineDateModeUseCase,
     private val deleteTodoRepeatUseCase: DeleteTodoRepeatUseCase,
     private val setTodoRoutineUseCase: SetTodoRoutineUseCase,
-    private val deleteTodoRoutineUseCase: DeleteTodoRoutineUseCase
+    private val deleteTodoRoutineUseCase: DeleteTodoRoutineUseCase,
+    private val getTodoCompletionCountUseCase: GetTodoCompletionCountUseCase,
+    private val setTodoCompletionCountUseCase: SetTodoCompletionCountUseCase
 ) : BaseViewModel<TodayPageState>(TodayPageState()) {
     private var snapshotList: List<TodoItemModel> = emptyList()
 
@@ -101,10 +106,26 @@ class TodayViewModel @Inject constructor(
             params = mapOf("task_ID" to "$id")
         )
 
+        updateTodoCompletionCount()
+
         viewModelScope.launch {
             updateTodoCompletionUseCase(id).collect {
                 resultResponse(it, { updateSnapshotList(uiState.value.todayList) }, { onFailedUpdateTodayList() })
             }
+        }
+    }
+
+    private fun updateTodoCompletionCount() {
+        viewModelScope.launch {
+            val count = getTodoCompletionCountUseCase(Unit).first()
+
+            if (count == 5 || count == 40 || count == 80) {
+                emitEventFlow(TodayEvent.ShowInAppReview)
+            }
+
+            Timber.d("count: $count")
+
+            setTodoCompletionCountUseCase(count + 1).collect {}
         }
     }
 

@@ -1,6 +1,9 @@
 package com.poptato.today
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
@@ -56,6 +59,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -69,6 +73,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.android.play.core.review.ReviewManagerFactory
 import com.poptato.component.todo.TodoItem
 import com.poptato.domain.model.enums.TodoType
 import com.poptato.core.util.DateTimeFormatter
@@ -107,6 +112,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import androidx.core.net.toUri
+import com.google.android.play.core.review.testing.FakeReviewManager
 
 @Composable
 fun TodayScreen(
@@ -122,6 +130,10 @@ fun TodayScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val date = DateTimeFormatter.getTodayMonthDay()
     val haptic = LocalHapticFeedback.current
+    val context = LocalContext.current
+    val activity = (context as? Activity)
+        ?: throw IllegalStateException("Not in an Activity context")
+    val reviewManager = remember { ReviewManagerFactory.create(context) }
 
     LaunchedEffect(todoExternalEvent) {
         viewModel.observeExternalEvents(todoExternalEvent)
@@ -142,6 +154,20 @@ fun TodayScreen(
                         delay(300)
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         showSnackBar(SNACK_BAR_TODAY_ALL_CHECKED)
+                    }
+                }
+                is TodayEvent.ShowInAppReview -> {
+                    scope.launch {
+                        try {
+                            val request = reviewManager.requestReviewFlow().await()
+                            reviewManager.launchReviewFlow(activity, request).await()
+                        } catch (_: Exception) {
+                            val intent = Intent(
+                                Intent.ACTION_VIEW,
+                                "https://play.google.com/store/apps/details?id=${context.packageName}".toUri()
+                            )
+                            context.startActivity(intent)
+                        }
                     }
                 }
             }

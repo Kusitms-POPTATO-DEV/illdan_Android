@@ -1,6 +1,7 @@
 package com.poptato.data.repository
 
 import com.poptato.data.base.BaseRepository
+import com.poptato.data.datastore.PoptatoDataStore
 import com.poptato.data.mapper.TodoDetailResponseMapper
 import com.poptato.data.mapper.UnitResponseMapper
 import com.poptato.data.service.TodoService
@@ -17,7 +18,8 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class TodoRepositoryImpl @Inject constructor(
-    private val todoService: TodoService
+    private val todoService: TodoService,
+    private val dataStore: PoptatoDataStore
 ) : TodoRepository, BaseRepository() {
     override suspend fun deleteTodo(todoId: Long): Flow<Result<Unit>> {
         return apiLaunch(apiCall = { todoService.deleteTodo(todoId) }, UnitResponseMapper)
@@ -90,5 +92,13 @@ class TodoRepositoryImpl @Inject constructor(
 
     override suspend fun deleteTodoRoutine(todoId: Long): Flow<Result<Unit>> {
         return apiLaunch(apiCall = { todoService.deleteTodoRoutine(todoId) }, UnitResponseMapper)
+    }
+
+    override suspend fun getTodoCompletionCount(): Flow<Int> {
+        return dataStore.todoCompletionCount
+    }
+
+    override suspend fun setTodoCompletionCount(count: Int) {
+        return dataStore.setTodoCompletionCount(count)
     }
 }

@@ -13,4 +13,7 @@ dependencies {
     implementation(projects.core.ui)
     implementation(projects.designSystem)
     implementation(projects.feature.component)
+
+    implementation(libs.review)
+    implementation(libs.review.ktx)
 }

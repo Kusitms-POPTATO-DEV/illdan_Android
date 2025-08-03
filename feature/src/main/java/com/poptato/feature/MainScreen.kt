@@ -337,12 +337,7 @@ fun BottomSheetContent(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .navigationBarsPadding()
-                .clickable(
-                    indication = null,
-                    interactionSource = interactionSource,
-                    onClick = { } // 내부 클릭 이벤트 소비
-                ),
+                .navigationBarsPadding(),
             contentAlignment = Alignment.BottomCenter
         ) {
             AnimatedContent(
@@ -360,6 +355,11 @@ fun BottomSheetContent(
                         .fillMaxWidth()
                         .wrapContentHeight()
                         .background(Gray100, shape = RoundedCornerShape(24.dp))
+                        .clickable(
+                            indication = null,
+                            interactionSource = interactionSource,
+                            onClick = { } // 내부 클릭 이벤트 소비
+                        )
                         .clip(RoundedCornerShape(24.dp))
                         .align(Alignment.BottomCenter)
                 ) {

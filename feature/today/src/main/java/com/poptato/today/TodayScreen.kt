@@ -3,7 +3,6 @@ package com.poptato.today
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
@@ -30,6 +29,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -114,7 +114,8 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import androidx.core.net.toUri
-import com.google.android.play.core.review.testing.FakeReviewManager
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun TodayScreen(
@@ -192,7 +193,6 @@ fun TodayScreen(
             onClickBtnGetTodo = { goToBacklog() },
             onItemSwiped = { itemToRemove -> viewModel.swipeTodayItem(itemToRemove) },
             onMove = { from, to -> viewModel.moveItem(from, to) },
-            onDragEnd = { viewModel.onDragEnd() },
             showBottomSheet = {
                 viewModel.getSelectedItemDetailContent(it) { callback ->
                     showBottomSheet(callback, uiState.categoryList)
@@ -234,7 +234,6 @@ fun TodayContent(
     onClickBtnGetTodo: () -> Unit = {},
     onItemSwiped: (TodoItemModel) -> Unit = {},
     onMove: (fromIndex: Int, toIndex: Int) -> Unit = { _, _ -> },
-    onDragEnd: () -> Unit,
     showBottomSheet: (TodoItemModel) -> Unit = {},
     activeItemId: Long?,
     onClearActiveItem: () -> Unit = {},
@@ -263,11 +262,10 @@ fun TodayContent(
                     onClickBtnGetTodo = onClickBtnGetTodo
                 )
                 else TodayTodoList(
-                    list = uiState.todayList,
+                    todayList = uiState.todayList,
                     onCheckedChange = onCheckedChange,
                     onItemSwiped = onItemSwiped,
                     onMove = onMove,
-                    onDragEnd = onDragEnd,
                     showBottomSheet = showBottomSheet,
                     activeItemId = activeItemId,
                     onClearActiveItem = onClearActiveItem,
@@ -293,11 +291,10 @@ fun TodayContent(
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 fun TodayTodoList(
-    list: List<TodoItemModel> = emptyList(),
+    todayList: List<TodoItemModel> = emptyList(),
     onCheckedChange: (TodoStatus, Long) -> Unit = { _, _ -> },
     onItemSwiped: (TodoItemModel) -> Unit = {},
     onMove: (fromIndex: Int, toIndex: Int) -> Unit = { _, _ -> },
-    onDragEnd: () -> Unit,
     showBottomSheet: (TodoItemModel) -> Unit = {},
     activeItemId: Long?,
     onClearActiveItem: () -> Unit = {},
@@ -306,121 +303,82 @@ fun TodayTodoList(
     isDeadlineDateMode: Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
-    var draggedItem by remember { mutableStateOf<TodoItemModel?>(null) }
-    var isDragging by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-    val dragDropState = rememberDragDropListState(
-        lazyListState = rememberLazyListState(),
-        onMove = onMove
-    )
+    val lazyListState = rememberLazyListState()
+    var list by remember { mutableStateOf(todayList) }
+    val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        onMove(from.index, to.index)
+    }
 
     BackHandler {
         focusManager.clearFocus()
     }
 
     LazyColumn(
-        state = dragDropState.lazyListState,
+        state = lazyListState,
         modifier = Modifier
-            .pointerInput(Unit) {
-                detectDragGesturesAfterLongPress(
-                    onDragStart = { offset ->
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        dragDropState.onDragStart(offset)
-                        draggedItem = list[dragDropState.currentIndexOfDraggedItem
-                            ?: return@detectDragGesturesAfterLongPress]
-                        isDragging = true
-                    },
-                    onDragEnd = {
-                        dragDropState.onDragInterrupted()
-                        draggedItem = null
-                        isDragging = false
-                        onDragEnd()
-                    },
-                    onDragCancel = {
-                        dragDropState.onDragInterrupted()
-                        draggedItem = null
-                        isDragging = false
-                    },
-                    onDrag = { change, offset ->
-                        change.consume()
-                        dragDropState.onDrag(offset)
-                        if (dragDropState.overscrollJob?.isActive == true) return@detectDragGesturesAfterLongPress
-                        dragDropState
-                            .checkForOverScroll()
-                            .takeIf { it != 0f }
-                            ?.let {
-                                dragDropState.overscrollJob = scope.launch {
-                                    val adjustedScroll = it * 0.5f
-                                    dragDropState.lazyListState.scrollBy(adjustedScroll)
-                                }
-                            } ?: run { dragDropState.overscrollJob?.cancel() }
-                    }
-                )
-            }
             .fillMaxSize()
             .padding(horizontal = 16.dp)
     ) {
+        items(todayList, key = { it.todoId }) {
 
-        itemsIndexed(items = list, key = { index, item -> item.todoId }) { index, item ->
-            var offsetX by remember { mutableFloatStateOf(0f) }
-            val isDragged = index == dragDropState.currentIndexOfDraggedItem
-            val isActive = activeItemId == item.todoId
+            ReorderableItem(
+                reorderableLazyListState,
+                key = it.todoId
+            ) { isDragging ->
+                var offsetX by remember { mutableFloatStateOf(0f) }
+                val isActive = activeItemId == it.todoId
 
-            TodoItem(
-                item = item,
-                todoType = TodoType.TODAY,
-                onCheckedChange = onCheckedChange,
-                modifier = Modifier
-                    .zIndex(if (index == dragDropState.currentIndexOfDraggedItem) 1f else 0f)
-                    .graphicsLayer {
-                        translationY =
-                            dragDropState.elementDisplacement.takeIf { index == dragDropState.currentIndexOfDraggedItem }
-                                ?: 0f
-                        scaleX = if (isDragged) 1.05f else 1f
-                        scaleY = if (isDragged) 1.05f else 1f
-                    }
-                    .offset { IntOffset(offsetX.toInt(), 0) }
-                    .pointerInput(item.todoStatus) {
-                        if (item.todoStatus == TodoStatus.COMPLETED) return@pointerInput
-                        detectHorizontalDragGestures(
-                            onDragEnd = {
-                                if (offsetX > 200f) {
-                                    onItemSwiped(item)
-                                } else {
-                                    offsetX = 0f
+                TodoItem(
+                    item = it,
+                    todoType = TodoType.TODAY,
+                    onCheckedChange = onCheckedChange,
+                    modifier = Modifier
+                        .offset { IntOffset(offsetX.toInt(), 0) }
+                        .pointerInput(it.todoStatus) {
+                            if (it.todoStatus == TodoStatus.COMPLETED) return@pointerInput
+                            detectHorizontalDragGestures(
+                                onDragEnd = {
+                                    if (offsetX > 300f) {
+                                        list = list.filter { item -> item.todoId != it.todoId }
+                                        onItemSwiped(it)
+                                    } else {
+                                        offsetX = 0f
+                                    }
+                                },
+                                onHorizontalDrag = { change, dragAmount ->
+                                    change.consume()
+                                    if (offsetX + dragAmount >= 0f) {
+                                        offsetX += dragAmount
+                                    }
                                 }
-                            },
-                            onHorizontalDrag = { change, dragAmount ->
-                                change.consume()
-                                if (offsetX + dragAmount >= 0f) {
-                                    offsetX += dragAmount
-                                }
+                            )
+                        }
+                        .longPressDraggableHandle()
+                        .then(
+                            if (!isDragging) {
+                                Modifier.animateItem(
+                                    fadeInSpec = null,
+                                    fadeOutSpec = null
+                                )
+                            } else {
+                                Modifier
                             }
                         )
-                    }
-                    .then(
-                        if (!isDragging) {
-                            Modifier.animateItem(
-                                fadeInSpec = null,
-                                fadeOutSpec = null
-                            )
-                        } else {
-                            Modifier
-                        }
-                    )
-                    .border(
-                        if (isDragged) BorderStroke(1.dp, Color.White) else BorderStroke(
-                            0.dp,
-                            Color.Transparent
+                        .border(
+                            if (isDragging) BorderStroke(1.dp, Color.White) else BorderStroke(
+                                0.dp,
+                                Color.Transparent
+                            ),
+                            RoundedCornerShape(8.dp)
                         ),
-                        RoundedCornerShape(8.dp)
-                    ),
-                showBottomSheet = showBottomSheet,
-                isActive = isActive,
-                isDeadlineDateMode = isDeadlineDateMode,
-                onClearActiveItem = onClearActiveItem,
-                onTodoItemModified = onTodoItemModified
-            )
+                    showBottomSheet = showBottomSheet,
+                    isActive = isActive,
+                    isDeadlineDateMode = isDeadlineDateMode,
+                    onClearActiveItem = onClearActiveItem,
+                    onTodoItemModified = onTodoItemModified
+                )
+            }
+
             Spacer(modifier = Modifier.height(12.dp))
         }
 

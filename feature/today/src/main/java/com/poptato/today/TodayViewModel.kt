@@ -227,6 +227,7 @@ class TodayViewModel @Inject constructor(
         if (firstCompletedIndex != -1 && (fromIndex >= firstCompletedIndex || toIndex >= firstCompletedIndex)) return
 
         currentList.move(fromIndex, toIndex)
+        onDragEnd(currentList)
         updateList(currentList)
 
         AnalyticsManager.logEvent(
@@ -235,8 +236,8 @@ class TodayViewModel @Inject constructor(
         )
     }
 
-    fun onDragEnd() {
-        val todoIdList = uiState.value.todayList
+    private fun onDragEnd(newList: List<TodoItemModel>) {
+        val todoIdList = newList
             .filter { it.todoStatus == TodoStatus.INCOMPLETE }
             .map { it.todoId }
 

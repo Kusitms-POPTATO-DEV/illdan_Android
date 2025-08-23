@@ -284,6 +284,7 @@ class BacklogViewModel @Inject constructor(
     fun onMove(from: Int, to: Int) {
         val currentList = uiState.value.backlogList.toMutableList()
         currentList.move(from, to)
+        onDragEnd(currentList)
         updateList(currentList)
     }
 
@@ -295,8 +296,8 @@ class BacklogViewModel @Inject constructor(
         updateCategoryList(currentList)
     }
 
-    fun onDragEnd() {
-        val todoIdList = uiState.value.backlogList.map { it.todoId }
+    private fun onDragEnd(newList: List<TodoItemModel> = emptyList()) {
+        val todoIdList = newList.map { it.todoId }
 
         viewModelScope.launch {
             dragDropUseCase.invoke(

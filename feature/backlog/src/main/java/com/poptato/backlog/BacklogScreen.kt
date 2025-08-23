@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -32,6 +33,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -131,6 +133,8 @@ import com.poptato.ui.util.rememberDragDropListState
 import com.poptato.ui.viewModel.GuideViewModel
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalPermissionsApi::class)
@@ -263,7 +267,6 @@ fun BacklogScreen(
                 )
             },
             resetNewItemFlag = { viewModel.updateNewItemFlag(false) },
-            onDragEnd = { viewModel.onDragEnd() },
             onCategoryDragEnd = { viewModel.onCategoryDragEnd() },
             onMove = { from, to -> viewModel.onMove(from, to) },
             onMoveCategory = { from, to -> viewModel.onMoveCategory(from, to) },
@@ -296,7 +299,6 @@ fun BacklogContent(
     onClearActiveItem: () -> Unit = {},
     onTodoItemModified: (Long, String) -> Unit = { _, _ -> },
     resetNewItemFlag: () -> Unit = {},
-    onDragEnd: (List<TodoItemModel>) -> Unit = {},
     onCategoryDragEnd: () -> Unit = {},
     onMove: (Int, Int) -> Unit,
     onMoveCategory: (Int, Int) -> Unit,
@@ -430,7 +432,6 @@ fun BacklogContent(
                             onTodoItemModified = onTodoItemModified,
                             isNewItemCreated = uiState.isNewItemCreated,
                             resetNewItemFlag = resetNewItemFlag,
-                            onDragEnd = onDragEnd,
                             onMove = onMove,
                             haptic = haptic,
                             isDeadlineDateMode = uiState.isDeadlineDateMode
@@ -663,124 +664,81 @@ fun BacklogTaskList(
     onTodoItemModified: (Long, String) -> Unit = { _, _ -> },
     isNewItemCreated: Boolean = false,
     resetNewItemFlag: () -> Unit = {},
-    onDragEnd: (List<TodoItemModel>) -> Unit = { },
     onMove: (Int, Int) -> Unit,
     haptic: HapticFeedback = LocalHapticFeedback.current,
     isDeadlineDateMode: Boolean = false
 ) {
-    var draggedItem by remember { mutableStateOf<TodoItemModel?>(null) }
-    var isDragging by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-    val dragDropState = rememberDragDropListState(
-        lazyListState = rememberLazyListState(),
-        onMove = onMove
-    )
+    val lazyListState = rememberLazyListState()
+    var list by remember { mutableStateOf(backlogList) }
+    val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        onMove(from.index, to.index)
+    }
 
     LazyColumn(
-        state = dragDropState.lazyListState,
+        state = lazyListState,
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
-            .pointerInput(Unit) {
-                detectDragGesturesAfterLongPress(
-                    onDragStart = { offset ->
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        dragDropState.onDragStart(offset)
-                        draggedItem = backlogList[dragDropState.currentIndexOfDraggedItem
-                            ?: return@detectDragGesturesAfterLongPress]
-                        AnalyticsManager.logEvent(
-                            eventName = "drag_tasks",
-                            params = mapOf("task_ID" to "${draggedItem?.todoId}")
-                        )
-                        isDragging = true
-                    },
-                    onDragEnd = {
-                        dragDropState.onDragInterrupted()
-                        draggedItem = null
-                        isDragging = false
-                        onDragEnd(backlogList)
-                    },
-                    onDragCancel = {
-                        dragDropState.onDragInterrupted()
-                        draggedItem = null
-                        isDragging = false
-                    },
-                    onDrag = { change, offset ->
-                        change.consume()
-                        dragDropState.onDrag(offset)
-                        if (dragDropState.overscrollJob?.isActive == true) return@detectDragGesturesAfterLongPress
-                        dragDropState
-                            .checkForOverScroll()
-                            .takeIf { it != 0f }
-                            ?.let {
-                                dragDropState.overscrollJob = scope.launch {
-                                    val adjustedScroll = it * 0.3f
-                                    dragDropState.lazyListState.scrollBy(adjustedScroll)
-                                }
-                            } ?: run { dragDropState.overscrollJob?.cancel() }
-                    }
-                )
-            }
     ) {
-        itemsIndexed(backlogList, key = { _, item -> item.todoId }) { index, item ->
-            var offsetX by remember { mutableFloatStateOf(0f) }
-            val isDragged = index == dragDropState.currentIndexOfDraggedItem
-            val isActive = activeItemId == item.todoId
+        items(backlogList, key = { it.todoId }) {
 
-            Box(
-                modifier = Modifier
-                    .zIndex(if (index == dragDropState.currentIndexOfDraggedItem) 1f else 0f)
-                    .graphicsLayer {
-                        translationY =
-                            dragDropState.elementDisplacement.takeIf { index == dragDropState.currentIndexOfDraggedItem }
-                                ?: 0f
-                        scaleX = if (isDragged) 1.05f else 1f
-                        scaleY = if (isDragged) 1.05f else 1f
-                    }
-                    .offset { IntOffset(offsetX.toInt(), 0) }
-                    .pointerInput(Unit) {
-                        detectHorizontalDragGestures(
-                            onDragEnd = {
-                                if (offsetX < -300f) {
-                                    onItemSwiped(item)
-                                    offsetX = 0f
-                                } else {
-                                    offsetX = 0f
+            ReorderableItem(
+                reorderableLazyListState,
+                key = it.todoId
+            ) { isDragging ->
+                var offsetX by remember { mutableFloatStateOf(0f) }
+                val isActive = activeItemId == it.todoId
+
+                Box(
+                    modifier = Modifier
+                        .offset { IntOffset(offsetX.toInt(), 0) }
+                        .pointerInput(Unit) {
+                            detectHorizontalDragGestures(
+                                onDragEnd = {
+                                    if (offsetX < -300f) {
+                                        list = list.filter { item -> item.todoId != it.todoId }
+                                        onItemSwiped(it)
+                                        offsetX = 0f
+                                    } else {
+                                        offsetX = 0f
+                                    }
+                                },
+                                onHorizontalDrag = { change, dragAmount ->
+                                    change.consume()
+                                    if (offsetX + dragAmount <= 0f) {
+                                        offsetX += dragAmount
+                                    }
                                 }
-                            },
-                            onHorizontalDrag = { change, dragAmount ->
-                                change.consume()
-                                if (offsetX + dragAmount <= 0f) {
-                                    offsetX += dragAmount
-                                }
+                            )
+                        }
+                        .longPressDraggableHandle()
+                        .then(
+                            if (!isDragging) {
+                                Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null)
+                            } else {
+                                Modifier
                             }
                         )
-                    }
-                    .then(
-                        if (!isDragging) {
-                            Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null)
-                        } else {
-                            Modifier
-                        }
+                        .border(
+                            if (isDragging) BorderStroke(1.dp, Color.White) else BorderStroke(
+                                0.dp,
+                                Color.Transparent
+                            ),
+                            RoundedCornerShape(8.dp)
+                        )
+                ) {
+                    TodoItem(
+                        item = it,
+                        isActive = isActive,
+                        isDeadlineDateMode = isDeadlineDateMode,
+                        showBottomSheet = showBottomSheet,
+                        onClearActiveItem = onClearActiveItem,
+                        onTodoItemModified = onTodoItemModified,
+                        todoType = TodoType.BACKLOG
                     )
-                    .border(
-                        if (isDragged) BorderStroke(1.dp, Color.White) else BorderStroke(
-                            0.dp,
-                            Color.Transparent
-                        ),
-                        RoundedCornerShape(8.dp)
-                    )
-            ) {
-                TodoItem(
-                    item = item,
-                    isActive = isActive,
-                    isDeadlineDateMode = isDeadlineDateMode,
-                    showBottomSheet = showBottomSheet,
-                    onClearActiveItem = onClearActiveItem,
-                    onTodoItemModified = onTodoItemModified,
-                    todoType = TodoType.BACKLOG
-                )
+                }
             }
+
             Spacer(modifier = Modifier.height(12.dp))
         }
 
@@ -788,14 +746,104 @@ fun BacklogTaskList(
     }
 
     LaunchedEffect(isNewItemCreated) {
-        if (isNewItemCreated && !isDragging) {
-            dragDropState.lazyListState.scrollToItem(0)
+        if (isNewItemCreated) {
+            lazyListState.scrollToItem(0)
             resetNewItemFlag()
         }
     }
 }
 
-@SuppressLint("ModifierParameter")
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun CreateBacklogTextFiled(
+    createBacklog: (String) -> Unit = {}
+) {
+    var isFocused by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    val imeVisible = WindowInsets.isImeVisible
+    var taskInput by remember { mutableStateOf("") }
+
+    LaunchedEffect(imeVisible) {
+        if (!imeVisible) {
+            focusManager.clearFocus()
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .border(
+                width = 1.dp,
+                color = if (isFocused) Gray00 else Gray70,
+                shape = RoundedCornerShape(12.dp)
+            )
+    ) {
+        BasicTextField(
+            value = taskInput,
+            onValueChange = { taskInput = it },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp)
+                .padding(start = 16.dp, end = 28.dp)
+                .onFocusChanged { focusState ->
+                    isFocused = focusState.isFocused
+                },
+            textStyle = PoptatoTypo.mdRegular,
+            cursorBrush = SolidColor(Gray00),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    if (taskInput.isNotEmpty()) {
+                        createBacklog(taskInput)
+                        taskInput = ""
+                    } else {
+                        focusManager.clearFocus()
+                    }
+                }
+            ),
+            decorationBox = { innerTextField ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (taskInput.isEmpty() && !isFocused) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_add),
+                            contentDescription = "",
+                            tint = Gray80
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = BacklogHint,
+                            style = PoptatoTypo.mdRegular,
+                            color = Gray80
+                        )
+                    }
+                    innerTextField()
+                }
+            }
+        )
+        if (taskInput.isNotEmpty()) {
+            IconButton(
+                onClick = { taskInput = "" },
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_close),
+                    contentDescription = "",
+                    tint = Color.Unspecified
+                )
+            }
+        }
+    }
+}
+
+@SuppressLint("Deprecated")
 @Composable
 fun BacklogItem(
     item: TodoItemModel,
@@ -932,96 +980,6 @@ fun BacklogItem(
                         onClickBtnTodoSettings(index)
                     }
             )
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun CreateBacklogTextFiled(
-    createBacklog: (String) -> Unit = {}
-) {
-    var isFocused by remember { mutableStateOf(false) }
-    val focusManager = LocalFocusManager.current
-    val imeVisible = WindowInsets.isImeVisible
-    var taskInput by remember { mutableStateOf("") }
-
-    LaunchedEffect(imeVisible) {
-        if (!imeVisible) {
-            focusManager.clearFocus()
-        }
-    }
-
-    Box(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .border(
-                width = 1.dp,
-                color = if (isFocused) Gray00 else Gray70,
-                shape = RoundedCornerShape(12.dp)
-            )
-    ) {
-        BasicTextField(
-            value = taskInput,
-            onValueChange = { taskInput = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp)
-                .padding(start = 16.dp, end = 28.dp)
-                .onFocusChanged { focusState ->
-                    isFocused = focusState.isFocused
-                },
-            textStyle = PoptatoTypo.mdRegular,
-            cursorBrush = SolidColor(Gray00),
-            keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    if (taskInput.isNotEmpty()) {
-                        createBacklog(taskInput)
-                        taskInput = ""
-                    } else {
-                        focusManager.clearFocus()
-                    }
-                }
-            ),
-            decorationBox = { innerTextField ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (taskInput.isEmpty() && !isFocused) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_add),
-                            contentDescription = "",
-                            tint = Gray80
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = BacklogHint,
-                            style = PoptatoTypo.mdRegular,
-                            color = Gray80
-                        )
-                    }
-                    innerTextField()
-                }
-            }
-        )
-        if (taskInput.isNotEmpty()) {
-            IconButton(
-                onClick = { taskInput = "" },
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_close),
-                    contentDescription = "",
-                    tint = Color.Unspecified
-                )
-            }
         }
     }
 }

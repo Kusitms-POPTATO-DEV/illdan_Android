@@ -16,4 +16,6 @@ dependencies {
 
     implementation(libs.review)
     implementation(libs.review.ktx)
+
+    implementation(libs.reorderable)
 }

@@ -3,20 +3,20 @@ agp = "8.6.1"
 activity = "1.10.1"
 foundation = "1.8.3"
 kotlin = "2.0.20"  # kotlin 버전 올릴 때는 ksp 버전과 호환되는지 확인
-coreKtx = "1.16.0"
+coreKtx = "1.17.0"
 junit = "4.13.2"
-junitVersion = "1.2.1"
-coroutineTest = "1.7.3"
+junitVersion = "1.3.0"
+coroutineTest = "1.10.2"
 mock = "1.13.7"
-espressoCore = "3.6.1"
+espressoCore = "3.7.0"
 lifecycle = "2.9.2"
 lifecycleRuntimeKtx = "2.9.2"
 activityCompose = "1.10.1"
-composeBom = "2025.07.00"
+composeBom = "2025.08.00"
 composeCompiler = "1.5.14"
 hilt = "2.51.1"
 androidxHilt = "1.2.0"
-navigationCompose = "2.9.2"
+navigationCompose = "2.9.3"
 retrofit = "2.11.0"
 retrofit-bom = "2.11.0"
 gson = "2.11.0"
@@ -26,7 +26,7 @@ okhttp-urlconnection = "4.9.1"
 appcompat = "1.7.1"
 material = "1.12.0"
 coroutines = "1.10.2"
-coreKtxVersion = "1.6.1"
+coreKtxVersion = "1.7.0"
 roomKtx = "2.7.2"
 datastore = "1.1.7"
 gradleplugin = "8.5.2"
@@ -46,16 +46,17 @@ androidx-paging = "3.3.6"
 coil = "2.7.0"
 coil-svg="2.2.2"
 kotlin-serialization-converter = "0.8.0"
-kakao-auth = "2.21.5"
+kakao-auth = "2.21.6"
 web-view = "0.24.13-rc"
 pdf-viewer = "1.6.0"
 lazy-column-scrollbar = "2.2.0"
 google-service = "4.4.3"
-firebase-bom = "33.14.0"
-firebase-messaging = "24.1.1"
+firebase-bom = "34.1.0"
+firebase-messaging = "25.0.0"
 permissions = "0.33.1-alpha"
 clarity = "3.0.1"
 review = "2.0.2"
+reorderable = "2.4.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -176,6 +177,9 @@ clarity = { module = "com.microsoft.clarity:clarity-compose", version.ref = "cla
 # Review
 review = { module = "com.google.android.play:review", version.ref = "review" }
 review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "review" }
+
+# Reorderable
+reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 
 [bundles]
 compose = [

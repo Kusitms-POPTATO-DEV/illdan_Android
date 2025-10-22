@@ -21,4 +21,6 @@ dependencies {
 
     implementation(libs.firebase.messaging)
     implementation(libs.permissions)
+
+    implementation(libs.reorderable)
 }

@@ -31,7 +31,8 @@ class TokenRefreshHandler @Inject constructor(
                         request = ReissueRequestModel(
                             accessToken = tokens.accessToken,
                             refreshToken = tokens.refreshToken,
-                            clientId = clientId ?: ""
+                            clientId = clientId ?: "",
+                            mobileType = "ANDROID"
                         )
                     ).firstOrNull()
 

@@ -60,7 +60,8 @@ class TokenAuthenticator @Inject constructor(
                     ReissueRequestModel(
                         accessToken = tokenModel.accessToken,
                         refreshToken = tokenModel.refreshToken,
-                        clientId = clientId ?: ""
+                        clientId = clientId ?: "",
+                        mobileType = "ANDROID"
                     )
                 ).firstOrNull()
 

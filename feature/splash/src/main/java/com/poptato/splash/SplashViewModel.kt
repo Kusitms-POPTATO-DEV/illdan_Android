@@ -45,7 +45,8 @@ class SplashViewModel @Inject constructor(
                     request = ReissueRequestModel(
                         accessToken = token.accessToken,
                         refreshToken = token.refreshToken,
-                        clientId = clientId ?: ""
+                        clientId = clientId ?: "",
+                        mobileType = "ANDROID"
                     )
                 ).collect {
                     resultResponse(it, ::onSuccessReissueToken)

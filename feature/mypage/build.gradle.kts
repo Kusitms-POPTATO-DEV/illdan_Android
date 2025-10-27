@@ -33,7 +33,6 @@ dependencies {
     implementation(libs.web.view)
 
     // pdf viewer
-    implementation(libs.pdf.viewer)
     implementation(libs.coil.compose)
     implementation(libs.coil.svg)
 }

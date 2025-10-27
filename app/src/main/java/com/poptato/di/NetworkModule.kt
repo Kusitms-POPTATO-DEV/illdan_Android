@@ -40,6 +40,7 @@ object NetworkModule {
             }
 
             request.addHeader("X-App-Version", "V2")
+            request.addHeader("X-Mobile-Type", "ANDROID")
 
             val requestWithHeaders = request.build()
             Timber.i("Request Headers: ${requestWithHeaders.headers}")

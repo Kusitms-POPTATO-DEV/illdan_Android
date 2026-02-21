@@ -45,7 +45,7 @@ object NetworkModule {
             val requestWithHeaders = request.build()
             Timber.i("Request Headers: ${requestWithHeaders.headers}")
 
-            chain.proceed(request.build())
+            chain.proceed(requestWithHeaders)
         }
 
         return OkHttpClient.Builder()

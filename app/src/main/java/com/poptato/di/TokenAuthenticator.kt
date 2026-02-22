@@ -2,16 +2,15 @@ package com.poptato.di
 
 import com.google.gson.Gson
 import com.poptato.data.base.ApiResponse
-import com.poptato.data.datastore.PoptatoDataStore
 import com.poptato.domain.model.request.ReissueRequestModel
 import com.poptato.domain.model.response.auth.TokenModel
-import com.poptato.domain.repository.AuthRepository
 import com.poptato.domain.usecase.auth.GetTokenUseCase
 import com.poptato.domain.usecase.auth.ReissueTokenUseCase
 import com.poptato.domain.usecase.auth.SaveTokenUseCase
 import com.poptato.ui.util.CommonEventManager
 import com.poptato.ui.util.FCMManager
 import dagger.Lazy
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -29,6 +28,11 @@ class TokenAuthenticator @Inject constructor(
     private val reissueTokenUseCase: Lazy<ReissueTokenUseCase>
 ): Authenticator {
     override fun authenticate(route: Route?, response: Response): Request? {
+        if (responseCount(response) >= 2) {
+            Timber.w("동일 요청의 인증 재시도 횟수 초과")
+            return null
+        }
+
         val errorCode = response.parseErrorCode()
 
         return when (errorCode) {
@@ -66,7 +70,7 @@ class TokenAuthenticator @Inject constructor(
                 ).firstOrNull()
 
                 newTokensResult?.getOrNull()?.let { newTokens ->
-                    saveTokenUseCase.get().invoke(newTokens).collect {}
+                    saveTokenUseCase.get().invoke(newTokens).first()
                     response.request.newBuilder()
                         .header("Authorization", "Bearer ${newTokens.accessToken}")
                         .build()
@@ -81,10 +85,20 @@ class TokenAuthenticator @Inject constructor(
         }
     }
 
+    private fun responseCount(response: Response): Int {
+        var count = 1
+        var prior = response.priorResponse
+        while (prior != null) {
+            count++
+            prior = prior.priorResponse
+        }
+        return count
+    }
+
     private fun getFCMTokenSync(): String? = runBlocking {
         suspendCancellableCoroutine { continuation ->
             FCMManager.getFCMToken { token ->
-                continuation.resume(token)
+                if (continuation.isActive) continuation.resume(token)
             }
         }
     }

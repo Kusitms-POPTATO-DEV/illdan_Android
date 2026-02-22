@@ -14,6 +14,7 @@ import com.poptato.ui.base.BaseViewModel
 import com.poptato.ui.util.FCMManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -29,11 +30,16 @@ class SplashViewModel @Inject constructor(
     }
 
     private fun checkLocalToken() {
-        viewModelScope.launch(Dispatchers.Main) {
-            getTokenUseCase(Unit).collect {
-                if (it.accessToken.isNotEmpty() && it.refreshToken.isNotEmpty()) {
-                    reissueToken(it)
-                }
+        viewModelScope.launch {
+            val token = getTokenUseCase(Unit).firstOrNull()
+
+            if (token != null &&
+                token.accessToken.isNotEmpty() &&
+                token.refreshToken.isNotEmpty()
+            ) {
+                reissueToken(token)
+            } else {
+                updateState(uiState.value.copy(skipLogin = false))
             }
         }
     }

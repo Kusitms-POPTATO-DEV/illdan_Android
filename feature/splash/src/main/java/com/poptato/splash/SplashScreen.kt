@@ -35,8 +35,7 @@ fun SplashScreen(
     LaunchedEffect(Unit) {
         delay(2000L)
 
-        if (uiState.skipLogin) { goToToday() }
-        else { goToKaKaoLogin() }
+        if (uiState.skipLogin) goToToday() else goToKaKaoLogin()
     }
 
     SplashContent()
